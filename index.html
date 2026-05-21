@@ -63,6 +63,29 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #24324f;
         }
+        @keyframes compassNeedleLive {
+            0%, 100% { transform: rotate(-0.7deg) translateX(-0.4px); }
+            28% { transform: rotate(0.9deg) translateX(0.6px); }
+            58% { transform: rotate(-0.35deg) translateX(-0.2px); }
+            78% { transform: rotate(0.55deg) translateX(0.3px); }
+        }
+        @keyframes compassNeedlePredicted {
+            0%, 100% { transform: rotate(0.45deg) translateX(0.25px); }
+            34% { transform: rotate(-0.65deg) translateX(-0.45px); }
+            63% { transform: rotate(0.25deg) translateX(0.2px); }
+            84% { transform: rotate(-0.35deg) translateX(-0.2px); }
+        }
+        .needle-wobble-live,
+        .needle-wobble-predicted {
+            transform-origin: bottom center;
+            will-change: transform;
+        }
+        .needle-wobble-live {
+            animation: compassNeedleLive 1.85s ease-in-out infinite;
+        }
+        .needle-wobble-predicted {
+            animation: compassNeedlePredicted 2.2s ease-in-out infinite;
+        }
     </style>
 </head>
 <body class="text-slate-100 min-h-screen flex flex-col selection:bg-cyan-500/30 selection:text-cyan-400 overflow-x-hidden">
@@ -228,6 +251,10 @@
                             </div>
                         </div>
 
+                        <!-- Cardinal guide lines -->
+                        <div class="absolute left-6 right-6 top-1/2 h-px -translate-y-1/2 bg-slate-700/45 pointer-events-none z-10"></div>
+                        <div class="absolute top-6 bottom-6 left-1/2 w-px -translate-x-1/2 bg-slate-700/45 pointer-events-none z-10"></div>
+
                         <!-- Card Points (N, S, E, W, etc.) -->
                         <div class="absolute inset-0 font-mono text-xs font-bold text-slate-500 p-2 pointer-events-none select-none">
                             <span class="absolute top-2 left-1/2 -translate-x-1/2 text-cyan-400/90 font-extrabold">N</span>
@@ -241,26 +268,30 @@
                         <div class="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
                             
                             <!-- LIVE NEEDLE (Cyan Glow) - Pivots precisely around its bottom center -->
-                            <div id="needle-live" class="absolute bottom-1/2 w-1.5 h-28 md:h-36 origin-bottom transition-transform duration-1000 ease-out" style="transform: rotate(0deg);">
-                                <div class="w-full h-full bg-gradient-to-t from-cyan-500/20 via-cyan-500 to-cyan-400 rounded-full shadow-[0_0_15px_#06b6d4]"></div>
-                                <!-- Live indicator arrowhead -->
-                                <div class="absolute -top-1 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-b-[9px] border-b-cyan-400"></div>
+                            <div id="needle-live" class="absolute bottom-1/2 w-2.5 h-32 md:h-40 origin-bottom transition-transform duration-1000 ease-out" style="transform: rotate(0deg);">
+                                <div class="needle-wobble-live relative w-full h-full">
+                                    <div class="w-full h-full bg-gradient-to-t from-cyan-500/20 via-cyan-500 to-cyan-400 rounded-full shadow-[0_0_15px_#06b6d4]"></div>
+                                    <!-- Live indicator arrowhead -->
+                                    <div class="absolute -top-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-b-[14px] border-b-cyan-400"></div>
+                                </div>
                             </div>
 
                             <!-- PREDICTED NEEDLE (Amber Dash/Line) - Pivots precisely around its bottom center -->
                             <div id="needle-predicted" class="absolute bottom-1/2 w-1 h-24 md:h-32 origin-bottom transition-transform duration-1000 ease-out" style="transform: rotate(0deg);">
-                                <div class="w-full h-full bg-gradient-to-t from-amber-500/10 via-amber-500/70 to-amber-400 rounded-full shadow-[0_0_8px_#f59e0b]"></div>
-                                <!-- Predicted indicator marker -->
-                                <div class="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-amber-400 rounded-full border border-slate-950"></div>
+                                <div class="needle-wobble-predicted relative w-full h-full">
+                                    <div class="w-full h-full bg-gradient-to-t from-amber-500/10 via-amber-500/70 to-amber-400 rounded-full shadow-[0_0_8px_#f59e0b]"></div>
+                                    <!-- Predicted indicator arrowhead -->
+                                    <div class="absolute -top-1.5 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-b-[10px] border-b-amber-300 opacity-80"></div>
+                                </div>
                             </div>
 
                         </div>
 
                         <!-- Center Telemetry Overlay Hub -->
-                        <div class="absolute w-36 h-36 bg-slate-950 border border-slate-800/80 rounded-full flex flex-col items-center justify-center text-center p-3 shadow-2xl z-30">
-                            <span class="text-[9px] uppercase tracking-widest text-slate-500 font-mono">Telemetry</span>
-                            <span id="center-heading" class="text-lg font-bold font-mono tracking-tight text-white my-0.5">--° --</span>
-                            <span id="center-speed" class="text-xl font-extrabold text-cyan-400 font-mono">--.-</span>
+                        <div class="absolute w-28 h-28 md:w-32 md:h-32 bg-slate-950 border border-slate-800/80 rounded-full flex flex-col items-center justify-center text-center p-2.5 shadow-2xl z-30">
+                            <span class="text-[8px] uppercase tracking-widest text-slate-500 font-mono">Telemetry</span>
+                            <span id="center-heading" class="text-base font-bold font-mono tracking-tight text-white my-0.5">--° --</span>
+                            <span id="center-speed" class="text-lg font-extrabold text-cyan-400 font-mono">--.-</span>
                             <span id="center-speed-unit" class="text-[9px] font-mono text-slate-400">km/h</span>
                         </div>
                     </div>
@@ -316,14 +347,14 @@
                         </h3>
                         <p class="text-xs text-slate-400 mt-1">Comparing today's 24-hour prediction baseline vs live Open-Meteo forecasts.</p>
                     </div>
-                    <div class="flex flex-col items-end gap-1">
-                        <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-cyan-950/60 text-cyan-400 border border-cyan-900/40 uppercase font-bold">Hourly</span>
-                        <span id="anomaly-scan-status" class="text-[10px] font-mono text-slate-500 text-right">Anomaly scan: waiting for live data</span>
-                    </div>
+                    <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-cyan-950/60 text-cyan-400 border border-cyan-900/40 uppercase font-bold">Hourly</span>
                 </div>
 
                 <div class="relative h-64 w-full">
                     <canvas id="hourlyChart"></canvas>
+                </div>
+                <div class="mt-3 flex justify-end">
+                    <span id="anomaly-scan-status" class="text-[10px] font-mono text-slate-500 text-right">Anomaly scan: waiting for live data</span>
                 </div>
             </div>
 
