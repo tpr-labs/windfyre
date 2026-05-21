@@ -316,7 +316,10 @@
                         </h3>
                         <p class="text-xs text-slate-400 mt-1">Comparing today's 24-hour prediction baseline vs live Open-Meteo forecasts.</p>
                     </div>
-                    <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-cyan-950/60 text-cyan-400 border border-cyan-900/40 uppercase font-bold">Hourly</span>
+                    <div class="flex flex-col items-end gap-1">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-cyan-950/60 text-cyan-400 border border-cyan-900/40 uppercase font-bold">Hourly</span>
+                        <span id="anomaly-scan-status" class="text-[10px] font-mono text-slate-500 text-right">Anomaly scan: waiting for live data</span>
+                    </div>
                 </div>
 
                 <div class="relative h-64 w-full">
@@ -559,6 +562,13 @@
             const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
             const idx = Math.round(((deg % 360) / 45)) % 8;
             return directions[idx];
+        }
+
+        function matchScoreClasses(score) {
+            if (score >= 88) return 'text-emerald-400';
+            if (score >= 72) return 'text-lime-400';
+            if (score >= 55) return 'text-amber-400';
+            return 'text-rose-400';
         }
 
         // Keep a compact status line instead of a large telemetry log panel.
@@ -853,7 +863,9 @@
             const directionMatch = Math.max(0, 100 - (dirDelta * 0.5));
             const matchPercentage = Math.round((speedMatch + directionMatch) / 2);
 
-            document.getElementById('live-match-score').innerText = hasLiveTelemetry ? `${matchPercentage}%` : '--%';
+            const matchScoreEl = document.getElementById('live-match-score');
+            matchScoreEl.innerText = hasLiveTelemetry ? `${matchPercentage}%` : '--%';
+            matchScoreEl.className = `text-2xl font-black font-mono ${hasLiveTelemetry ? matchScoreClasses(matchPercentage) : 'text-slate-500'}`;
             document.getElementById('predicted-wind-baseline').innerText = `Predicted: ${formatSpeed(prediction.speed)} ${unitLabel}`;
 
             // Update Compass Needle Vectors
@@ -946,6 +958,107 @@
         // -------------------------------------------------------------------------
         // Chart.js Building Block Methods
         // -------------------------------------------------------------------------
+        function seededRandom(seed) {
+            let value = seed >>> 0;
+            return () => {
+                value += 0x6D2B79F5;
+                let mixed = value;
+                mixed = Math.imul(mixed ^ (mixed >>> 15), mixed | 1);
+                mixed ^= mixed + Math.imul(mixed ^ (mixed >>> 7), mixed | 61);
+                return ((mixed ^ (mixed >>> 14)) >>> 0) / 4294967296;
+            };
+        }
+
+        function averagePathLength(size) {
+            if (size <= 1) return 0;
+            if (size === 2) return 1;
+            return 2 * (Math.log(size - 1) + 0.5772156649) - (2 * (size - 1) / size);
+        }
+
+        function buildIsolationTree(rows, depth, maxDepth, random) {
+            if (depth >= maxDepth || rows.length <= 1) {
+                return { external: true, size: rows.length };
+            }
+
+            const featureCount = rows[0].features.length;
+            const featureIndex = Math.floor(random() * featureCount);
+            const values = rows.map(row => row.features[featureIndex]);
+            const min = Math.min(...values);
+            const max = Math.max(...values);
+
+            if (min === max) {
+                return { external: true, size: rows.length };
+            }
+
+            const split = min + random() * (max - min);
+            const left = rows.filter(row => row.features[featureIndex] < split);
+            const right = rows.filter(row => row.features[featureIndex] >= split);
+
+            if (!left.length || !right.length) {
+                return { external: true, size: rows.length };
+            }
+
+            return {
+                external: false,
+                featureIndex,
+                split,
+                left: buildIsolationTree(left, depth + 1, maxDepth, random),
+                right: buildIsolationTree(right, depth + 1, maxDepth, random)
+            };
+        }
+
+        function isolationPathLength(row, node, depth = 0) {
+            if (node.external) {
+                return depth + averagePathLength(node.size);
+            }
+            return row.features[node.featureIndex] < node.split
+                ? isolationPathLength(row, node.left, depth + 1)
+                : isolationPathLength(row, node.right, depth + 1);
+        }
+
+        function detectHourlyWindAnomalies(rows) {
+            if (rows.length < 8) {
+                return { byHour: new Map(), count: 0, message: "Anomaly scan: waiting for live data" };
+            }
+
+            const random = seededRandom(20260522);
+            const treeCount = 72;
+            const sampleSize = Math.min(16, rows.length);
+            const maxDepth = Math.ceil(Math.log2(sampleSize));
+            const trees = [];
+
+            for (let i = 0; i < treeCount; i++) {
+                const sample = [];
+                const used = new Set();
+                while (sample.length < sampleSize) {
+                    const pick = Math.floor(random() * rows.length);
+                    if (!used.has(pick)) {
+                        used.add(pick);
+                        sample.push(rows[pick]);
+                    }
+                }
+                trees.push(buildIsolationTree(sample, 0, maxDepth, random));
+            }
+
+            const normalization = averagePathLength(sampleSize) || 1;
+            const scores = rows.map(row => {
+                const path = trees.reduce((total, tree) => total + isolationPathLength(row, tree), 0) / treeCount;
+                return { ...row, score: Math.pow(2, -path / normalization) };
+            });
+
+            const flagged = scores
+                .filter(row => row.score >= 0.62 || (row.speedDelta >= 8 && row.directionDelta >= 55))
+                .sort((a, b) => b.score - a.score)
+                .slice(0, 4);
+
+            const byHour = new Map(flagged.map(row => [row.hour, row]));
+            const message = flagged.length
+                ? `Anomaly scan: ${flagged.length} unusual hour${flagged.length > 1 ? "s" : ""} flagged`
+                : "Anomaly scan: no unusual live hours";
+
+            return { byHour, count: flagged.length, message };
+        }
+
         function buildHourlyChart() {
             const ctx = document.getElementById('hourlyChart').getContext('2d');
             
@@ -956,6 +1069,8 @@
             const now = new Date();
             const predictionDataset = [];
             const liveDataset = [];
+            const anomalyDataset = [];
+            const anomalyRows = [];
             const labels = [];
 
             for (let i = 0; i < 24; i++) {
@@ -963,15 +1078,54 @@
                 targetTime.setHours(i);
                 
                 const predictedObj = getHistoricalPrediction(targetTime, i);
-                predictionDataset.push(formatSpeed(predictedObj.speed));
+                const predictedSpeed = formatSpeed(predictedObj.speed);
+                predictionDataset.push(predictedSpeed);
 
                 if (telemetryData && !telemetryData.predictionOnly && telemetryData.hourly && telemetryData.hourly.wind_speed_10m) {
-                    liveDataset.push(formatSpeed(telemetryData.hourly.wind_speed_10m[i]));
+                    const liveSpeedRaw = telemetryData.hourly.wind_speed_10m[i];
+                    const liveDirection = telemetryData.hourly.wind_direction_10m?.[i];
+                    const liveSpeed = formatSpeed(liveSpeedRaw);
+                    liveDataset.push(liveSpeed);
+
+                    if (typeof liveSpeedRaw === 'number' && typeof liveDirection === 'number') {
+                        let directionDelta = Math.abs(liveDirection - predictedObj.direction) % 360;
+                        if (directionDelta > 180) directionDelta = 360 - directionDelta;
+                        const speedDelta = Math.abs(liveSpeedRaw - predictedObj.speed);
+                        const directionRad = liveDirection * Math.PI / 180;
+
+                        anomalyRows.push({
+                            hour: i,
+                            speed: liveSpeed,
+                            speedDelta,
+                            directionDelta,
+                            features: [
+                                liveSpeedRaw / 35,
+                                Math.sin(directionRad),
+                                Math.cos(directionRad),
+                                speedDelta / 18,
+                                directionDelta / 180,
+                                i / 23
+                            ]
+                        });
+                    }
                 } else {
                     liveDataset.push(null);
                 }
 
                 labels.push(`${i.toString().padStart(2, '0')}:00`);
+            }
+
+            const anomalyScan = detectHourlyWindAnomalies(anomalyRows);
+            for (let i = 0; i < 24; i++) {
+                anomalyDataset.push(anomalyScan.byHour.get(i)?.speed ?? null);
+            }
+
+            const anomalyStatus = document.getElementById('anomaly-scan-status');
+            if (anomalyStatus) {
+                anomalyStatus.textContent = anomalyScan.message;
+                anomalyStatus.className = anomalyScan.count
+                    ? 'text-[10px] font-mono text-rose-400 text-right'
+                    : 'text-[10px] font-mono text-slate-500 text-right';
             }
 
             const unitStr = UNIT_LABEL;
@@ -987,7 +1141,7 @@
                             borderColor: '#fbbf24',
                             borderWidth: 2,
                             borderDash: [5, 5],
-                            pointStyle: 'line',
+                            pointStyle: 'circle',
                             pointRadius: 0,
                             fill: false,
                             tension: 0.4
@@ -1003,6 +1157,20 @@
                             pointStyle: 'line',
                             pointBackgroundColor: '#22d3ee',
                             pointHoverRadius: 6
+                        },
+                        {
+                            label: 'Anomaly',
+                            data: anomalyDataset,
+                            borderColor: '#fb7185',
+                            backgroundColor: '#fb7185',
+                            pointBorderColor: '#fecdd3',
+                            pointBorderWidth: 2,
+                            pointRadius: 6,
+                            pointHoverRadius: 8,
+                            pointStyle: 'circle',
+                            showLine: false,
+                            fill: false,
+                            order: 0
                         }
                     ]
                 },
@@ -1090,10 +1258,13 @@
                             borderColor: '#fbbf24', 
                             borderWidth: 2,
                             borderDash: [5, 5],
-                            pointStyle: 'line',
+                            pointStyle: 'circle',
                             pointBackgroundColor: '#fbbf24',
-                            pointHoverRadius: 6,
-                            pointRadius: 4,
+                            pointHoverRadius: 8,
+                            pointRadius: 7,
+                            pointBorderColor: '#0f172a',
+                            pointBorderWidth: 3,
+                            pointHitRadius: 12,
                             fill: false,
                             tension: 0.3,
                             order: 1 
