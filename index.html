@@ -87,7 +87,7 @@
                         <span class="font-extrabold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-slate-400 text-sm md:text-base">WINDFYRE</span>
                     </div>
                 </div>
-                <span class="hidden sm:inline-block px-2 py-0.5 text-[10px] uppercase font-mono font-bold tracking-widest bg-cyan-950 text-cyan-400 border border-cyan-800/60 rounded">Bengaluru v2.5</span>
+                <span class="hidden sm:inline-block px-2 py-0.5 text-[10px] uppercase font-mono font-bold tracking-widest bg-cyan-950 text-cyan-400 border border-cyan-800/60 rounded">v2.5</span>
             </div>
 
             <!-- Refresh State -->
@@ -202,10 +202,6 @@
                             <i class="fa-solid fa-compass text-cyan-400"></i> Wind Compass
                         </h2>
                         <p class="text-xs text-slate-400 mt-1">Live directional vectors compared with embedded 2026 ML predictions.</p>
-                        <p class="text-[11px] font-mono text-slate-500 mt-2 flex items-center gap-2">
-                            <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
-                            <span id="last-updated-detail">Last updated: loading local prediction data</span>
-                        </p>
                     </div>
                     
                     <!-- Interactive Clock Time Scrubber -->
@@ -301,6 +297,10 @@
                         </div>
                     </div>
                 </div>
+                <p class="text-[11px] font-mono text-slate-500 flex items-center justify-end gap-2 text-right">
+                    <span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span>
+                    <span id="last-updated-detail">Last updated: loading local prediction data</span>
+                </p>
             </div>
         </div>
 
@@ -566,7 +566,7 @@
             const status = document.getElementById('last-updated-detail');
             if (!status) return;
             const timeStr = new Date().toLocaleTimeString('en-US', { hour12: false });
-            status.className = type === 'success' ? 'text-emerald-400' : type === 'warn' ? 'text-amber-400' : type === 'error' ? 'text-rose-400' : 'text-slate-500';
+            status.className = 'text-slate-500';
             status.textContent = `Last updated ${timeStr}: ${message}`;
         }
 
@@ -609,12 +609,31 @@
         const ctx = canvas.getContext('2d');
         let particles = [];
         let particleAnimationId = null;
+        let activeWindFlow = { speed: 10, direction: 90 };
 
         function resizeCanvas() {
             const rect = canvas.getBoundingClientRect();
             canvas.width = rect.width * window.devicePixelRatio;
             canvas.height = rect.height * window.devicePixelRatio;
-            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+            ctx.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
+        }
+
+        function clamp(value, min, max) {
+            return Math.max(min, Math.min(max, value));
+        }
+
+        function particleCountForSpeed(speed) {
+            return Math.round(clamp(42 + (speed * 3.6), 48, 135));
+        }
+
+        function setWindFlow(speed, direction) {
+            activeWindFlow = {
+                speed: Number.isFinite(speed) ? speed : 10,
+                direction: Number.isFinite(direction) ? direction : 90
+            };
+            canvas.dataset.flowSpeed = activeWindFlow.speed.toFixed(1);
+            canvas.dataset.flowDirection = Math.round(activeWindFlow.direction);
+            syncParticleDensity();
         }
 
         class WindParticle {
@@ -635,7 +654,7 @@
             update(speed, angle) {
                 this.life--;
                 const angleRad = (angle - 90) * Math.PI / 180;
-                const speedStep = Math.max(1, speed * 0.15);
+                const speedStep = clamp(speed * 0.24, 0.7, 7.5);
                 this.x += Math.cos(angleRad) * speedStep;
                 this.y += Math.sin(angleRad) * speedStep;
 
@@ -645,10 +664,10 @@
                 if (this.y > this.h) this.y = 0;
 
                 if (this.life > this.maxLife * 0.8) {
-                    this.alpha += 0.05;
-                    if (this.alpha > 0.35) this.alpha = 0.35;
+                    this.alpha += 0.06;
+                    if (this.alpha > 0.58) this.alpha = 0.58;
                 } else if (this.life < this.maxLife * 0.2) {
-                    this.alpha -= 0.05;
+                    this.alpha -= 0.045;
                     if (this.alpha < 0) this.alpha = 0;
                 }
 
@@ -658,29 +677,43 @@
             }
 
             draw(ctx) {
-                ctx.strokeStyle = `rgba(34, 211, 238, ${this.alpha})`;
-                ctx.lineWidth = 1.5;
+                const speedGlow = clamp(activeWindFlow.speed / 28, 0.35, 1);
+                ctx.strokeStyle = `rgba(103, 232, 249, ${this.alpha * speedGlow})`;
+                ctx.lineWidth = 1.15 + speedGlow;
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, 1, 0, Math.PI * 2);
                 ctx.stroke();
             }
         }
 
+        function syncParticleDensity() {
+            const rect = canvas.getBoundingClientRect();
+            const targetCount = particleCountForSpeed(activeWindFlow.speed);
+            while (particles.length < targetCount) {
+                particles.push(new WindParticle(rect.width, rect.height));
+            }
+            if (particles.length > targetCount) {
+                particles.splice(targetCount);
+            }
+            canvas.dataset.particleCount = String(particles.length);
+        }
+
         function initParticles() {
             const rect = canvas.getBoundingClientRect();
             particles = [];
-            for (let i = 0; i < 45; i++) {
+            const targetCount = particleCountForSpeed(activeWindFlow.speed);
+            for (let i = 0; i < targetCount; i++) {
                 particles.push(new WindParticle(rect.width, rect.height));
             }
+            canvas.dataset.particleCount = String(particles.length);
         }
 
         function animateParticles() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            const liveSpeed = telemetryData?.current?.wind_speed_10m || 15.0;
-            const liveDir = telemetryData?.current?.wind_direction_10m || 80;
+            syncParticleDensity();
 
             particles.forEach(p => {
-                p.update(liveSpeed, liveDir);
+                p.update(activeWindFlow.speed, activeWindFlow.direction);
                 p.draw(ctx);
             });
 
@@ -829,6 +862,7 @@
 
             needleLive.style.transform = `rotate(${comparisonDirection}deg)`;
             needlePred.style.transform = `rotate(${prediction.direction}deg)`;
+            setWindFlow(comparisonSpeed, comparisonDirection);
 
             // Update Compass Text Overlays
             document.getElementById('center-heading').innerText = `${Math.round(comparisonDirection)}° ${getCardinal(comparisonDirection)}`;
@@ -880,6 +914,7 @@
 
             document.getElementById('needle-live').style.transform = `rotate(${targetDir}deg)`;
             document.getElementById('needle-predicted').style.transform = `rotate(${prediction.direction}deg)`;
+            setWindFlow(targetSpeed, targetDir);
 
             document.getElementById('center-heading').innerText = `${Math.round(targetDir)}° ${getCardinal(targetDir)}`;
             document.getElementById('center-speed').innerText = formatSpeed(targetSpeed);
@@ -952,6 +987,7 @@
                             borderColor: '#fbbf24',
                             borderWidth: 2,
                             borderDash: [5, 5],
+                            pointStyle: 'line',
                             pointRadius: 0,
                             fill: false,
                             tension: 0.4
@@ -964,6 +1000,7 @@
                             backgroundColor: 'rgba(34, 211, 238, 0.05)',
                             fill: true,
                             tension: 0.4,
+                            pointStyle: 'line',
                             pointBackgroundColor: '#22d3ee',
                             pointHoverRadius: 6
                         }
@@ -978,6 +1015,10 @@
                             position: 'top',
                             labels: {
                                 color: '#94a3b8',
+                                usePointStyle: true,
+                                pointStyle: 'line',
+                                boxWidth: 28,
+                                boxHeight: 6,
                                 font: { family: 'Plus Jakarta Sans', size: 11 }
                             }
                         },
@@ -1049,6 +1090,7 @@
                             borderColor: '#fbbf24', 
                             borderWidth: 2,
                             borderDash: [5, 5],
+                            pointStyle: 'line',
                             pointBackgroundColor: '#fbbf24',
                             pointHoverRadius: 6,
                             pointRadius: 4,
@@ -1065,6 +1107,7 @@
                             hoverBackgroundColor: 'rgba(34, 211, 238, 0.55)',
                             borderWidth: 1.5,
                             borderRadius: 6,
+                            pointStyle: 'line',
                             order: 2 
                         }
                     ]
@@ -1078,6 +1121,10 @@
                             position: 'top',
                             labels: {
                                 color: '#94a3b8',
+                                usePointStyle: true,
+                                pointStyle: 'line',
+                                boxWidth: 28,
+                                boxHeight: 6,
                                 font: { family: 'Plus Jakarta Sans', size: 11 }
                             }
                         },
