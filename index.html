@@ -468,7 +468,7 @@
         <!-- How Reliable Is This Section -->
         <div class="bg-slate-900/45 border border-slate-800/70 rounded-3xl p-6 backdrop-blur-md">
             <h3 class="text-xl font-bold text-white mb-2"><i class="fa-solid fa-circle-question text-cyan-400"></i> Dynamic Model Reliability Check</h3>
-            <p class="text-sm text-slate-400 mb-6">Transparency in wind tracking algorithms and prediction modeling. Check typical delta margins across the previous 24 hours.</p>
+            <p class="text-sm text-slate-400 mb-6">Transparency in wind and weather prediction modeling, based on the 2025 back-test against historical Open-Meteo archive data.</p>
             
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div class="bg-slate-950 p-4 rounded-2xl border border-slate-900 flex flex-col justify-between">
@@ -490,6 +490,49 @@
                     <span class="text-xs text-slate-500 font-mono uppercase tracking-wider">Prediction Trust index</span>
                     <span id="stats-trust" class="text-lg font-bold text-emerald-400 mt-1">--</span>
                     <span class="text-[10px] text-slate-400 mt-1">Current hourly model confidence</span>
+                </div>
+            </div>
+
+            <div class="mt-6 pt-6 border-t border-slate-800/70">
+                <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 mb-4">
+                    <div>
+                        <span class="text-[10px] font-mono text-emerald-400 uppercase tracking-widest">Weather Prediction Details</span>
+                        <h4 class="text-base font-bold text-white mt-1">How the weather model is performing</h4>
+                    </div>
+                    <span id="weather-reliability-note" class="text-[10px] font-mono text-slate-500">Current hourly weather baseline</span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-6 gap-4">
+                    <div class="bg-slate-950 p-4 rounded-2xl border border-slate-900 flex flex-col justify-between">
+                        <span class="text-xs text-slate-500 font-mono uppercase tracking-wider">Weather Trust</span>
+                        <span id="weather-stats-trust" class="text-lg font-bold text-emerald-400 mt-1">--</span>
+                        <span class="text-[10px] text-slate-400 mt-1">Current hour confidence</span>
+                    </div>
+                    <div class="bg-slate-950 p-4 rounded-2xl border border-slate-900 flex flex-col justify-between">
+                        <span class="text-xs text-slate-500 font-mono uppercase tracking-wider">Predicted Now</span>
+                        <span id="weather-stats-now" class="text-lg font-bold text-white mt-1">--</span>
+                        <span id="weather-stats-now-note" class="text-[10px] text-slate-400 mt-1">Condition baseline</span>
+                    </div>
+                    <div class="bg-slate-950 p-4 rounded-2xl border border-slate-900 flex flex-col justify-between">
+                        <span class="text-xs text-slate-500 font-mono uppercase tracking-wider">Temp Miss</span>
+                        <span id="weather-stats-temp" class="text-lg font-bold text-amber-400 mt-1">--</span>
+                        <span class="text-[10px] text-slate-400 mt-1">2025 validation average</span>
+                    </div>
+                    <div class="bg-slate-950 p-4 rounded-2xl border border-slate-900 flex flex-col justify-between">
+                        <span class="text-xs text-slate-500 font-mono uppercase tracking-wider">Humidity Miss</span>
+                        <span id="weather-stats-humidity" class="text-lg font-bold text-cyan-400 mt-1">--</span>
+                        <span class="text-[10px] text-slate-400 mt-1">2025 validation average</span>
+                    </div>
+                    <div class="bg-slate-950 p-4 rounded-2xl border border-slate-900 flex flex-col justify-between">
+                        <span class="text-xs text-slate-500 font-mono uppercase tracking-wider">Rain Miss</span>
+                        <span id="weather-stats-rain" class="text-lg font-bold text-emerald-400 mt-1">--</span>
+                        <span class="text-[10px] text-slate-400 mt-1">Hourly precipitation error</span>
+                    </div>
+                    <div class="bg-slate-950 p-4 rounded-2xl border border-slate-900 flex flex-col justify-between">
+                        <span class="text-xs text-slate-500 font-mono uppercase tracking-wider">Wet Hour Hit</span>
+                        <span id="weather-stats-wet" class="text-lg font-bold text-emerald-400 mt-1">--</span>
+                        <span class="text-[10px] text-slate-400 mt-1">Rain/no-rain classification</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1016,6 +1059,16 @@
             document.getElementById('stats-dir-miss').innerText = `±${payload.metrics.direction_mae_deg}°`;
             document.getElementById('stats-speed-miss').innerText = `±${payload.metrics.speed_mae_kmh} km/h`;
             document.getElementById('stats-trust').innerText = `${prediction.confidence}%`;
+            document.getElementById('weather-stats-trust').innerText = typeof prediction.weatherConfidence === 'number' ? `${prediction.weatherConfidence}%` : '--%';
+            document.getElementById('weather-stats-trust').className = `text-lg font-bold mt-1 ${typeof prediction.weatherConfidence === 'number' ? matchScoreClasses(prediction.weatherConfidence) : 'text-slate-500'}`;
+            document.getElementById('weather-stats-now').innerText = typeof prediction.temperature === 'number' ? `${prediction.temperature}°C` : '--';
+            document.getElementById('weather-stats-now-note').innerText = `${interpretWeatherCode(prediction.weatherCode)} · ${typeof prediction.humidity === 'number' ? prediction.humidity : '--'}% humidity`;
+            document.getElementById('weather-stats-temp').innerText = `±${payload.metrics.temperature_mae_c}°C`;
+            document.getElementById('weather-stats-humidity').innerText = `±${payload.metrics.humidity_mae_pct}%`;
+            document.getElementById('weather-stats-rain').innerText = `±${payload.metrics.precipitation_mae_mm} mm`;
+            document.getElementById('weather-stats-wet').innerText = `${payload.metrics.wet_hour_accuracy_pct}%`;
+            document.getElementById('weather-stats-wet').className = `text-lg font-bold mt-1 ${matchScoreClasses(payload.metrics.wet_hour_accuracy_pct)}`;
+            document.getElementById('weather-reliability-note').innerText = `${prediction.stamp} embedded weather prediction`;
 
             // Render Charts
             buildHourlyChart();
