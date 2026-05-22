@@ -402,8 +402,34 @@
                 </div>
             </div>
 
-            <div class="relative h-72 w-full">
-                <canvas id="weatherChart"></canvas>
+            <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
+                <div class="rounded-2xl border border-slate-800/80 bg-slate-950/45 p-4">
+                    <div class="flex items-center justify-between gap-3 mb-3">
+                        <h4 class="text-sm font-bold text-white">Max Temperature</h4>
+                        <span id="weather-max-status" class="text-[10px] font-mono text-slate-500 text-right">Waiting for live forecast</span>
+                    </div>
+                    <div class="relative h-60 w-full">
+                        <canvas id="weatherMaxChart"></canvas>
+                    </div>
+                </div>
+                <div class="rounded-2xl border border-slate-800/80 bg-slate-950/45 p-4">
+                    <div class="flex items-center justify-between gap-3 mb-3">
+                        <h4 class="text-sm font-bold text-white">Min Temperature</h4>
+                        <span id="weather-min-status" class="text-[10px] font-mono text-slate-500 text-right">Waiting for live forecast</span>
+                    </div>
+                    <div class="relative h-60 w-full">
+                        <canvas id="weatherMinChart"></canvas>
+                    </div>
+                </div>
+                <div class="rounded-2xl border border-slate-800/80 bg-slate-950/45 p-4">
+                    <div class="flex items-center justify-between gap-3 mb-3">
+                        <h4 class="text-sm font-bold text-white">Rainfall</h4>
+                        <span id="weather-rain-status" class="text-[10px] font-mono text-slate-500 text-right">Waiting for live forecast</span>
+                    </div>
+                    <div class="relative h-60 w-full">
+                        <canvas id="weatherRainChart"></canvas>
+                    </div>
+                </div>
             </div>
             <div class="mt-3 flex justify-end">
                 <span id="weather-graph-status" class="text-[10px] font-mono text-slate-500 text-right">Weather graph: waiting for live forecast</span>
@@ -560,7 +586,7 @@
         let telemetryData = null; 
         let hourlyChart = null;
         let weeklyChart = null;
-        let weatherChart = null;
+        let weatherCharts = {};
 
         const payload = JSON.parse(document.getElementById('wind-data').textContent);
         const BENGALURU_LOCATION = {
@@ -1523,42 +1549,176 @@
             };
         }
 
-        function detectDailyWeatherAnomalies(rows) {
+        function detectWeatherParameterAnomalies(rows, options) {
             const flagged = rows
-                .filter(row => row.hasLive && (row.tempDelta >= 4.5 || row.rainDelta >= 8 || (row.liveRain >= 12 && row.predRain <= 1.5)))
-                .sort((a, b) => (b.tempDelta + b.rainDelta) - (a.tempDelta + a.rainDelta))
+                .filter(row => {
+                    if (!row.hasLive || typeof row.live !== 'number' || typeof row.predicted !== 'number') return false;
+                    const delta = Math.abs(row.live - row.predicted);
+                    return delta >= options.deltaThreshold || (
+                        typeof options.heavyLiveThreshold === 'number' &&
+                        row.live >= options.heavyLiveThreshold &&
+                        row.predicted <= (options.lowPredictionThreshold || 0)
+                    );
+                })
+                .map(row => ({ ...row, delta: Math.abs(row.live - row.predicted) }))
+                .sort((a, b) => b.delta - a.delta)
                 .slice(0, 3);
 
             const byIndex = new Map(flagged.map(row => [row.index, row]));
             const message = flagged.length
-                ? `Weather anomaly: ${flagged.length} unusual day${flagged.length > 1 ? "s" : ""} flagged`
-                : rows.some(row => row.hasLive) ? "Weather anomaly: no unusual days" : "Weather anomaly: waiting for live forecast";
+                ? `${options.label}: ${flagged.length} unusual day${flagged.length > 1 ? "s" : ""}`
+                : rows.some(row => row.hasLive) ? `${options.label}: no unusual days` : `${options.label}: waiting for live forecast`;
 
             return { byIndex, count: flagged.length, message };
         }
 
+        function weatherChartOptions(yTitle, beginAtZero = false) {
+            return {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            color: '#94a3b8',
+                            usePointStyle: true,
+                            pointStyle: 'line',
+                            boxWidth: 26,
+                            boxHeight: 6,
+                            font: { family: 'Plus Jakarta Sans', size: 11 }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: '#0f172a',
+                        borderColor: '#1e293b',
+                        borderWidth: 1,
+                        titleColor: '#f1f5f9',
+                        bodyColor: '#cbd5e1'
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#64748b', font: { family: 'Plus Jakarta Sans', size: 11 } }
+                    },
+                    y: {
+                        beginAtZero,
+                        grid: { color: 'rgba(255,255,255,0.05)' },
+                        title: { display: true, text: yTitle, color: '#64748b', font: { family: 'Plus Jakarta Sans', size: 11 } },
+                        ticks: { color: '#64748b', font: { family: 'JetBrains Mono', size: 10 } }
+                    }
+                }
+            };
+        }
+
+        function renderWeatherParameterChart(config) {
+            const canvasEl = document.getElementById(config.canvasId);
+            const status = document.getElementById(config.statusId);
+            if (!canvasEl) return { count: 0, message: `${config.anomalyLabel}: chart unavailable` };
+
+            if (weatherCharts[config.key]) {
+                weatherCharts[config.key].destroy();
+            }
+
+            const anomalyScan = detectWeatherParameterAnomalies(config.rows, {
+                label: config.anomalyLabel,
+                deltaThreshold: config.deltaThreshold,
+                heavyLiveThreshold: config.heavyLiveThreshold,
+                lowPredictionThreshold: config.lowPredictionThreshold
+            });
+            const anomalyPoints = config.rows.map(row => anomalyScan.byIndex.get(row.index)?.marker ?? null);
+
+            weatherCharts[config.key] = new Chart(canvasEl.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: config.labels,
+                    datasets: [
+                        {
+                            type: 'line',
+                            label: config.liveLabel,
+                            data: config.liveData,
+                            borderColor: config.liveColor,
+                            backgroundColor: config.liveFill,
+                            pointBackgroundColor: config.liveColor,
+                            pointBorderColor: '#0f172a',
+                            pointBorderWidth: 2,
+                            pointRadius: 5,
+                            pointHoverRadius: 7,
+                            borderWidth: 3,
+                            fill: config.fillLive,
+                            tension: 0.35,
+                            order: 1
+                        },
+                        {
+                            type: 'line',
+                            label: config.predictedLabel,
+                            data: config.predictedData,
+                            borderColor: config.predictedColor,
+                            backgroundColor: config.predictedFill,
+                            pointBackgroundColor: config.predictedPointColor,
+                            pointBorderColor: '#0f172a',
+                            pointBorderWidth: 2,
+                            pointRadius: 4,
+                            pointHoverRadius: 7,
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            fill: false,
+                            tension: 0.35,
+                            order: 2
+                        },
+                        {
+                            type: 'line',
+                            label: 'Anomaly',
+                            data: anomalyPoints,
+                            borderColor: '#fb7185',
+                            backgroundColor: '#fb7185',
+                            pointBorderColor: '#fecdd3',
+                            pointBorderWidth: 2,
+                            pointRadius: 6,
+                            pointHoverRadius: 8,
+                            pointStyle: 'circle',
+                            showLine: false,
+                            fill: false,
+                            order: 0
+                        }
+                    ]
+                },
+                options: weatherChartOptions(config.yTitle, config.beginAtZero)
+            });
+
+            if (status) {
+                status.textContent = anomalyScan.message;
+                status.className = anomalyScan.count
+                    ? 'text-[10px] font-mono text-rose-400 text-right'
+                    : 'text-[10px] font-mono text-slate-500 text-right';
+            }
+
+            return anomalyScan;
+        }
+
         function buildWeatherChart() {
             const section = document.getElementById('weather-outlook-section');
-            const canvasEl = document.getElementById('weatherChart');
             const status = document.getElementById('weather-graph-status');
             const strip = document.getElementById('weather-condition-strip');
+            const canvases = ['weatherMaxChart', 'weatherMinChart', 'weatherRainChart'];
             
-            if (!section || !canvasEl) return;
+            if (!section) return;
 
             if (!hasDailyWeatherData()) {
                 section.classList.add('hidden');
-                if (weatherChart) {
-                    weatherChart.destroy();
-                    weatherChart = null;
-                }
+                Object.values(weatherCharts).forEach(chart => chart.destroy());
+                weatherCharts = {};
                 if (status) status.textContent = 'Weather graph: waiting for live forecast';
+                canvases.forEach(id => {
+                    const canvasStatus = document.getElementById(id.replace('Chart', '-status').replace('weatherMax', 'weather-max').replace('weatherMin', 'weather-min').replace('weatherRain', 'weather-rain'));
+                    if (canvasStatus) canvasStatus.textContent = 'Waiting for live forecast';
+                });
                 return;
             }
 
             section.classList.remove('hidden');
-            if (weatherChart) {
-                weatherChart.destroy();
-            }
 
             const daily = telemetryData.daily;
             const labels = [];
@@ -1568,24 +1728,23 @@
             const liveMaxTemps = [];
             const liveMinTemps = [];
             const liveRain = [];
-            const anomalyRows = [];
-            const anomalyPoints = [];
+            const maxRows = [];
+            const minRows = [];
+            const rainRows = [];
 
             for (let index = 0; index < 7; index++) {
                 const dateStr = daily.time[index];
                 const date = dateStr ? new Date(`${dateStr}T00:00`) : new Date();
                 if (!dateStr) date.setDate(new Date().getDate() + index);
                 labels.push(date.toLocaleDateString('en-US', { weekday: 'short', day: '2-digit' }));
-            }
 
-            labels.forEach((label, index) => {
-                const dateStr = daily.time[index];
-                const date = dateStr ? new Date(`${dateStr}T00:00`) : new Date();
-                if (!dateStr) date.setDate(new Date().getDate() + index);
                 const predicted = getDailyWeatherPrediction(date);
                 const liveMax = typeof daily.temperature_2m_max?.[index] === 'number' ? Math.round(daily.temperature_2m_max[index] * 10) / 10 : null;
                 const liveMin = typeof daily.temperature_2m_min?.[index] === 'number' ? Math.round(daily.temperature_2m_min[index] * 10) / 10 : null;
                 const liveRainSum = typeof daily.precipitation_sum?.[index] === 'number' ? Math.round(daily.precipitation_sum[index] * 10) / 10 : null;
+                const hasLiveMax = !telemetryData.predictionOnly && typeof liveMax === 'number' && typeof predicted.maxTemp === 'number';
+                const hasLiveMin = !telemetryData.predictionOnly && typeof liveMin === 'number' && typeof predicted.minTemp === 'number';
+                const hasLiveRain = !telemetryData.predictionOnly && typeof liveRainSum === 'number' && typeof predicted.rain === 'number';
 
                 predictedMaxTemps.push(predicted.maxTemp);
                 predictedMinTemps.push(predicted.minTemp);
@@ -1594,27 +1753,9 @@
                 liveMinTemps.push(telemetryData.predictionOnly ? null : liveMin);
                 liveRain.push(telemetryData.predictionOnly ? null : liveRainSum);
 
-                const hasLive = !telemetryData.predictionOnly && typeof liveMax === 'number' && typeof liveMin === 'number';
-                const tempDelta = hasLive && typeof predicted.maxTemp === 'number'
-                    ? Math.max(Math.abs(liveMax - predicted.maxTemp), Math.abs(liveMin - predicted.minTemp))
-                    : 0;
-                const rainDelta = hasLive && typeof liveRainSum === 'number' && typeof predicted.rain === 'number'
-                    ? Math.abs(liveRainSum - predicted.rain)
-                    : 0;
-                anomalyRows.push({
-                    index,
-                    hasLive,
-                    tempDelta,
-                    rainDelta,
-                    liveRain: liveRainSum || 0,
-                    predRain: predicted.rain || 0,
-                    marker: liveMax
-                });
-            });
-
-            const anomalyScan = detectDailyWeatherAnomalies(anomalyRows);
-            for (let i = 0; i < 7; i++) {
-                anomalyPoints.push(anomalyScan.byIndex.get(i)?.marker ?? null);
+                maxRows.push({ index, hasLive: hasLiveMax, live: liveMax, predicted: predicted.maxTemp, marker: liveMax });
+                minRows.push({ index, hasLive: hasLiveMin, live: liveMin, predicted: predicted.minTemp, marker: liveMin });
+                rainRows.push({ index, hasLive: hasLiveRain, live: liveRainSum, predicted: predicted.rain, marker: liveRainSum });
             }
 
             if (strip) {
@@ -1644,184 +1785,80 @@
                 }).join('');
             }
 
-            weatherChart = new Chart(canvasEl.getContext('2d'), {
-                type: 'line',
-                data: {
-                    labels,
-                    datasets: [
-                        {
-                            type: 'line',
-                            label: 'Live Max Temp (°C)',
-                            data: liveMaxTemps,
-                            borderColor: '#fbbf24',
-                            backgroundColor: 'rgba(251, 191, 36, 0.08)',
-                            pointBackgroundColor: '#fbbf24',
-                            pointBorderColor: '#0f172a',
-                            pointBorderWidth: 2,
-                            pointRadius: 5,
-                            pointHoverRadius: 7,
-                            borderWidth: 3,
-                            fill: true,
-                            tension: 0.35,
-                            yAxisID: 'yTemp',
-                            order: 1
-                        },
-                        {
-                            type: 'line',
-                            label: 'ML Predicted Max (°C)',
-                            data: predictedMaxTemps,
-                            borderColor: 'rgba(251, 191, 36, 0.72)',
-                            backgroundColor: 'rgba(251, 191, 36, 0.03)',
-                            pointBackgroundColor: '#fbbf24',
-                            pointBorderColor: '#0f172a',
-                            pointBorderWidth: 2,
-                            pointRadius: 4,
-                            pointHoverRadius: 7,
-                            borderWidth: 2,
-                            borderDash: [5, 5],
-                            fill: false,
-                            tension: 0.35,
-                            yAxisID: 'yTemp',
-                            order: 2
-                        },
-                        {
-                            type: 'line',
-                            label: 'Live Min Temp (°C)',
-                            data: liveMinTemps,
-                            borderColor: '#22d3ee',
-                            backgroundColor: 'rgba(34, 211, 238, 0.05)',
-                            pointBackgroundColor: '#22d3ee',
-                            pointBorderColor: '#0f172a',
-                            pointBorderWidth: 2,
-                            pointRadius: 5,
-                            pointHoverRadius: 7,
-                            borderWidth: 2,
-                            fill: false,
-                            tension: 0.35,
-                            yAxisID: 'yTemp',
-                            order: 3
-                        },
-                        {
-                            type: 'line',
-                            label: 'ML Predicted Min (°C)',
-                            data: predictedMinTemps,
-                            borderColor: 'rgba(34, 211, 238, 0.70)',
-                            backgroundColor: 'rgba(34, 211, 238, 0.03)',
-                            pointBackgroundColor: '#22d3ee',
-                            pointBorderColor: '#0f172a',
-                            pointBorderWidth: 2,
-                            pointRadius: 4,
-                            pointHoverRadius: 7,
-                            borderWidth: 2,
-                            borderDash: [5, 5],
-                            fill: false,
-                            tension: 0.35,
-                            yAxisID: 'yTemp',
-                            order: 4
-                        },
-                        {
-                            type: 'line',
-                            label: 'Live Rainfall (mm)',
-                            data: liveRain,
-                            borderColor: '#22c55e',
-                            backgroundColor: 'rgba(34, 197, 94, 0.08)',
-                            pointBackgroundColor: '#22c55e',
-                            pointBorderColor: '#0f172a',
-                            pointBorderWidth: 2,
-                            pointRadius: 5,
-                            pointHoverRadius: 7,
-                            borderWidth: 2,
-                            fill: false,
-                            tension: 0.35,
-                            yAxisID: 'yRain',
-                            order: 5
-                        },
-                        {
-                            type: 'line',
-                            label: 'ML Predicted Rainfall (mm)',
-                            data: predictedRain,
-                            borderColor: 'rgba(74, 222, 128, 0.74)',
-                            backgroundColor: 'rgba(74, 222, 128, 0.05)',
-                            pointBackgroundColor: '#4ade80',
-                            pointBorderColor: '#0f172a',
-                            pointBorderWidth: 2,
-                            pointRadius: 4,
-                            pointHoverRadius: 7,
-                            borderWidth: 2,
-                            borderDash: [4, 4],
-                            fill: false,
-                            tension: 0.35,
-                            yAxisID: 'yRain',
-                            order: 6
-                        },
-                        {
-                            type: 'line',
-                            label: 'Weather anomaly',
-                            data: anomalyPoints,
-                            borderColor: '#fb7185',
-                            backgroundColor: '#fb7185',
-                            pointBorderColor: '#fecdd3',
-                            pointBorderWidth: 2,
-                            pointRadius: 6,
-                            pointHoverRadius: 8,
-                            pointStyle: 'circle',
-                            showLine: false,
-                            fill: false,
-                            yAxisID: 'yTemp',
-                            order: 0
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: { mode: 'index', intersect: false },
-                    plugins: {
-                        legend: {
-                            display: true,
-                            position: 'top',
-                            labels: {
-                                color: '#94a3b8',
-                                usePointStyle: true,
-                                pointStyle: 'line',
-                                boxWidth: 28,
-                                boxHeight: 6,
-                                font: { family: 'Plus Jakarta Sans', size: 11 }
-                            }
-                        },
-                        tooltip: {
-                            backgroundColor: '#0f172a',
-                            borderColor: '#1e293b',
-                            borderWidth: 1,
-                            titleColor: '#f1f5f9',
-                            bodyColor: '#cbd5e1'
-                        }
-                    },
-                    scales: {
-                        x: {
-                            grid: { display: false },
-                            ticks: { color: '#64748b', font: { family: 'Plus Jakarta Sans', size: 11 } }
-                        },
-                        yTemp: {
-                            position: 'left',
-                            grid: { color: 'rgba(255,255,255,0.05)' },
-                            title: { display: true, text: 'Temperature °C', color: '#64748b', font: { family: 'Plus Jakarta Sans', size: 11 } },
-                            ticks: { color: '#64748b', font: { family: 'JetBrains Mono', size: 10 } }
-                        },
-                        yRain: {
-                            position: 'right',
-                            grid: { drawOnChartArea: false },
-                            suggestedMin: 0,
-                            title: { display: true, text: 'Rainfall mm', color: '#64748b', font: { family: 'Plus Jakarta Sans', size: 11 } },
-                            ticks: { color: '#64748b', font: { family: 'JetBrains Mono', size: 10 } }
-                        }
-                    }
-                }
+            const maxScan = renderWeatherParameterChart({
+                key: 'max',
+                canvasId: 'weatherMaxChart',
+                statusId: 'weather-max-status',
+                labels,
+                rows: maxRows,
+                liveData: liveMaxTemps,
+                predictedData: predictedMaxTemps,
+                liveLabel: 'Live Max (°C)',
+                predictedLabel: 'ML Predicted Max (°C)',
+                yTitle: 'Max temperature °C',
+                anomalyLabel: 'Max temp anomaly',
+                deltaThreshold: 4.5,
+                liveColor: '#fbbf24',
+                liveFill: 'rgba(251, 191, 36, 0.08)',
+                predictedColor: 'rgba(251, 191, 36, 0.72)',
+                predictedFill: 'rgba(251, 191, 36, 0.03)',
+                predictedPointColor: '#fbbf24',
+                fillLive: true,
+                beginAtZero: false
             });
 
+            const minScan = renderWeatherParameterChart({
+                key: 'min',
+                canvasId: 'weatherMinChart',
+                statusId: 'weather-min-status',
+                labels,
+                rows: minRows,
+                liveData: liveMinTemps,
+                predictedData: predictedMinTemps,
+                liveLabel: 'Live Min (°C)',
+                predictedLabel: 'ML Predicted Min (°C)',
+                yTitle: 'Min temperature °C',
+                anomalyLabel: 'Min temp anomaly',
+                deltaThreshold: 4.5,
+                liveColor: '#22d3ee',
+                liveFill: 'rgba(34, 211, 238, 0.06)',
+                predictedColor: 'rgba(34, 211, 238, 0.70)',
+                predictedFill: 'rgba(34, 211, 238, 0.03)',
+                predictedPointColor: '#22d3ee',
+                fillLive: false,
+                beginAtZero: false
+            });
+
+            const rainScan = renderWeatherParameterChart({
+                key: 'rain',
+                canvasId: 'weatherRainChart',
+                statusId: 'weather-rain-status',
+                labels,
+                rows: rainRows,
+                liveData: liveRain,
+                predictedData: predictedRain,
+                liveLabel: 'Live Rainfall (mm)',
+                predictedLabel: 'ML Predicted Rainfall (mm)',
+                yTitle: 'Rainfall mm',
+                anomalyLabel: 'Rainfall anomaly',
+                deltaThreshold: 8,
+                heavyLiveThreshold: 12,
+                lowPredictionThreshold: 1.5,
+                liveColor: '#22c55e',
+                liveFill: 'rgba(34, 197, 94, 0.08)',
+                predictedColor: 'rgba(74, 222, 128, 0.74)',
+                predictedFill: 'rgba(74, 222, 128, 0.05)',
+                predictedPointColor: '#4ade80',
+                fillLive: false,
+                beginAtZero: true
+            });
+
+            const totalAnomalies = maxScan.count + minScan.count + rainScan.count;
             if (status) {
-                status.textContent = anomalyScan.message;
-                status.className = anomalyScan.count
+                status.textContent = totalAnomalies
+                    ? `Weather anomaly: ${totalAnomalies} parameter alert${totalAnomalies > 1 ? 's' : ''} across 7 days`
+                    : 'Weather anomaly: no unusual parameter days';
+                status.className = totalAnomalies
                     ? 'text-[10px] font-mono text-rose-400 text-right'
                     : 'text-[10px] font-mono text-slate-500 text-right';
             }
