@@ -1,0 +1,292 @@
+{
+  "generated_at": "2026-05-22T10:53:05Z",
+  "target_year": 2026,
+  "source": "cities.txt",
+  "cities": [
+    {
+      "slug": "bengaluru-nandini-layout",
+      "displayName": "Bengaluru",
+      "location": "Bengaluru, Karnataka",
+      "latitude": 13.0143,
+      "longitude": 77.5355,
+      "timezone": "Asia/Kolkata",
+      "predictionPath": "predictions/cities/bengaluru-nandini-layout.json",
+      "metrics": {
+        "training_rows": 105192,
+        "validation_year": 2025,
+        "direction_mae_deg": 29.6,
+        "speed_mae_kmh": 3.17,
+        "temperature_mae_c": 1.08,
+        "wet_hour_accuracy_pct": 81.7,
+        "predicted_rows": 8760,
+        "generated_at": "2026-05-22T10:09:04Z"
+      }
+    },
+    {
+      "slug": "nagamangala",
+      "displayName": "Nagamangala",
+      "location": "Nagamangala, Karnataka",
+      "latitude": 12.81939,
+      "longitude": 76.75456,
+      "timezone": "Asia/Kolkata",
+      "predictionPath": "predictions/cities/nagamangala.json",
+      "metrics": {
+        "training_rows": 105192,
+        "validation_year": 2025,
+        "direction_mae_deg": 32.7,
+        "speed_mae_kmh": 3.1,
+        "temperature_mae_c": 1.16,
+        "wet_hour_accuracy_pct": 82.5,
+        "predicted_rows": 8760,
+        "generated_at": "2026-05-22T10:11:38Z"
+      }
+    },
+    {
+      "slug": "sakleshpur",
+      "displayName": "Sakleshpur",
+      "location": "Sakleshpur, Karnataka",
+      "latitude": 12.94119,
+      "longitude": 75.78467,
+      "timezone": "Asia/Kolkata",
+      "predictionPath": "predictions/cities/sakleshpur.json",
+      "metrics": {
+        "training_rows": 105192,
+        "validation_year": 2025,
+        "direction_mae_deg": 31.5,
+        "speed_mae_kmh": 2.8,
+        "temperature_mae_c": 1.12,
+        "wet_hour_accuracy_pct": 82.4,
+        "predicted_rows": 8760,
+        "generated_at": "2026-05-22T10:12:48Z"
+      }
+    },
+    {
+      "slug": "mangalore",
+      "displayName": "Mangalore",
+      "location": "Mangaluru, Karnataka",
+      "latitude": 12.91723,
+      "longitude": 74.85603,
+      "timezone": "Asia/Kolkata",
+      "predictionPath": "predictions/cities/mangalore.json",
+      "metrics": {
+        "training_rows": 105192,
+        "validation_year": 2025,
+        "direction_mae_deg": 40.4,
+        "speed_mae_kmh": 3.45,
+        "temperature_mae_c": 0.73,
+        "wet_hour_accuracy_pct": 77.6,
+        "predicted_rows": 8760,
+        "generated_at": "2026-05-22T10:14:57Z"
+      }
+    },
+    {
+      "slug": "ooty",
+      "displayName": "Ooty",
+      "location": "Udhagamandalam, Tamil Nadu",
+      "latitude": 11.4134,
+      "longitude": 76.69521,
+      "timezone": "Asia/Kolkata",
+      "predictionPath": "predictions/cities/ooty.json",
+      "metrics": {
+        "training_rows": 105192,
+        "validation_year": 2025,
+        "direction_mae_deg": 30.7,
+        "speed_mae_kmh": 2.0,
+        "temperature_mae_c": 0.96,
+        "wet_hour_accuracy_pct": 75.2,
+        "predicted_rows": 8760,
+        "generated_at": "2026-05-22T10:18:54Z"
+      }
+    },
+    {
+      "slug": "wayanad",
+      "displayName": "Wayanad",
+      "location": "Wayanad, Kerala",
+      "latitude": 11.8032,
+      "longitude": 76.00451,
+      "timezone": "Asia/Kolkata",
+      "predictionPath": "predictions/cities/wayanad.json",
+      "metrics": {
+        "training_rows": 105192,
+        "validation_year": 2025,
+        "direction_mae_deg": 35.2,
+        "speed_mae_kmh": 1.87,
+        "temperature_mae_c": 1.08,
+        "wet_hour_accuracy_pct": 78.1,
+        "predicted_rows": 8760,
+        "generated_at": "2026-05-22T10:21:53Z"
+      }
+    },
+    {
+      "slug": "munnar",
+      "displayName": "Munnar",
+      "location": "Munnar, Kerala",
+      "latitude": 10.08818,
+      "longitude": 77.06239,
+      "timezone": "Asia/Kolkata",
+      "predictionPath": "predictions/cities/munnar.json",
+      "metrics": {
+        "training_rows": 105192,
+        "validation_year": 2025,
+        "direction_mae_deg": 31.5,
+        "speed_mae_kmh": 1.85,
+        "temperature_mae_c": 1.05,
+        "wet_hour_accuracy_pct": 72.8,
+        "predicted_rows": 8760,
+        "generated_at": "2026-05-22T10:24:31Z"
+      }
+    },
+    {
+      "slug": "shimla",
+      "displayName": "Shimla",
+      "location": "Shimla, Himachal Pradesh",
+      "latitude": 31.10442,
+      "longitude": 77.16662,
+      "timezone": "Asia/Kolkata",
+      "predictionPath": "predictions/cities/shimla.json",
+      "metrics": {
+        "training_rows": 105192,
+        "validation_year": 2025,
+        "direction_mae_deg": 36.5,
+        "speed_mae_kmh": 1.59,
+        "temperature_mae_c": 1.71,
+        "wet_hour_accuracy_pct": 81.3,
+        "predicted_rows": 8760,
+        "generated_at": "2026-05-22T10:26:23Z"
+      }
+    },
+    {
+      "slug": "meghalaya",
+      "displayName": "Meghalaya",
+      "location": "Shillong, Meghalaya",
+      "latitude": 25.56892,
+      "longitude": 91.88313,
+      "timezone": "Asia/Kolkata",
+      "predictionPath": "predictions/cities/meghalaya.json",
+      "metrics": {
+        "training_rows": 105192,
+        "validation_year": 2025,
+        "direction_mae_deg": 48.3,
+        "speed_mae_kmh": 1.89,
+        "temperature_mae_c": 1.17,
+        "wet_hour_accuracy_pct": 75.4,
+        "predicted_rows": 8760,
+        "generated_at": "2026-05-22T10:28:26Z"
+      }
+    },
+    {
+      "slug": "jaipur",
+      "displayName": "Jaipur",
+      "location": "Jaipur, Rajasthan",
+      "latitude": 26.91962,
+      "longitude": 75.78781,
+      "timezone": "Asia/Kolkata",
+      "predictionPath": "predictions/cities/jaipur.json",
+      "metrics": {
+        "training_rows": 105192,
+        "validation_year": 2025,
+        "direction_mae_deg": 70.1,
+        "speed_mae_kmh": 3.06,
+        "temperature_mae_c": 2.03,
+        "wet_hour_accuracy_pct": 88.4,
+        "predicted_rows": 8760,
+        "generated_at": "2026-05-22T10:30:25Z"
+      }
+    },
+    {
+      "slug": "mysuru",
+      "displayName": "Mysuru",
+      "location": "Mysuru, Karnataka",
+      "latitude": 12.29791,
+      "longitude": 76.63925,
+      "timezone": "Asia/Kolkata",
+      "predictionPath": "predictions/cities/mysuru.json",
+      "metrics": {
+        "training_rows": 105192,
+        "validation_year": 2025,
+        "direction_mae_deg": 28.7,
+        "speed_mae_kmh": 3.14,
+        "temperature_mae_c": 1.06,
+        "wet_hour_accuracy_pct": 82.1,
+        "predicted_rows": 8760,
+        "generated_at": "2026-05-22T10:32:56Z"
+      }
+    },
+    {
+      "slug": "chennai",
+      "displayName": "Chennai",
+      "location": "Chennai, Tamil Nadu",
+      "latitude": 13.08784,
+      "longitude": 80.27847,
+      "timezone": "Asia/Kolkata",
+      "predictionPath": "predictions/cities/chennai.json",
+      "metrics": {
+        "training_rows": 105192,
+        "validation_year": 2025,
+        "direction_mae_deg": 34.3,
+        "speed_mae_kmh": 3.44,
+        "temperature_mae_c": 0.82,
+        "wet_hour_accuracy_pct": 82.9,
+        "predicted_rows": 8760,
+        "generated_at": "2026-05-22T10:35:24Z"
+      }
+    },
+    {
+      "slug": "alappuzha",
+      "displayName": "Alappuzha",
+      "location": "Alappuzha, Kerala",
+      "latitude": 9.49004,
+      "longitude": 76.3264,
+      "timezone": "Asia/Kolkata",
+      "predictionPath": "predictions/cities/alappuzha.json",
+      "metrics": {
+        "training_rows": 105192,
+        "validation_year": 2025,
+        "direction_mae_deg": 40.2,
+        "speed_mae_kmh": 1.9,
+        "temperature_mae_c": 0.91,
+        "wet_hour_accuracy_pct": 71.8,
+        "predicted_rows": 8760,
+        "generated_at": "2026-05-22T10:38:04Z"
+      }
+    },
+    {
+      "slug": "sirsi",
+      "displayName": "Sirsi",
+      "location": "Sirsi, Karnataka",
+      "latitude": 14.62072,
+      "longitude": 74.83554,
+      "timezone": "Asia/Kolkata",
+      "predictionPath": "predictions/cities/sirsi.json",
+      "metrics": {
+        "training_rows": 105192,
+        "validation_year": 2025,
+        "direction_mae_deg": 31.0,
+        "speed_mae_kmh": 3.43,
+        "temperature_mae_c": 1.14,
+        "wet_hour_accuracy_pct": 83.6,
+        "predicted_rows": 8760,
+        "generated_at": "2026-05-22T10:52:14Z"
+      }
+    },
+    {
+      "slug": "kodaikanal",
+      "displayName": "Kodaikanal",
+      "location": "Kodaikanal, Tamil Nadu",
+      "latitude": 10.23925,
+      "longitude": 77.48932,
+      "timezone": "Asia/Kolkata",
+      "predictionPath": "predictions/cities/kodaikanal.json",
+      "metrics": {
+        "training_rows": 105192,
+        "validation_year": 2025,
+        "direction_mae_deg": 35.3,
+        "speed_mae_kmh": 1.34,
+        "temperature_mae_c": 1.04,
+        "wet_hour_accuracy_pct": 71.0,
+        "predicted_rows": 8760,
+        "generated_at": "2026-05-22T10:53:05Z"
+      }
+    }
+  ]
+}
