@@ -625,6 +625,7 @@
         let hourlyRainChart = null;
         let weeklyChart = null;
         let weatherCharts = {};
+        let lastCurrentTimeLineMinute = null;
 
         let payload = null;
         let BENGALURU_LOCATION = {
@@ -645,6 +646,56 @@
         let cityIndex = null;
         let activeCityMeta = null;
         let bengaluruFormatter = buildDateFormatter(BENGALURU_LOCATION.timezone);
+
+        const currentTimeLinePlugin = {
+            id: 'currentTimeLine',
+            afterDatasetsDraw(chart, args, pluginOptions) {
+                const options = chart.options.plugins?.currentTimeLine;
+                if (!options?.enabled || !chart.chartArea || !chart.scales?.x) return;
+
+                const parts = bengaluruParts(new Date());
+                const hour = Math.max(0, Math.min(23, parts.hour));
+                const minute = Math.max(0, Math.min(59, parts.minute));
+                const xScale = chart.scales.x;
+                const startX = xScale.getPixelForValue(hour);
+                const endX = hour < 23 ? xScale.getPixelForValue(hour + 1) : xScale.right;
+                const x = startX + ((endX - startX) * (minute / 60));
+                const { top, bottom } = chart.chartArea;
+                const ctx = chart.ctx;
+
+                ctx.save();
+                ctx.beginPath();
+                ctx.moveTo(x, top + 4);
+                ctx.lineTo(x, bottom);
+                ctx.lineWidth = options.lineWidth || 1.5;
+                ctx.strokeStyle = options.color || 'rgba(226, 232, 240, 0.72)';
+                ctx.setLineDash(options.dash || [4, 5]);
+                ctx.shadowColor = options.glow || 'rgba(34, 211, 238, 0.35)';
+                ctx.shadowBlur = 8;
+                ctx.stroke();
+                ctx.setLineDash([]);
+                ctx.shadowBlur = 0;
+
+                const label = options.label || 'Now';
+                ctx.font = '700 10px "Plus Jakarta Sans", sans-serif';
+                const textWidth = ctx.measureText(label).width;
+                const labelX = Math.max(chart.chartArea.left + 4, Math.min(x - (textWidth / 2) - 7, chart.chartArea.right - textWidth - 14));
+                const labelY = top + 6;
+
+                ctx.fillStyle = options.badgeFill || 'rgba(15, 23, 42, 0.88)';
+                ctx.strokeStyle = options.badgeStroke || 'rgba(226, 232, 240, 0.18)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.roundRect(labelX, labelY, textWidth + 14, 18, 6);
+                ctx.fill();
+                ctx.stroke();
+                ctx.fillStyle = options.textColor || '#e2e8f0';
+                ctx.fillText(label, labelX + 7, labelY + 12.5);
+                ctx.restore();
+            }
+        };
+
+        Chart.register(currentTimeLinePlugin);
 
         function buildDateFormatter(timeZone) {
             return new Intl.DateTimeFormat('en-GB', {
@@ -1500,6 +1551,12 @@
                             borderWidth: 1,
                             titleColor: '#f1f5f9',
                             bodyColor: '#cbd5e1'
+                        },
+                        currentTimeLine: {
+                            enabled: true,
+                            label: 'Now',
+                            color: 'rgba(226, 232, 240, 0.78)',
+                            glow: 'rgba(34, 211, 238, 0.34)'
                         }
                     },
                     scales: {
@@ -1634,7 +1691,7 @@
                         }
                     ]
                 },
-                options: weatherChartOptions('Rainfall mm', true)
+                options: weatherChartOptions('Rainfall mm', true, true)
             });
         }
 
@@ -1795,7 +1852,7 @@
             return { byIndex, count: flagged.length, message };
         }
 
-        function weatherChartOptions(yTitle, beginAtZero = false) {
+        function weatherChartOptions(yTitle, beginAtZero = false, showCurrentTimeLine = false) {
             return {
                 responsive: true,
                 maintainAspectRatio: false,
@@ -1819,6 +1876,12 @@
                         borderWidth: 1,
                         titleColor: '#f1f5f9',
                         bodyColor: '#cbd5e1'
+                    },
+                    currentTimeLine: {
+                        enabled: showCurrentTimeLine,
+                        label: 'Now',
+                        color: 'rgba(226, 232, 240, 0.78)',
+                        glow: 'rgba(34, 197, 94, 0.26)'
                     }
                 },
                 scales: {
@@ -2219,6 +2282,13 @@
                 const now = new Date();
                 const clockStr = now.toLocaleTimeString('en-US', { hour12: false, timeZone: BENGALURU_LOCATION.timezone || 'Asia/Kolkata' });
                 document.getElementById('live-time').innerText = clockStr;
+                const parts = bengaluruParts(now);
+                const minuteKey = `${parts.hour}:${parts.minute}`;
+                if (minuteKey !== lastCurrentTimeLineMinute) {
+                    lastCurrentTimeLineMinute = minuteKey;
+                    hourlyChart?.update('none');
+                    hourlyRainChart?.update('none');
+                }
             }, 1000);
         }
 
