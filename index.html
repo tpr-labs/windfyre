@@ -359,7 +359,7 @@
             </div>
         </div>
 
-        <!-- Charts Suite Container (Next 12 Hours & Next 7 Days) -->
+        <!-- 24-Hour Tracks: Wind and Weather -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             
             <!-- Hourly Forecast Comparison Chart Card -->
@@ -382,57 +382,66 @@
                 </div>
             </div>
 
-            <!-- Weekly Max Mixed Trends Card -->
+            <!-- 24-Hour Weather/Rainfall Card -->
             <div class="bg-slate-900/45 border border-slate-800/70 rounded-3xl p-6 backdrop-blur-md">
                 <div class="flex items-center justify-between mb-6">
                     <div>
                         <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                            <i class="fa-solid fa-chart-line text-amber-400"></i> Past + Future 7 Days Velocity
+                            <i class="fa-solid fa-cloud-rain text-emerald-400"></i> 24-Hour Weather Track
                         </h3>
-                        <p class="text-xs text-slate-400 mt-1">Backtested daily wind speed plus the upcoming forecast, compared with embedded ML predictions.</p>
+                        <p class="text-xs text-slate-400 mt-1">Rainfall backtest and forecast compared with the embedded ML weather prediction.</p>
                     </div>
-                    <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-amber-950/60 text-amber-400 border border-amber-900/40 uppercase font-bold">7-Day Outlines</span>
+                    <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-950/60 text-emerald-400 border border-emerald-900/40 uppercase font-bold">Hourly</span>
                 </div>
 
                 <div class="relative h-64 w-full">
-                    <canvas id="weeklyChart"></canvas>
+                    <canvas id="hourlyRainChart"></canvas>
                 </div>
                 <div class="mt-3 flex justify-end">
-                    <span id="weekly-wind-anomaly-status" class="text-[10px] font-mono text-slate-500 text-right">Daily wind anomaly: waiting for live data</span>
+                    <span id="rain-hourly-anomaly-status" class="text-[10px] font-mono text-slate-500 text-right">Rain anomaly: waiting for live data</span>
                 </div>
             </div>
         </div>
 
-        <!-- Rain Outlook Section -->
+        <!-- Full-width Past/Future Wind Trends -->
+        <div class="bg-slate-900/45 border border-slate-800/70 rounded-3xl p-6 backdrop-blur-md">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-chart-line text-amber-400"></i> Past + Future 7 Days Velocity
+                    </h3>
+                    <p class="text-xs text-slate-400 mt-1">Backtested daily wind speed plus the upcoming forecast, compared with embedded ML predictions.</p>
+                </div>
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-amber-950/60 text-amber-400 border border-amber-900/40 uppercase font-bold">7-Day Outlines</span>
+            </div>
+
+            <div class="relative h-72 w-full">
+                <canvas id="weeklyChart"></canvas>
+            </div>
+            <div class="mt-3 flex justify-end">
+                <span id="weekly-wind-anomaly-status" class="text-[10px] font-mono text-slate-500 text-right">Daily wind anomaly: waiting for live data</span>
+            </div>
+        </div>
+
+        <!-- Full-width Past/Future Weather Trends -->
         <div id="rain-outlook-section" class="bg-slate-900/45 border border-slate-800/70 rounded-3xl p-6 backdrop-blur-md">
             <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5 mb-6">
                 <div>
                     <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                        <i class="fa-solid fa-cloud-rain text-emerald-400"></i> Rainfall Forecast
+                        <i class="fa-solid fa-cloud-rain text-emerald-400"></i> Past + Future 7 Days Rainfall
                     </h3>
-                    <p class="text-xs text-slate-400 mt-1">Live Open-Meteo rainfall compared with the embedded ML rain prediction for <span class="active-city-inline">Bengaluru</span>.</p>
+                    <p class="text-xs text-slate-400 mt-1">Observed and forecast rainfall compared with embedded ML weather prediction for <span class="active-city-inline">Bengaluru</span>.</p>
                 </div>
                 <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-950/60 text-emerald-400 border border-emerald-900/40 uppercase font-bold self-start">Rain Models</span>
             </div>
 
-            <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
-                <div class="rounded-2xl border border-slate-800/80 bg-slate-950/45 p-4">
-                    <div class="flex items-center justify-between gap-3 mb-3">
-                        <h4 class="text-sm font-bold text-white">24-Hour Rainfall Track</h4>
-                        <span id="rain-hourly-anomaly-status" class="text-[10px] font-mono text-slate-500 text-right">Rain anomaly: waiting for live data</span>
-                    </div>
-                    <div class="relative h-60 w-full">
-                        <canvas id="hourlyRainChart"></canvas>
-                    </div>
+            <div class="rounded-2xl border border-slate-800/80 bg-slate-950/45 p-4">
+                <div class="flex items-center justify-between gap-3 mb-3">
+                    <h4 class="text-sm font-bold text-white">Past + Future 7 Days Rainfall</h4>
+                    <span id="weather-rain-status" class="text-[10px] font-mono text-slate-500 text-right">Waiting for live forecast</span>
                 </div>
-                <div class="rounded-2xl border border-slate-800/80 bg-slate-950/45 p-4">
-                    <div class="flex items-center justify-between gap-3 mb-3">
-                        <h4 class="text-sm font-bold text-white">Past + Future 7 Days Rainfall</h4>
-                        <span id="weather-rain-status" class="text-[10px] font-mono text-slate-500 text-right">Waiting for live forecast</span>
-                    </div>
-                    <div class="relative h-60 w-full">
-                        <canvas id="weatherRainChart"></canvas>
-                    </div>
+                <div class="relative h-72 w-full">
+                    <canvas id="weatherRainChart"></canvas>
                 </div>
             </div>
         </div>
@@ -444,20 +453,17 @@
                     <h3 class="text-lg font-bold text-white flex items-center gap-2">
                         <i class="fa-solid fa-temperature-half text-cyan-400"></i> Past + Future 7-Day Temperature Outlook
                     </h3>
-                    <p class="text-xs text-slate-400 mt-1">Live Open-Meteo temperature forecast for Bengaluru, shown with the daily condition strip.</p>
-                </div>
-                <div id="weather-condition-strip" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 text-xs">
-                    <!-- Filled from live API weather data -->
+                    <p class="text-xs text-slate-400 mt-1">Observed and forecast temperature for <span class="active-city-inline">Bengaluru</span>, compared with embedded ML weather predictions.</p>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 gap-4">
                 <div class="rounded-2xl border border-slate-800/80 bg-slate-950/45 p-4">
                     <div class="flex items-center justify-between gap-3 mb-3">
                         <h4 class="text-sm font-bold text-white">Max Temperature</h4>
                         <span id="weather-max-status" class="text-[10px] font-mono text-slate-500 text-right">Waiting for live forecast</span>
                     </div>
-                    <div class="relative h-60 w-full">
+                    <div class="relative h-72 w-full">
                         <canvas id="weatherMaxChart"></canvas>
                     </div>
                 </div>
@@ -466,7 +472,7 @@
                         <h4 class="text-sm font-bold text-white">Min Temperature</h4>
                         <span id="weather-min-status" class="text-[10px] font-mono text-slate-500 text-right">Waiting for live forecast</span>
                     </div>
-                    <div class="relative h-60 w-full">
+                    <div class="relative h-72 w-full">
                         <canvas id="weatherMinChart"></canvas>
                     </div>
                 </div>
@@ -528,6 +534,22 @@
                         </p>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- How Reliable Is This Section -->
+        <div class="bg-slate-900/30 border border-slate-800/60 rounded-3xl p-6 backdrop-blur-md">
+            <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-4">
+                <div>
+                    <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-cloud-sun-rain text-emerald-400"></i> Daily Weather Cards
+                    </h3>
+                    <p class="text-xs text-slate-400 mt-1">Observed and forecast daily weather notes for <span class="active-city-inline">Bengaluru</span>.</p>
+                </div>
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-950/60 text-emerald-400 border border-emerald-900/40 uppercase font-bold self-start sm:self-auto">Weather Cards</span>
+            </div>
+            <div id="weather-condition-strip" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 text-xs">
+                <!-- Filled from live API weather data -->
             </div>
         </div>
 
@@ -790,8 +812,7 @@
 
         function dayWindowLabel(dateObj, offset) {
             if (offset === 0) return 'Today';
-            const label = dateObj.toLocaleDateString('en-US', { weekday: 'short', day: '2-digit' });
-            return offset < 0 ? `${label} past` : label;
+            return dateObj.toLocaleDateString('en-US', { weekday: 'short', day: '2-digit' });
         }
 
         function monthRecords(monthIndex) {
