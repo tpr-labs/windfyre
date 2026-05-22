@@ -367,9 +367,9 @@
                 <div class="flex items-center justify-between mb-6">
                     <div>
                         <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                            <i class="fa-solid fa-chart-line text-cyan-400"></i> Today's Predicted Wind Speed Curve
+                            <i class="fa-solid fa-chart-line text-cyan-400"></i> 24-Hour Wind Track
                         </h3>
-                        <p class="text-xs text-slate-400 mt-1">Comparing today's 24-hour prediction baseline vs live Open-Meteo forecasts.</p>
+                        <p class="text-xs text-slate-400 mt-1">Past hours compare observed Open-Meteo values with ML predictions; upcoming hours use forecast values.</p>
                     </div>
                     <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-cyan-950/60 text-cyan-400 border border-cyan-900/40 uppercase font-bold">Hourly</span>
                 </div>
@@ -387,15 +387,18 @@
                 <div class="flex items-center justify-between mb-6">
                     <div>
                         <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                            <i class="fa-solid fa-chart-line text-amber-400"></i> Next 7 Days Velocity & Predictions
+                            <i class="fa-solid fa-chart-line text-amber-400"></i> Past + Future 7 Days Velocity
                         </h3>
-                        <p class="text-xs text-slate-400 mt-1">Comparing maximum daily wind speed forecasts (Bars) with historical model predictions (Line).</p>
+                        <p class="text-xs text-slate-400 mt-1">Backtested daily wind speed plus the upcoming forecast, compared with embedded ML predictions.</p>
                     </div>
                     <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-amber-950/60 text-amber-400 border border-amber-900/40 uppercase font-bold">7-Day Outlines</span>
                 </div>
 
                 <div class="relative h-64 w-full">
                     <canvas id="weeklyChart"></canvas>
+                </div>
+                <div class="mt-3 flex justify-end">
+                    <span id="weekly-wind-anomaly-status" class="text-[10px] font-mono text-slate-500 text-right">Daily wind anomaly: waiting for live data</span>
                 </div>
             </div>
         </div>
@@ -415,7 +418,7 @@
             <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
                 <div class="rounded-2xl border border-slate-800/80 bg-slate-950/45 p-4">
                     <div class="flex items-center justify-between gap-3 mb-3">
-                        <h4 class="text-sm font-bold text-white">Today Rainfall</h4>
+                        <h4 class="text-sm font-bold text-white">24-Hour Rainfall Track</h4>
                         <span id="rain-hourly-anomaly-status" class="text-[10px] font-mono text-slate-500 text-right">Rain anomaly: waiting for live data</span>
                     </div>
                     <div class="relative h-60 w-full">
@@ -424,7 +427,7 @@
                 </div>
                 <div class="rounded-2xl border border-slate-800/80 bg-slate-950/45 p-4">
                     <div class="flex items-center justify-between gap-3 mb-3">
-                        <h4 class="text-sm font-bold text-white">Next 7 Days Rainfall</h4>
+                        <h4 class="text-sm font-bold text-white">Past + Future 7 Days Rainfall</h4>
                         <span id="weather-rain-status" class="text-[10px] font-mono text-slate-500 text-right">Waiting for live forecast</span>
                     </div>
                     <div class="relative h-60 w-full">
@@ -439,7 +442,7 @@
             <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5 mb-6">
                 <div>
                     <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                        <i class="fa-solid fa-temperature-half text-cyan-400"></i> 7-Day Temperature Outlook
+                        <i class="fa-solid fa-temperature-half text-cyan-400"></i> Past + Future 7-Day Temperature Outlook
                     </h3>
                     <p class="text-xs text-slate-400 mt-1">Live Open-Meteo temperature forecast for Bengaluru, shown with the daily condition strip.</p>
                 </div>
@@ -735,6 +738,62 @@
             return records[fallbackIndex] || records[0];
         }
 
+        function localDateKeyFor(dateObj = new Date()) {
+            const parts = bengaluruParts(dateObj);
+            return `${parts.year}-${String(parts.month).padStart(2, '0')}-${String(parts.day).padStart(2, '0')}`;
+        }
+
+        function localHourKeyFor(dateObj = new Date(), hourValue = null) {
+            const parts = bengaluruParts(dateObj);
+            const hour = hourValue === null ? parts.hour : Number(hourValue);
+            return `${parts.year}-${String(parts.month).padStart(2, '0')}-${String(parts.day).padStart(2, '0')}T${String(hour).padStart(2, '0')}:00`;
+        }
+
+        function cityDateWithOffset(dayOffset = 0) {
+            const date = new Date();
+            date.setDate(date.getDate() + dayOffset);
+            date.setHours(12, 0, 0, 0);
+            return date;
+        }
+
+        function telemetryHourlyIndex(dateObj = new Date(), hourValue = null) {
+            const times = telemetryData?.hourly?.time;
+            if (!Array.isArray(times)) return -1;
+            return times.indexOf(localHourKeyFor(dateObj, hourValue));
+        }
+
+        function telemetryHourlyValue(field, dateObj = new Date(), hourValue = null) {
+            if (!telemetryData || telemetryData.predictionOnly || !telemetryData.hourly) return null;
+            const values = telemetryData.hourly[field];
+            if (!Array.isArray(values)) return null;
+            const index = telemetryHourlyIndex(dateObj, hourValue);
+            return index >= 0 ? values[index] : null;
+        }
+
+        function telemetryDailyIndex(dateObj = new Date()) {
+            const times = telemetryData?.daily?.time;
+            if (!Array.isArray(times)) return -1;
+            return times.indexOf(localDateKeyFor(dateObj));
+        }
+
+        function telemetryDailyValue(field, dateObj = new Date()) {
+            if (!telemetryData || telemetryData.predictionOnly || !telemetryData.daily) return null;
+            const values = telemetryData.daily[field];
+            if (!Array.isArray(values)) return null;
+            const index = telemetryDailyIndex(dateObj);
+            return index >= 0 ? values[index] : null;
+        }
+
+        function dayWindowOffsets() {
+            return Array.from({ length: 14 }, (_, index) => index - 7);
+        }
+
+        function dayWindowLabel(dateObj, offset) {
+            if (offset === 0) return 'Today';
+            const label = dateObj.toLocaleDateString('en-US', { weekday: 'short', day: '2-digit' });
+            return offset < 0 ? `${label} past` : label;
+        }
+
         function monthRecords(monthIndex) {
             const month = String(monthIndex + 1).padStart(2, '0');
             return records.filter(record => record.t.slice(5, 7) === month);
@@ -1010,7 +1069,7 @@
             if (!payload || !BENGALURU_LOCATION.lat || !BENGALURU_LOCATION.lon) return;
             const requestSlug = activeCityMeta?.slug;
             // Streamlined URL requesting ONLY necessary rendering parameters
-            const url = `${payload.forecastUrl}?latitude=${BENGALURU_LOCATION.lat}&longitude=${BENGALURU_LOCATION.lon}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m&hourly=wind_speed_10m,wind_direction_10m,precipitation&daily=wind_speed_10m_max,weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum&timezone=${encodeURIComponent(BENGALURU_LOCATION.timezone)}`;
+            const url = `${payload.forecastUrl}?latitude=${BENGALURU_LOCATION.lat}&longitude=${BENGALURU_LOCATION.lon}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m&hourly=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m,precipitation&daily=wind_speed_10m_max,weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum&past_days=7&forecast_days=7&timezone=${encodeURIComponent(BENGALURU_LOCATION.timezone)}`;
             
             logToTerminal(`Initiating background sync with Open-Meteo [${BENGALURU_LOCATION.short}]...`, "system");
             
@@ -1412,6 +1471,49 @@
             return { byHour, count: flagged.length, message };
         }
 
+        function detectDailyWindAnomalies(rows) {
+            if (rows.length < 6) {
+                return { byIndex: new Map(), count: 0, message: "Daily wind anomaly: waiting for live data" };
+            }
+
+            const random = seededRandom(20260524);
+            const treeCount = 64;
+            const sampleSize = Math.min(12, rows.length);
+            const maxDepth = Math.ceil(Math.log2(sampleSize));
+            const trees = [];
+
+            for (let i = 0; i < treeCount; i++) {
+                const sample = [];
+                const used = new Set();
+                while (sample.length < sampleSize) {
+                    const pick = Math.floor(random() * rows.length);
+                    if (!used.has(pick)) {
+                        used.add(pick);
+                        sample.push(rows[pick]);
+                    }
+                }
+                trees.push(buildIsolationTree(sample, 0, maxDepth, random));
+            }
+
+            const normalization = averagePathLength(sampleSize) || 1;
+            const scores = rows.map(row => {
+                const path = trees.reduce((total, tree) => total + isolationPathLength(row, tree), 0) / treeCount;
+                return { ...row, score: Math.pow(2, -path / normalization) };
+            });
+
+            const flagged = scores
+                .filter(row => row.score >= 0.62 || row.speedDelta >= 6)
+                .sort((a, b) => b.score - a.score)
+                .slice(0, 4);
+
+            const byIndex = new Map(flagged.map(row => [row.index, row]));
+            const message = flagged.length
+                ? `Daily wind anomaly: ${flagged.length} unusual day${flagged.length > 1 ? "s" : ""} flagged`
+                : "Daily wind anomaly: no unusual days";
+
+            return { byIndex, count: flagged.length, message };
+        }
+
         function buildHourlyChart() {
             const ctx = document.getElementById('hourlyChart').getContext('2d');
             
@@ -1425,19 +1527,20 @@
             const anomalyDataset = [];
             const anomalyRows = [];
             const labels = [];
+            const currentHour = bengaluruParts(now).hour;
 
             for (let i = 0; i < 24; i++) {
                 const targetTime = new Date(now);
-                targetTime.setHours(i);
+                targetTime.setHours(i, 0, 0, 0);
                 
                 const predictedObj = getHistoricalPrediction(targetTime, i);
                 const predictedSpeed = formatSpeed(predictedObj.speed);
                 predictionDataset.push(predictedSpeed);
 
                 if (telemetryData && !telemetryData.predictionOnly && telemetryData.hourly && telemetryData.hourly.wind_speed_10m) {
-                    const liveSpeedRaw = telemetryData.hourly.wind_speed_10m[i];
-                    const liveDirection = telemetryData.hourly.wind_direction_10m?.[i];
-                    const liveSpeed = formatSpeed(liveSpeedRaw);
+                    const liveSpeedRaw = telemetryHourlyValue('wind_speed_10m', targetTime, i);
+                    const liveDirection = telemetryHourlyValue('wind_direction_10m', targetTime, i);
+                    const liveSpeed = typeof liveSpeedRaw === 'number' ? formatSpeed(liveSpeedRaw) : null;
                     liveDataset.push(liveSpeed);
 
                     if (typeof liveSpeedRaw === 'number' && typeof liveDirection === 'number') {
@@ -1449,6 +1552,7 @@
                         anomalyRows.push({
                             hour: i,
                             speed: liveSpeed,
+                            phase: i <= currentHour ? 'backtest' : 'forecast',
                             speedDelta,
                             directionDelta,
                             features: [
@@ -1500,7 +1604,7 @@
                             tension: 0.4
                         },
                         {
-                            label: `Live Forecast (${unitStr})`,
+                            label: `Observed / Forecast (${unitStr})`,
                             data: liveDataset,
                             borderColor: '#22d3ee',
                             borderWidth: 3,
@@ -1587,17 +1691,18 @@
             const liveDataset = [];
             const anomalyRows = [];
             const anomalyDataset = [];
+            const currentHour = bengaluruParts(now).hour;
 
             for (let i = 0; i < 24; i++) {
                 const targetTime = new Date(now);
-                targetTime.setHours(i);
+                targetTime.setHours(i, 0, 0, 0);
 
                 const predictedObj = getHistoricalPrediction(targetTime, i);
                 const predictedRain = typeof predictedObj.precipitation === 'number' ? Math.round(predictedObj.precipitation * 100) / 100 : null;
                 predictionDataset.push(predictedRain);
 
                 if (telemetryData && !telemetryData.predictionOnly && telemetryData.hourly && Array.isArray(telemetryData.hourly.precipitation)) {
-                    const liveRainRaw = telemetryData.hourly.precipitation[i];
+                    const liveRainRaw = telemetryHourlyValue('precipitation', targetTime, i);
                     const liveRain = typeof liveRainRaw === 'number' ? Math.round(liveRainRaw * 100) / 100 : null;
                     liveDataset.push(liveRain);
 
@@ -1606,6 +1711,7 @@
                         anomalyRows.push({
                             hour: i,
                             rain: liveRain,
+                            phase: i <= currentHour ? 'backtest' : 'forecast',
                             liveRain: liveRainRaw,
                             predictedRain,
                             rainDelta,
@@ -1661,7 +1767,7 @@
                             order: 2
                         },
                         {
-                            label: 'Live Rainfall (mm)',
+                            label: 'Observed / Forecast Rainfall (mm)',
                             data: liveDataset,
                             borderColor: '#22c55e',
                             backgroundColor: 'rgba(34, 197, 94, 0.08)',
@@ -1705,26 +1811,53 @@
             const labels = [];
             const liveSpeedDataset = [];
             const predictedSpeedDataset = [];
+            const anomalyDataset = [];
+            const anomalyRows = [];
             const unitStr = UNIT_LABEL;
             const now = new Date();
+            const offsets = dayWindowOffsets();
 
-            for (let i = 0; i < 7; i++) {
-                const targetDate = new Date();
-                targetDate.setDate(now.getDate() + i);
+            offsets.forEach((dayOffset, index) => {
+                const targetDate = cityDateWithOffset(dayOffset);
                 
-                const dayName = targetDate.toLocaleDateString('en-US', { weekday: 'short' });
-                const dateStr = targetDate.getDate().toString().padStart(2, '0');
-                labels.push(`${dayName} ${dateStr}`);
+                labels.push(dayWindowLabel(targetDate, dayOffset));
                 
-                // Live Max Forecast
-                if (telemetryData && !telemetryData.predictionOnly && telemetryData.daily && telemetryData.daily.wind_speed_10m_max) {
-                    liveSpeedDataset.push(formatSpeed(telemetryData.daily.wind_speed_10m_max[i]));
+                const liveSpeedRaw = telemetryDailyValue('wind_speed_10m_max', targetDate);
+                const predictedDaySpeeds = Array.from({ length: 24 }, (_, hour) => getHistoricalPrediction(targetDate, hour).speed);
+                const predictedSpeed = formatSpeed(Math.max(...predictedDaySpeeds));
+                predictedSpeedDataset.push(predictedSpeed);
+
+                if (typeof liveSpeedRaw === 'number') {
+                    const liveSpeed = formatSpeed(liveSpeedRaw);
+                    liveSpeedDataset.push(liveSpeed);
+                    const speedDelta = Math.abs(liveSpeedRaw - predictedSpeed);
+                    anomalyRows.push({
+                        index,
+                        speed: liveSpeed,
+                        speedDelta,
+                        features: [
+                            liveSpeedRaw / 45,
+                            predictedSpeed / 45,
+                            speedDelta / 18,
+                            (index + 1) / offsets.length
+                        ]
+                    });
                 } else {
                     liveSpeedDataset.push(null);
                 }
+            });
 
-                const predictedDaySpeeds = Array.from({ length: 24 }, (_, hour) => getHistoricalPrediction(targetDate, hour).speed);
-                predictedSpeedDataset.push(formatSpeed(Math.max(...predictedDaySpeeds))); 
+            const anomalyScan = detectDailyWindAnomalies(anomalyRows);
+            for (let index = 0; index < offsets.length; index++) {
+                anomalyDataset.push(anomalyScan.byIndex.get(index)?.speed ?? null);
+            }
+
+            const anomalyStatus = document.getElementById('weekly-wind-anomaly-status');
+            if (anomalyStatus) {
+                anomalyStatus.textContent = anomalyScan.message;
+                anomalyStatus.className = anomalyScan.count
+                    ? 'text-[10px] font-mono text-rose-400 text-right'
+                    : 'text-[10px] font-mono text-slate-500 text-right';
             }
 
             weeklyChart = new Chart(ctx, {
@@ -1752,7 +1885,7 @@
                         },
                         {
                             type: 'bar',
-                            label: `Live Forecast Max (${unitStr})`,
+                            label: `Observed / Forecast Max (${unitStr})`,
                             data: liveSpeedDataset,
                             backgroundColor: 'rgba(34, 211, 238, 0.25)', 
                             borderColor: '#06b6d4',
@@ -1761,6 +1894,21 @@
                             borderRadius: 6,
                             pointStyle: 'line',
                             order: 2 
+                        },
+                        {
+                            type: 'line',
+                            label: 'Anomaly',
+                            data: anomalyDataset,
+                            borderColor: '#fb7185',
+                            backgroundColor: '#fb7185',
+                            pointBorderColor: '#fecdd3',
+                            pointBorderWidth: 2,
+                            pointRadius: 6,
+                            pointHoverRadius: 8,
+                            pointStyle: 'circle',
+                            showLine: false,
+                            fill: false,
+                            order: 0
                         }
                     ]
                 },
@@ -2017,17 +2165,19 @@
             const maxRows = [];
             const minRows = [];
             const rainRows = [];
+            const offsets = dayWindowOffsets();
 
-            for (let index = 0; index < 7; index++) {
-                const dateStr = daily.time[index];
-                const date = dateStr ? new Date(`${dateStr}T00:00`) : new Date();
-                if (!dateStr) date.setDate(new Date().getDate() + index);
-                labels.push(date.toLocaleDateString('en-US', { weekday: 'short', day: '2-digit' }));
+            offsets.forEach((dayOffset, index) => {
+                const date = cityDateWithOffset(dayOffset);
+                labels.push(dayWindowLabel(date, dayOffset));
 
                 const predicted = getDailyWeatherPrediction(date);
-                const liveMax = typeof daily.temperature_2m_max?.[index] === 'number' ? Math.round(daily.temperature_2m_max[index] * 10) / 10 : null;
-                const liveMin = typeof daily.temperature_2m_min?.[index] === 'number' ? Math.round(daily.temperature_2m_min[index] * 10) / 10 : null;
-                const liveRainSum = typeof daily.precipitation_sum?.[index] === 'number' ? Math.round(daily.precipitation_sum[index] * 10) / 10 : null;
+                const liveMaxRaw = telemetryDailyValue('temperature_2m_max', date);
+                const liveMinRaw = telemetryDailyValue('temperature_2m_min', date);
+                const liveRainRaw = telemetryDailyValue('precipitation_sum', date);
+                const liveMax = typeof liveMaxRaw === 'number' ? Math.round(liveMaxRaw * 10) / 10 : null;
+                const liveMin = typeof liveMinRaw === 'number' ? Math.round(liveMinRaw * 10) / 10 : null;
+                const liveRainSum = typeof liveRainRaw === 'number' ? Math.round(liveRainRaw * 10) / 10 : null;
                 const hasLiveMax = !telemetryData.predictionOnly && typeof liveMax === 'number' && typeof predicted.maxTemp === 'number';
                 const hasLiveMin = !telemetryData.predictionOnly && typeof liveMin === 'number' && typeof predicted.minTemp === 'number';
                 const hasLiveRain = !telemetryData.predictionOnly && typeof liveRainSum === 'number' && typeof predicted.rain === 'number';
@@ -2042,13 +2192,14 @@
                 maxRows.push({ index, hasLive: hasLiveMax, live: liveMax, predicted: predicted.maxTemp, marker: liveMax });
                 minRows.push({ index, hasLive: hasLiveMin, live: liveMin, predicted: predicted.minTemp, marker: liveMin });
                 rainRows.push({ index, hasLive: hasLiveRain, live: liveRainSum, predicted: predicted.rain, marker: liveRainSum });
-            }
+            });
 
             if (strip) {
                 strip.innerHTML = labels.map((label, index) => {
-                    const predicted = getDailyWeatherPrediction(new Date(`${daily.time[index]}T00:00`));
-                    const code = daily.weather_code?.[index] ?? predicted.weatherCode;
-                    const rainChance = daily.precipitation_probability_max?.[index];
+                    const date = cityDateWithOffset(offsets[index]);
+                    const predicted = getDailyWeatherPrediction(date);
+                    const code = telemetryDailyValue('weather_code', date) ?? predicted.weatherCode;
+                    const rainChance = telemetryDailyValue('precipitation_probability_max', date);
                     const rainValue = liveRain[index] ?? predicted.rain;
                     const rainText = typeof rainChance === 'number'
                         ? `${rainChance}% rain`
