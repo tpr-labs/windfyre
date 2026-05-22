@@ -388,21 +388,55 @@
             </div>
         </div>
 
+        <!-- Rain Outlook Section -->
+        <div id="rain-outlook-section" class="bg-slate-900/45 border border-slate-800/70 rounded-3xl p-6 backdrop-blur-md">
+            <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5 mb-6">
+                <div>
+                    <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-cloud-rain text-emerald-400"></i> Rainfall Forecast
+                    </h3>
+                    <p class="text-xs text-slate-400 mt-1">Live Open-Meteo rainfall compared with the embedded ML rain prediction for Bengaluru.</p>
+                </div>
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-950/60 text-emerald-400 border border-emerald-900/40 uppercase font-bold self-start">Rain Models</span>
+            </div>
+
+            <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                <div class="rounded-2xl border border-slate-800/80 bg-slate-950/45 p-4">
+                    <div class="flex items-center justify-between gap-3 mb-3">
+                        <h4 class="text-sm font-bold text-white">Today Rainfall</h4>
+                        <span id="rain-hourly-anomaly-status" class="text-[10px] font-mono text-slate-500 text-right">Rain anomaly: waiting for live data</span>
+                    </div>
+                    <div class="relative h-60 w-full">
+                        <canvas id="hourlyRainChart"></canvas>
+                    </div>
+                </div>
+                <div class="rounded-2xl border border-slate-800/80 bg-slate-950/45 p-4">
+                    <div class="flex items-center justify-between gap-3 mb-3">
+                        <h4 class="text-sm font-bold text-white">Next 7 Days Rainfall</h4>
+                        <span id="weather-rain-status" class="text-[10px] font-mono text-slate-500 text-right">Waiting for live forecast</span>
+                    </div>
+                    <div class="relative h-60 w-full">
+                        <canvas id="weatherRainChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Live Weather Outlook, shown only when Open-Meteo provides weather forecast data -->
         <div id="weather-outlook-section" class="hidden bg-slate-900/45 border border-slate-800/70 rounded-3xl p-6 backdrop-blur-md">
             <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5 mb-6">
                 <div>
                     <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                        <i class="fa-solid fa-cloud-sun-rain text-cyan-400"></i> 7-Day Weather Outlook
+                        <i class="fa-solid fa-temperature-half text-cyan-400"></i> 7-Day Temperature Outlook
                     </h3>
-                    <p class="text-xs text-slate-400 mt-1">Live Open-Meteo weather forecast for Bengaluru, shown when the feed provides weather fields.</p>
+                    <p class="text-xs text-slate-400 mt-1">Live Open-Meteo temperature forecast for Bengaluru, shown with the daily condition strip.</p>
                 </div>
                 <div id="weather-condition-strip" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 text-xs">
                     <!-- Filled from live API weather data -->
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
                 <div class="rounded-2xl border border-slate-800/80 bg-slate-950/45 p-4">
                     <div class="flex items-center justify-between gap-3 mb-3">
                         <h4 class="text-sm font-bold text-white">Max Temperature</h4>
@@ -419,15 +453,6 @@
                     </div>
                     <div class="relative h-60 w-full">
                         <canvas id="weatherMinChart"></canvas>
-                    </div>
-                </div>
-                <div class="rounded-2xl border border-slate-800/80 bg-slate-950/45 p-4">
-                    <div class="flex items-center justify-between gap-3 mb-3">
-                        <h4 class="text-sm font-bold text-white">Rainfall</h4>
-                        <span id="weather-rain-status" class="text-[10px] font-mono text-slate-500 text-right">Waiting for live forecast</span>
-                    </div>
-                    <div class="relative h-60 w-full">
-                        <canvas id="weatherRainChart"></canvas>
                     </div>
                 </div>
             </div>
@@ -585,6 +610,7 @@
         let selectedHour = new Date().getHours();
         let telemetryData = null; 
         let hourlyChart = null;
+        let hourlyRainChart = null;
         let weeklyChart = null;
         let weatherCharts = {};
 
@@ -906,7 +932,7 @@
         // -------------------------------------------------------------------------
         async function syncLiveTelemetry() {
             // Streamlined URL requesting ONLY necessary rendering parameters
-            const url = `${payload.forecastUrl}?latitude=${BENGALURU_LOCATION.lat}&longitude=${BENGALURU_LOCATION.lon}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m&hourly=wind_speed_10m,wind_direction_10m&daily=wind_speed_10m_max,weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum&timezone=${encodeURIComponent(BENGALURU_LOCATION.timezone)}`;
+            const url = `${payload.forecastUrl}?latitude=${BENGALURU_LOCATION.lat}&longitude=${BENGALURU_LOCATION.lon}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m&hourly=wind_speed_10m,wind_direction_10m,precipitation&daily=wind_speed_10m_max,weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum&timezone=${encodeURIComponent(BENGALURU_LOCATION.timezone)}`;
             
             logToTerminal(`Initiating background sync with Open-Meteo [${BENGALURU_LOCATION.short}]...`, "system");
             
@@ -954,6 +980,7 @@
             const hourlyTime = [];
             const hourlySpeed = [];
             const hourlyDirection = [];
+            const hourlyPrecipitation = [];
             
             for (let i = 0; i < 24; i++) {
                 const targetTime = new Date(now);
@@ -963,6 +990,7 @@
                 hourlyTime.push(targetTime.toISOString().substring(0, 16));
                 hourlySpeed.push(hourlyPrediction.speed);
                 hourlyDirection.push(hourlyPrediction.direction);
+                hourlyPrecipitation.push(hourlyPrediction.precipitation);
             }
 
             const dailyTime = [];
@@ -1000,7 +1028,8 @@
                 hourly: {
                     time: hourlyTime,
                     wind_speed_10m: hourlySpeed,
-                    wind_direction_10m: hourlyDirection
+                    wind_direction_10m: hourlyDirection,
+                    precipitation: hourlyPrecipitation
                 },
                 daily: {
                     time: dailyTime,
@@ -1098,6 +1127,7 @@
 
             // Render Charts
             buildHourlyChart();
+            buildHourlyRainChart();
             buildWeeklyChart();
             buildWeatherChart();
         }
@@ -1260,6 +1290,49 @@
             return { byHour, count: flagged.length, message };
         }
 
+        function detectHourlyRainAnomalies(rows) {
+            if (rows.length < 8) {
+                return { byHour: new Map(), count: 0, message: "Rain anomaly: waiting for live data" };
+            }
+
+            const random = seededRandom(20260523);
+            const treeCount = 72;
+            const sampleSize = Math.min(16, rows.length);
+            const maxDepth = Math.ceil(Math.log2(sampleSize));
+            const trees = [];
+
+            for (let i = 0; i < treeCount; i++) {
+                const sample = [];
+                const used = new Set();
+                while (sample.length < sampleSize) {
+                    const pick = Math.floor(random() * rows.length);
+                    if (!used.has(pick)) {
+                        used.add(pick);
+                        sample.push(rows[pick]);
+                    }
+                }
+                trees.push(buildIsolationTree(sample, 0, maxDepth, random));
+            }
+
+            const normalization = averagePathLength(sampleSize) || 1;
+            const scores = rows.map(row => {
+                const path = trees.reduce((total, tree) => total + isolationPathLength(row, tree), 0) / treeCount;
+                return { ...row, score: Math.pow(2, -path / normalization) };
+            });
+
+            const flagged = scores
+                .filter(row => row.score >= 0.64 || row.rainDelta >= 2 || (row.liveRain >= 1.5 && row.predictedRain <= 0.15))
+                .sort((a, b) => b.score - a.score)
+                .slice(0, 4);
+
+            const byHour = new Map(flagged.map(row => [row.hour, row]));
+            const message = flagged.length
+                ? `Rain anomaly: ${flagged.length} unusual hour${flagged.length > 1 ? "s" : ""} flagged`
+                : "Rain anomaly: no unusual live hours";
+
+            return { byHour, count: flagged.length, message };
+        }
+
         function buildHourlyChart() {
             const ctx = document.getElementById('hourlyChart').getContext('2d');
             
@@ -1412,6 +1485,128 @@
                         }
                     }
                 }
+            });
+        }
+
+        function buildHourlyRainChart() {
+            const canvasEl = document.getElementById('hourlyRainChart');
+            if (!canvasEl) return;
+
+            if (hourlyRainChart) {
+                hourlyRainChart.destroy();
+            }
+
+            const now = new Date();
+            const labels = [];
+            const predictionDataset = [];
+            const liveDataset = [];
+            const anomalyRows = [];
+            const anomalyDataset = [];
+
+            for (let i = 0; i < 24; i++) {
+                const targetTime = new Date(now);
+                targetTime.setHours(i);
+
+                const predictedObj = getHistoricalPrediction(targetTime, i);
+                const predictedRain = typeof predictedObj.precipitation === 'number' ? Math.round(predictedObj.precipitation * 100) / 100 : null;
+                predictionDataset.push(predictedRain);
+
+                if (telemetryData && !telemetryData.predictionOnly && telemetryData.hourly && Array.isArray(telemetryData.hourly.precipitation)) {
+                    const liveRainRaw = telemetryData.hourly.precipitation[i];
+                    const liveRain = typeof liveRainRaw === 'number' ? Math.round(liveRainRaw * 100) / 100 : null;
+                    liveDataset.push(liveRain);
+
+                    if (typeof liveRainRaw === 'number' && typeof predictedRain === 'number') {
+                        const rainDelta = Math.abs(liveRainRaw - predictedRain);
+                        anomalyRows.push({
+                            hour: i,
+                            rain: liveRain,
+                            liveRain: liveRainRaw,
+                            predictedRain,
+                            rainDelta,
+                            features: [
+                                Math.min(liveRainRaw / 12, 1),
+                                Math.min(predictedRain / 12, 1),
+                                Math.min(rainDelta / 8, 1),
+                                i / 23,
+                                liveRainRaw > 0 ? 1 : 0,
+                                predictedRain > 0 ? 1 : 0
+                            ]
+                        });
+                    }
+                } else {
+                    liveDataset.push(null);
+                }
+
+                labels.push(`${i.toString().padStart(2, '0')}:00`);
+            }
+
+            const anomalyScan = detectHourlyRainAnomalies(anomalyRows);
+            for (let i = 0; i < 24; i++) {
+                anomalyDataset.push(anomalyScan.byHour.get(i)?.rain ?? null);
+            }
+
+            const anomalyStatus = document.getElementById('rain-hourly-anomaly-status');
+            if (anomalyStatus) {
+                anomalyStatus.textContent = anomalyScan.message;
+                anomalyStatus.className = anomalyScan.count
+                    ? 'text-[10px] font-mono text-rose-400 text-right'
+                    : 'text-[10px] font-mono text-slate-500 text-right';
+            }
+
+            hourlyRainChart = new Chart(canvasEl.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [
+                        {
+                            label: 'ML Predicted Rainfall (mm)',
+                            data: predictionDataset,
+                            borderColor: 'rgba(74, 222, 128, 0.76)',
+                            backgroundColor: 'rgba(74, 222, 128, 0.04)',
+                            pointBackgroundColor: '#4ade80',
+                            pointBorderColor: '#0f172a',
+                            pointBorderWidth: 2,
+                            pointRadius: 3,
+                            pointHoverRadius: 7,
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            fill: false,
+                            tension: 0.35,
+                            order: 2
+                        },
+                        {
+                            label: 'Live Rainfall (mm)',
+                            data: liveDataset,
+                            borderColor: '#22c55e',
+                            backgroundColor: 'rgba(34, 197, 94, 0.08)',
+                            pointBackgroundColor: '#22c55e',
+                            pointBorderColor: '#0f172a',
+                            pointBorderWidth: 2,
+                            pointRadius: 4,
+                            pointHoverRadius: 7,
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.35,
+                            order: 1
+                        },
+                        {
+                            label: 'Anomaly',
+                            data: anomalyDataset,
+                            borderColor: '#fb7185',
+                            backgroundColor: '#fb7185',
+                            pointBorderColor: '#fecdd3',
+                            pointBorderWidth: 2,
+                            pointRadius: 6,
+                            pointHoverRadius: 8,
+                            pointStyle: 'circle',
+                            showLine: false,
+                            fill: false,
+                            order: 0
+                        }
+                    ]
+                },
+                options: weatherChartOptions('Rainfall mm', true)
             });
         }
 
@@ -1710,7 +1905,7 @@
                 section.classList.add('hidden');
                 Object.values(weatherCharts).forEach(chart => chart.destroy());
                 weatherCharts = {};
-                if (status) status.textContent = 'Weather graph: waiting for live forecast';
+                if (status) status.textContent = 'Temperature graph: waiting for live forecast';
                 canvases.forEach(id => {
                     const canvasStatus = document.getElementById(id.replace('Chart', '-status').replace('weatherMax', 'weather-max').replace('weatherMin', 'weather-min').replace('weatherRain', 'weather-rain'));
                     if (canvasStatus) canvasStatus.textContent = 'Waiting for live forecast';
@@ -1853,11 +2048,11 @@
                 beginAtZero: true
             });
 
-            const totalAnomalies = maxScan.count + minScan.count + rainScan.count;
+            const totalAnomalies = maxScan.count + minScan.count;
             if (status) {
                 status.textContent = totalAnomalies
-                    ? `Weather anomaly: ${totalAnomalies} parameter alert${totalAnomalies > 1 ? 's' : ''} across 7 days`
-                    : 'Weather anomaly: no unusual parameter days';
+                    ? `Temperature anomaly: ${totalAnomalies} parameter alert${totalAnomalies > 1 ? 's' : ''} across 7 days`
+                    : 'Temperature anomaly: no unusual parameter days';
                 status.className = totalAnomalies
                     ? 'text-[10px] font-mono text-rose-400 text-right'
                     : 'text-[10px] font-mono text-slate-500 text-right';
