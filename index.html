@@ -365,62 +365,6 @@
             `;
         }
 
-        function livePanel(state, prediction) {
-            if (state.liveStatus === 'queued') {
-                return `
-                    <div class="rounded-2xl border border-slate-800/70 bg-slate-950/45 p-3 text-xs font-mono text-slate-500">
-                        Live sync queued...
-                    </div>
-                `;
-            }
-
-            if (state.liveStatus === 'loading') {
-                return `
-                    <div class="rounded-2xl border border-cyan-900/40 bg-cyan-950/10 p-3 text-xs font-mono text-cyan-300">
-                        <i class="fa-solid fa-circle-notch animate-spin mr-2"></i>Fetching live data...
-                    </div>
-                `;
-            }
-
-            if (state.liveStatus === 'error') {
-                return `
-                    <div class="rounded-2xl border border-rose-900/50 bg-rose-950/15 p-3 text-xs text-rose-300">
-                        Live sync failed. Prediction remains available.
-                    </div>
-                `;
-            }
-
-            if (!state.live && state.liveStatus === 'off') return '';
-
-            if (!state.live) {
-                return `
-                    <div class="rounded-2xl border border-slate-800/70 bg-slate-950/45 p-3 text-xs font-mono text-slate-500">
-                        Waiting for live sync...
-                    </div>
-                `;
-            }
-
-            const score = predictionAccuracy(state, prediction);
-            return `
-                <div class="rounded-2xl border border-cyan-900/40 bg-cyan-950/10 p-3">
-                    <div class="flex items-center justify-between gap-3">
-                        <span class="text-[10px] font-mono uppercase tracking-widest text-cyan-300">Live now</span>
-                        <span class="text-[10px] font-mono ${matchClasses(score)}">${score === null ? '--' : `${score}% prediction accuracy`}</span>
-                    </div>
-                    <div class="mt-2 grid grid-cols-2 gap-3 text-sm">
-                        <div>
-                            <div class="text-slate-500 text-[10px] uppercase font-mono">Wind</div>
-                            <div class="font-bold text-cyan-100">${formatSpeed(state.live.wind_speed_10m)} · ${getCardinal(state.live.wind_direction_10m)}</div>
-                        </div>
-                        <div>
-                            <div class="text-slate-500 text-[10px] uppercase font-mono">Weather</div>
-                            <div class="font-bold text-slate-100">${formatTemp(state.live.temperature_2m)} · ${weatherText(state.live.weather_code)}</div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
         function cityCard(state) {
             const prediction = predictionForCity(state);
             const records24 = predicted24Hours(state);
@@ -431,10 +375,54 @@
             const predictedArrowRotation = Number.isFinite(prediction.direction) ? prediction.direction : 0;
             const liveArrowRotation = state.live && Number.isFinite(state.live.wind_direction_10m) ? state.live.wind_direction_10m : null;
             const monthly = state.payload.monthly?.[localParts(new Date(), state.payload.timezone).month - 1];
+            const liveRain = state.live ? liveRainTotal(state) : null;
             const accuracyPanel = state.live ? `
                 <div class="rounded-2xl border border-slate-800/60 bg-slate-950/45 p-3 flex items-center justify-between gap-3">
                     <span class="text-[10px] font-mono uppercase tracking-widest text-slate-500">Prediction accuracy</span>
                     <span class="text-lg font-black ${matchClasses(accuracy)}">${accuracy === null ? '--' : `${accuracy}%`}</span>
+                </div>
+            ` : '';
+            const comparisonPanel = state.live ? `
+                <div class="rounded-2xl border border-cyan-900/35 bg-cyan-950/10 p-3 space-y-3">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <span class="text-[10px] font-mono uppercase tracking-widest text-amber-300">Predicted weather</span>
+                            <div class="mt-1 flex items-center gap-2 text-base font-black text-white">
+                                <i class="${weatherIcon(prediction.weatherCode)} text-sm"></i>
+                                ${formatTemp(prediction.temperature)}
+                            </div>
+                            <div class="text-[11px] text-slate-400">${weatherText(prediction.weatherCode)}</div>
+                        </div>
+                        <div>
+                            <span class="text-[10px] font-mono uppercase tracking-widest text-cyan-300">Live weather</span>
+                            <div class="mt-1 text-base font-black text-cyan-100">${formatTemp(state.live.temperature_2m)}</div>
+                            <div class="text-[11px] text-slate-400">${weatherText(state.live.weather_code)}</div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 border-t border-slate-800/70 pt-3">
+                        <div>
+                            <span class="text-[10px] font-mono uppercase tracking-widest text-amber-300">Predicted rain</span>
+                            <div class="mt-1 text-base font-black text-white">${Math.round(rainTotal * 10) / 10} mm</div>
+                            <div class="text-[11px] text-slate-400">next 24h</div>
+                        </div>
+                        <div>
+                            <span class="text-[10px] font-mono uppercase tracking-widest text-cyan-300">Live rain</span>
+                            <div class="mt-1 text-base font-black text-cyan-100">${liveRain === null ? '-- mm' : `${Math.round(liveRain * 10) / 10} mm`}</div>
+                            <div class="text-[11px] text-slate-400">observed + forecast</div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 border-t border-slate-800/70 pt-3">
+                        <div>
+                            <span class="text-[10px] font-mono uppercase tracking-widest text-amber-300">Predicted wind</span>
+                            <div class="mt-1 text-base font-black text-white">${formatSpeed(prediction.speed)}</div>
+                            <div class="text-[11px] text-slate-400">${Math.round(prediction.direction)}° ${getCardinal(prediction.direction)}</div>
+                        </div>
+                        <div>
+                            <span class="text-[10px] font-mono uppercase tracking-widest text-cyan-300">Live wind</span>
+                            <div class="mt-1 text-base font-black text-cyan-100">${formatSpeed(state.live.wind_speed_10m)}</div>
+                            <div class="text-[11px] text-slate-400">${Math.round(state.live.wind_direction_10m)}° ${getCardinal(state.live.wind_direction_10m)}</div>
+                        </div>
+                    </div>
                 </div>
             ` : '';
 
@@ -464,22 +452,7 @@
                     </div>
 
                     ${accuracyPanel}
-
-                    <div class="grid grid-cols-2 gap-3">
-                        <div class="rounded-2xl border border-amber-900/30 bg-amber-950/10 p-3">
-                            <span class="text-[10px] font-mono uppercase tracking-widest text-amber-300">Predicted wind</span>
-                            <div class="mt-1 text-xl font-black text-white">${formatSpeed(prediction.speed)}</div>
-                            <div class="text-xs text-slate-400">${Math.round(prediction.direction)}° ${getCardinal(prediction.direction)} · ${prediction.confidence}% trust</div>
-                        </div>
-                        <div class="rounded-2xl border border-emerald-900/30 bg-emerald-950/10 p-3">
-                            <span class="text-[10px] font-mono uppercase tracking-widest text-emerald-300">Predicted weather</span>
-                            <div class="mt-1 flex items-center gap-2 text-xl font-black text-white">
-                                <i class="${weatherIcon(prediction.weatherCode)} text-base"></i>
-                                ${formatTemp(prediction.temperature)}
-                            </div>
-                            <div class="text-xs text-slate-400">${weatherText(prediction.weatherCode)} · ${Math.round(rainTotal * 10) / 10} mm next 24h</div>
-                        </div>
-                    </div>
+                    ${comparisonPanel}
 
                     <div class="rounded-2xl border border-slate-800/60 bg-slate-950/45 p-3 space-y-3">
                         <div class="flex items-center justify-between gap-3">
@@ -514,8 +487,6 @@
                             })}
                         </div>
                     </div>
-
-                    ${livePanel(state, prediction)}
 
                     <a href="${detailUrlForCity(state)}" class="inline-flex items-center justify-center gap-2 rounded-2xl border border-cyan-900/45 bg-cyan-950/20 px-4 py-3 text-sm font-bold text-cyan-200 hover:bg-cyan-950/35 hover:border-cyan-700/70 transition-all">
                         View details
