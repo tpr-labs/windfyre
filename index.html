@@ -3,52 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Windfyre // Multi-City Wind Dashboard</title>
-    <!-- Tailwind CSS CDN -->
+    <title>Windfyre // City Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    colors: {
-                        slate: {
-                            950: '#060a13',
-                            900: '#0b111e',
-                            800: '#172033',
-                            700: '#24324f',
-                        },
-                        cyan: {
-                            400: '#22d3ee',
-                            500: '#06b6d4',
-                            600: '#0891b2',
-                        },
-                        amber: {
-                            400: '#fbbf24',
-                            500: '#f59e0b',
-                            600: '#d97706',
-                        }
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace']
                     }
                 }
             }
-        }
+        };
     </script>
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Chart.js CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: #060a13;
+            background-image:
+                radial-gradient(circle at 20% 0%, rgba(34, 211, 238, 0.08), transparent 28%),
+                radial-gradient(circle at 80% 10%, rgba(245, 158, 11, 0.07), transparent 26%),
+                linear-gradient(180deg, #060a13 0%, #0b1120 52%, #060a13 100%);
         }
-        .font-mono {
-            font-family: 'JetBrains Mono', monospace;
-        }
-        /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -60,2642 +41,648 @@
             background: #172033;
             border-radius: 4px;
         }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #24324f;
+        .live-toggle:checked + .toggle-track {
+            background: rgba(8, 145, 178, 0.55);
+            border-color: rgba(34, 211, 238, 0.6);
         }
-        @keyframes compassNeedleLive {
-            0%, 100% { transform: rotate(-0.7deg) translateX(-0.4px); }
-            28% { transform: rotate(0.9deg) translateX(0.6px); }
-            58% { transform: rotate(-0.35deg) translateX(-0.2px); }
-            78% { transform: rotate(0.55deg) translateX(0.3px); }
+        .live-toggle:checked + .toggle-track .toggle-thumb {
+            transform: translateX(1.55rem);
+            background: #67e8f9;
+            box-shadow: 0 0 18px rgba(103, 232, 249, 0.42);
         }
-        @keyframes compassNeedlePredicted {
-            0%, 100% { transform: rotate(0.45deg) translateX(0.25px); }
-            34% { transform: rotate(-0.65deg) translateX(-0.45px); }
-            63% { transform: rotate(0.25deg) translateX(0.2px); }
-            84% { transform: rotate(-0.35deg) translateX(-0.2px); }
+        .mini-chart svg {
+            overflow: visible;
         }
-        .needle-wobble-live,
-        .needle-wobble-predicted,
-        .needle-wobble-gust {
-            transform-origin: bottom center;
-            will-change: transform;
-        }
-        .needle-wobble-live {
-            animation: compassNeedleLive 1.85s ease-in-out infinite;
-        }
-        .needle-wobble-predicted {
-            animation: compassNeedlePredicted 2.2s ease-in-out infinite;
-        }
-        .needle-wobble-gust {
-            animation: compassNeedleLive 1.55s ease-in-out infinite;
+        .mini-chart path,
+        .wind-strip span {
+            transition: height 250ms ease, opacity 250ms ease;
         }
     </style>
 </head>
-<body class="text-slate-100 min-h-screen flex flex-col selection:bg-cyan-500/30 selection:text-cyan-400 overflow-x-hidden">
-
-    <!-- Top Loading / Offline Status bar -->
-    <div id="offline-banner" class="hidden bg-amber-600/20 border-b border-amber-500/30 text-amber-400 px-4 py-2 text-xs md:text-sm text-center font-mono flex items-center justify-center gap-2 transition-all duration-300">
-        <span class="relative flex h-2 w-2">
-            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-            <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
-        </span>
-        Live telemetry is unavailable. Showing embedded 2026 ML prediction data until the feed reconnects.
-    </div>
-
-    <!-- Main Navigation Bar -->
-    <header class="border-b border-slate-800/60 bg-slate-950/80 backdrop-blur-md sticky top-0 z-40 transition-colors">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="relative">
-                    <div class="absolute -inset-1.5 bg-gradient-to-r from-cyan-500 to-amber-500 rounded-lg blur opacity-45 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-tilt"></div>
-                    <div class="relative bg-slate-950 px-3 py-1.5 rounded-md border border-slate-800 flex items-center gap-2">
-                        <i class="fa-solid fa-wind text-cyan-400 animate-pulse"></i>
-                        <span class="font-extrabold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-slate-400 text-sm md:text-base">WINDFYRE</span>
-                    </div>
+<body class="min-h-screen text-slate-100 selection:bg-cyan-500/30 selection:text-cyan-200">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-7">
+        <header class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 border-b border-slate-900 pb-6">
+            <div class="space-y-3">
+                <div class="inline-flex items-center gap-2 rounded-full border border-cyan-500/20 bg-cyan-950/20 px-3 py-1 text-[11px] font-mono uppercase tracking-[0.22em] text-cyan-300">
+                    <i class="fa-solid fa-wind"></i>
+                    Windfyre city grid
                 </div>
-                <span class="hidden sm:inline-block px-2 py-0.5 text-[10px] uppercase font-mono font-bold tracking-widest bg-cyan-950 text-cyan-400 border border-cyan-800/60 rounded">v2.5</span>
-            </div>
-
-            <!-- Refresh State -->
-            <div class="flex items-center gap-4">
-                <button onclick="refreshData()" class="p-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-slate-100 transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500" title="Sync live telemetry">
-                    <i id="refresh-icon" class="fa-solid fa-arrows-rotate"></i>
-                </button>
-            </div>
-        </div>
-    </header>
-
-    <!-- App Wrapper -->
-    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10 space-y-8">
-        
-        <!-- Hero Title Section -->
-        <div class="border-b border-slate-900 pb-6">
-            <div class="space-y-2">
-                <h1 class="text-3xl md:text-5xl font-black tracking-tight text-white flex items-center gap-3">
-                    The Winds of <span id="dashboard-city-title">Bengaluru</span>
-                </h1>
-                <p class="text-slate-400 text-sm md:text-base max-w-2xl">
-                    Adaptive 2026 wind and weather modeling across selected cities, matched with real-time Open-Meteo telemetry from the active location.
-                </p>
-            </div>
-            <div class="mt-5 flex flex-col sm:flex-row sm:items-end gap-3">
-                <label class="flex flex-col gap-2 max-w-sm w-full">
-                    <span class="text-[10px] font-mono text-slate-500 uppercase tracking-[0.24em]">Select City</span>
-                    <select id="city-select" class="bg-slate-950/80 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-cyan-500/80 focus:ring-2 focus:ring-cyan-500/10 transition-all">
-                        <option>Loading cities...</option>
-                    </select>
-                </label>
-                <div id="city-load-status" class="text-xs font-mono text-slate-500 min-h-[1.5rem] flex items-center gap-2">
-                    <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
-                    Loading prediction index
-                </div>
-            </div>
-        </div>
-
-        <!-- Notification Message Box -->
-        <div id="toast-message" class="hidden transform scale-95 opacity-0 transition-all duration-300 bg-slate-900 border border-slate-800 rounded-xl p-4 flex items-center justify-between gap-3 shadow-2xl">
-            <div class="flex items-center gap-3">
-                <div class="p-2 rounded-lg bg-cyan-950 text-cyan-400"><i class="fa-solid fa-circle-info"></i></div>
                 <div>
-                    <h4 id="toast-title" class="font-bold text-sm text-white">System Update</h4>
-                    <p id="toast-desc" class="text-xs text-slate-400">Loading new telemetry charts...</p>
+                    <h1 class="text-3xl sm:text-5xl font-black tracking-tight text-white">Prediction Dashboard</h1>
+                    <p class="mt-2 max-w-2xl text-sm text-slate-400">All city prediction files are loaded from this repo. Live Open-Meteo data is optional and fetched slowly when enabled.</p>
                 </div>
             </div>
-            <button onclick="dismissToast()" class="text-slate-500 hover:text-white transition-all"><i class="fa-solid fa-xmark"></i></button>
-        </div>
 
-        <!-- Telemetry Highlights Grid (4-cards) -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <!-- Card 1: Local Time & Telemetry Status -->
-            <div class="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-5 backdrop-blur-md flex flex-col justify-between h-32 relative overflow-hidden group hover:border-slate-700/80 transition-all duration-300">
-                <div class="absolute top-0 right-0 p-3 text-slate-800 group-hover:text-cyan-500/10 transition-colors"><i class="fa-solid fa-clock text-4xl"></i></div>
-                <div>
-                    <span class="text-xs text-slate-500 uppercase tracking-widest font-mono block">Local Clock</span>
-                    <span id="live-time" class="text-2xl font-black text-white font-mono block tracking-tight mt-1">--:--:--</span>
+            <div class="flex flex-col sm:flex-row gap-3 sm:items-center">
+                <div id="load-status" class="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-xs font-mono text-slate-400">
+                    Loading prediction index...
                 </div>
-                <div class="flex items-center justify-between mt-2">
-                    <span class="text-xs text-slate-400 flex items-center gap-1.5">
-                        <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping"></span>
-                        <span id="active-timezone-label">Asia/Kolkata</span>
+                <label class="flex items-center gap-3 rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 cursor-pointer select-none">
+                    <input id="live-toggle" type="checkbox" class="live-toggle sr-only">
+                    <span class="toggle-track relative h-7 w-14 rounded-full border border-slate-700 bg-slate-900 transition-colors">
+                        <span class="toggle-thumb absolute left-1 top-1 h-5 w-5 rounded-full bg-slate-500 transition-all"></span>
                     </span>
-                    <span id="active-city-badge" class="text-[10px] font-mono text-slate-500">Bengaluru</span>
-                </div>
+                    <span class="flex flex-col">
+                        <span class="text-sm font-bold text-white">Load live data</span>
+                        <span id="live-toggle-note" class="text-[10px] font-mono uppercase tracking-wider text-slate-500">2s delay per city</span>
+                    </span>
+                </label>
             </div>
+        </header>
 
-            <!-- Card 2: Live Weather Telemetry -->
-            <div class="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-5 backdrop-blur-md flex flex-col justify-between h-32 relative overflow-hidden group hover:border-slate-700/80 transition-all duration-300">
-                <div class="absolute top-0 right-0 p-3 text-slate-800 group-hover:text-cyan-500/10 transition-colors"><i class="fa-solid fa-cloud-sun text-4xl"></i></div>
-                <div>
-                    <span class="text-xs text-slate-500 uppercase tracking-widest font-mono block">Live Conditions</span>
-                    <span id="live-weather-desc" class="text-xl font-bold text-white block tracking-tight mt-1 truncate">Checking...</span>
-                </div>
-                <div class="flex justify-between items-center mt-2">
-                    <span id="live-temp" class="text-sm font-mono text-cyan-400 font-semibold">--°C</span>
-                    <span id="live-humidity" class="text-xs text-slate-400">Humidity: --%</span>
-                </div>
+        <section id="summary-grid" class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="rounded-2xl border border-slate-800/80 bg-slate-900/45 p-4">
+                <span class="text-[10px] font-mono uppercase tracking-widest text-slate-500">Cities Loaded</span>
+                <div id="summary-cities" class="mt-1 text-2xl font-black text-white">--</div>
             </div>
-
-            <!-- Card 3: Live Wind Speed / Direction -->
-            <div class="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-5 backdrop-blur-md flex flex-col justify-between h-32 relative overflow-hidden group hover:border-slate-700/80 transition-all duration-300">
-                <div class="absolute top-0 right-0 p-3 text-slate-800 group-hover:text-cyan-500/10 transition-colors"><i class="fa-solid fa-gauge-simple-high text-4xl"></i></div>
-                <div>
-                    <span class="text-xs text-slate-500 uppercase tracking-widest font-mono block">Live Wind Telemetry</span>
-                    <div class="flex items-baseline gap-1 mt-1">
-                        <span id="live-wind-speed" class="text-2xl font-black text-white font-mono">--.-</span>
-                        <span id="wind-unit-label" class="text-xs font-mono text-slate-400">km/h</span>
-                    </div>
-                </div>
-                <div class="flex justify-between items-center mt-2">
-                    <span id="live-wind-dir" class="text-xs font-mono text-cyan-400 font-medium">---° --</span>
-                    <span id="live-wind-gusts" class="text-[10px] text-slate-500 uppercase font-mono">Gusts: -- km/h</span>
-                </div>
+            <div class="rounded-2xl border border-slate-800/80 bg-slate-900/45 p-4">
+                <span class="text-[10px] font-mono uppercase tracking-widest text-slate-500">Windiest Now</span>
+                <div id="summary-windiest" class="mt-1 text-sm font-bold text-slate-100 leading-tight">--</div>
             </div>
-
-            <!-- Card 4: Forecast Baseline Alignment -->
-            <div class="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-5 backdrop-blur-md flex flex-col justify-between h-32 relative overflow-hidden group hover:border-slate-700/80 transition-all duration-300">
-                <div class="absolute top-0 right-0 p-3 text-slate-800 group-hover:text-amber-500/10 transition-colors"><i class="fa-solid fa-network-wired text-4xl"></i></div>
-                <div>
-                    <span class="text-xs text-slate-500 uppercase tracking-widest font-mono block">Model Evaluation</span>
-                    <div class="flex items-baseline gap-1 mt-1">
-                        <span id="live-match-score" class="text-2xl font-black text-amber-400 font-mono">--%</span>
-                        <span class="text-xs font-mono text-slate-400">Match</span>
-                    </div>
-                </div>
-                <div class="flex justify-between items-center mt-2">
-                    <span id="predicted-wind-baseline" class="text-xs font-mono text-amber-500">Predicted: -- km/h</span>
-                    <span class="px-1.5 py-0.5 rounded text-[9px] font-mono bg-amber-950 text-amber-400 border border-amber-900/60 uppercase">ML 2026</span>
-                </div>
+            <div class="rounded-2xl border border-slate-800/80 bg-slate-900/45 p-4">
+                <span class="text-[10px] font-mono uppercase tracking-widest text-slate-500">Wettest Next 24h</span>
+                <div id="summary-wettest" class="mt-1 text-sm font-bold text-slate-100 leading-tight">--</div>
             </div>
-        </div>
-
-        <!-- Main Workspace: Wind Compass -->
-        <div class="grid grid-cols-1 gap-8">
-            
-            <!-- Animated Compass and Interactive Selector -->
-            <div class="bg-slate-900/25 border border-slate-800/60 rounded-3xl p-6 backdrop-blur-md flex flex-col justify-between gap-6 relative">
-                
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div>
-                        <h2 class="text-xl font-bold text-white flex items-center gap-2">
-                            <i class="fa-solid fa-compass text-cyan-400"></i> Wind Compass
-                        </h2>
-                        <p class="text-xs text-slate-400 mt-1">Live directional vectors compared with embedded 2026 ML predictions.</p>
-                    </div>
-                    
-                    <!-- Interactive Clock Time Scrubber -->
-                    <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 flex items-center gap-3 w-full sm:w-auto">
-                        <span class="text-xs font-mono text-slate-400 whitespace-nowrap"><i class="fa-solid fa-hourglass-half text-amber-500 mr-1 animate-spin-slow"></i> Timeline Scrub:</span>
-                        <input id="hour-scrubber" type="range" min="0" max="23" value="12" class="w-full sm:w-32 accent-cyan-500 bg-slate-800 rounded-lg cursor-pointer h-1.5">
-                        <span id="scrub-hour-label" class="text-xs font-mono font-bold text-cyan-400">12:00</span>
-                    </div>
-                </div>
-
-                <!-- Animated Canvas Frame & Compass Grid -->
-                <div class="relative w-full flex flex-col md:flex-row items-center justify-around gap-8 py-4">
-                    
-                    <!-- CANVAS COMPASS CONTAINER -->
-                    <div class="relative w-64 h-64 md:w-96 md:h-96 lg:w-[26rem] lg:h-[26rem] flex-shrink-0 flex items-center justify-center">
-                        
-                        <!-- Embedded Flow Canvas inside the Compass Frame -->
-                        <canvas id="windCanvas" class="absolute inset-0 rounded-full w-full h-full opacity-60 pointer-events-none"></canvas>
-                        
-                        <!-- Compass Background Dial Rings -->
-                        <div class="absolute inset-0 rounded-full border border-slate-800/80 flex items-center justify-center shadow-inner">
-                            <div class="w-[85%] h-[85%] rounded-full border border-dashed border-slate-800/60 flex items-center justify-center">
-                                <div class="w-[70%] h-[70%] rounded-full border border-slate-800/80 bg-slate-950/40"></div>
-                            </div>
-                        </div>
-
-                        <!-- Cardinal guide lines -->
-                        <div class="absolute left-6 right-6 top-1/2 h-px -translate-y-1/2 bg-slate-700/45 pointer-events-none z-10"></div>
-                        <div class="absolute top-6 bottom-6 left-1/2 w-px -translate-x-1/2 bg-slate-700/45 pointer-events-none z-10"></div>
-
-                        <!-- Card Points (N, S, E, W, etc.) -->
-                        <div class="absolute inset-0 font-mono text-xs font-bold text-slate-500 p-2 pointer-events-none select-none">
-                            <span class="absolute top-2 left-1/2 -translate-x-1/2 text-cyan-400/90 font-extrabold">N</span>
-                            <span class="absolute right-3 top-1/2 -translate-y-1/2">E</span>
-                            <span class="absolute bottom-2 left-1/2 -translate-x-1/2">S</span>
-                            <span class="absolute left-3 top-1/2 -translate-y-1/2">W</span>
-                            
-                        </div>
-
-                        <!-- Outer degree markers -->
-                        <div class="absolute inset-0 font-mono text-[9px] md:text-[10px] text-slate-600 pointer-events-none select-none">
-                            <span class="absolute top-7 left-1/2 -translate-x-1/2">0°</span>
-                            <span class="absolute top-[15%] right-[15%]">45°</span>
-                            <span class="absolute right-7 top-1/2 -translate-y-1/2">90°</span>
-                            <span class="absolute bottom-[15%] right-[15%]">135°</span>
-                            <span class="absolute bottom-7 left-1/2 -translate-x-1/2">180°</span>
-                            <span class="absolute bottom-[15%] left-[15%]">225°</span>
-                            <span class="absolute left-7 top-1/2 -translate-y-1/2">270°</span>
-                            <span class="absolute top-[15%] left-[15%]">315°</span>
-                        </div>
-
-                        <!-- CENTERED ROTATION ANCHOR BOX (NEEDLES) -->
-                        <div class="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
-
-                            <!-- GUST PEAK VECTOR (faint cyan) - shows short burst potential beyond steady wind -->
-                            <div id="needle-gust" class="absolute bottom-1/2 w-6 h-36 md:h-44 origin-bottom transition-transform duration-1000 ease-out opacity-0" style="transform: rotate(0deg);">
-                                <div class="needle-wobble-gust relative w-full h-full">
-                                    <div class="absolute left-1/2 top-2 bottom-0 w-px -translate-x-1/2 bg-gradient-to-t from-cyan-400/0 via-cyan-300/25 to-cyan-200/70 shadow-[0_0_12px_rgba(103,232,249,0.42)]"></div>
-                                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[7px] border-l-transparent border-r-[7px] border-r-transparent border-b-[16px] border-b-cyan-200/80 drop-shadow-[0_0_8px_rgba(103,232,249,0.55)]"></div>
-                                </div>
-                            </div>
-                            
-                            <!-- LIVE NEEDLE (Cyan Glow) - Pivots precisely around its bottom center -->
-                            <div id="needle-live" class="absolute bottom-1/2 w-2.5 h-32 md:h-40 origin-bottom transition-transform duration-1000 ease-out" style="transform: rotate(0deg);">
-                                <div class="needle-wobble-live relative w-full h-full">
-                                    <div class="w-full h-full bg-gradient-to-t from-cyan-500/20 via-cyan-500 to-cyan-400 rounded-full shadow-[0_0_15px_#06b6d4]"></div>
-                                    <!-- Live indicator arrowhead -->
-                                    <div class="absolute -top-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-b-[14px] border-b-cyan-400"></div>
-                                </div>
-                            </div>
-
-                            <!-- PREDICTED NEEDLE (Amber Dash/Line) - Pivots precisely around its bottom center -->
-                            <div id="needle-predicted" class="absolute bottom-1/2 w-2.5 h-32 md:h-40 origin-bottom transition-transform duration-1000 ease-out opacity-45" style="transform: rotate(0deg);">
-                                <div class="needle-wobble-predicted relative w-full h-full">
-                                    <div class="w-full h-full bg-gradient-to-t from-amber-500/10 via-amber-500/60 to-amber-300 rounded-full shadow-[0_0_8px_rgba(245,158,11,0.55)]"></div>
-                                    <!-- Predicted indicator arrowhead -->
-                                    <div class="absolute -top-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-b-[14px] border-b-amber-300"></div>
-                                </div>
-                            </div>
-
-                        </div>
-
-                        <!-- Center Telemetry Overlay Hub -->
-                        <div class="absolute w-28 h-28 md:w-32 md:h-32 bg-slate-950 border border-slate-800/80 rounded-full flex flex-col items-center justify-center text-center p-2.5 shadow-2xl z-30">
-                            <span class="text-[8px] uppercase tracking-widest text-slate-500 font-mono">Telemetry</span>
-                            <span id="center-heading" class="text-base font-bold font-mono tracking-tight text-white my-0.5">--° --</span>
-                            <span id="center-speed" class="text-lg font-extrabold text-cyan-400 font-mono">--.-</span>
-                            <span id="center-speed-unit" class="text-[9px] font-mono text-slate-400">km/h</span>
-                        </div>
-                    </div>
-
-                    <!-- Compass Meta Readout side-panel -->
-                    <div class="flex-grow space-y-4 w-full md:max-w-sm">
-                        <div class="bg-slate-950/60 rounded-xl p-4 border border-slate-800/60 space-y-3">
-                            <div class="flex items-center justify-between border-b border-slate-900 pb-2">
-                                <span class="text-xs text-slate-400 flex items-center gap-1.5 font-medium">
-                                    <span class="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_6px_#06b6d4]"></span>
-                                    Live Telemetry
-                                </span>
-                                <span id="comp-live-val" class="text-xs font-mono font-bold text-white">--</span>
-                            </div>
-                            <div class="flex items-center justify-between border-b border-slate-900 pb-2">
-                                <span class="text-xs text-slate-400 flex items-center gap-1.5 font-medium">
-                                    <span class="w-2 h-2 rounded-full border border-cyan-200/80 bg-cyan-300/20 shadow-[0_0_6px_rgba(103,232,249,0.55)]"></span>
-                                    Gust Peak
-                                </span>
-                                <span id="comp-gust-val" class="text-xs font-mono font-bold text-cyan-100/90">--</span>
-                            </div>
-                            <div class="flex items-center justify-between border-b border-slate-900 pb-2">
-                                <span class="text-xs text-slate-400 flex items-center gap-1.5 font-medium">
-                                    <span class="w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_6px_#f59e0b]"></span>
-                                    Model Baseline
-                                </span>
-                                <span id="comp-pred-val" class="text-xs font-mono font-bold text-white">--</span>
-                            </div>
-                            <div class="flex items-center justify-between">
-                                <span class="text-xs text-slate-400 font-medium">Direction Divergence</span>
-                                <span id="comp-divergence-val" class="text-xs font-mono font-bold text-rose-400">--°</span>
-                            </div>
-                        </div>
-
-                        <!-- Fast Information card -->
-                        <div class="bg-gradient-to-br from-slate-900 to-slate-950 p-4 rounded-xl border border-slate-800/50">
-                            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-300 font-mono mb-1.5">Seasonality Signature</h4>
-                            <p id="seasonal-desc" class="text-xs text-slate-400 leading-relaxed">
-                                Loading local Bengaluru seasonal signature variables based on 2026 climate tracking matrices.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <p class="text-[11px] font-mono text-slate-500 flex items-center justify-end gap-2 text-right">
-                    <span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span>
-                    <span id="last-updated-detail">Last updated: loading local prediction data</span>
-                </p>
+            <div class="rounded-2xl border border-slate-800/80 bg-slate-900/45 p-4">
+                <span class="text-[10px] font-mono uppercase tracking-widest text-slate-500">Live Sync</span>
+                <div id="summary-live" class="mt-1 text-lg font-extrabold text-amber-300 truncate">Off</div>
             </div>
-        </div>
+        </section>
 
-        <!-- 24-Hour Tracks: Wind and Weather -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            
-            <!-- Hourly Forecast Comparison Chart Card -->
-            <div class="bg-slate-900/45 border border-slate-800/70 rounded-3xl p-6 backdrop-blur-md">
-                <div class="flex items-center justify-between mb-6">
-                    <div>
-                        <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                            <i class="fa-solid fa-chart-line text-cyan-400"></i> 24-Hour Wind Track
-                        </h3>
-                        <p class="text-xs text-slate-400 mt-1">Past hours compare observed Open-Meteo values with ML predictions; upcoming hours use forecast values.</p>
-                    </div>
-                    <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-cyan-950/60 text-cyan-400 border border-cyan-900/40 uppercase font-bold">Hourly</span>
-                </div>
-
-                <div class="relative h-64 w-full">
-                    <canvas id="hourlyChart"></canvas>
-                </div>
-                <div class="mt-3 flex justify-end">
-                    <span id="anomaly-scan-status" class="text-[10px] font-mono text-slate-500 text-right">Anomaly scan: waiting for live data</span>
-                </div>
-            </div>
-
-            <!-- 24-Hour Weather/Rainfall Card -->
-            <div class="bg-slate-900/45 border border-slate-800/70 rounded-3xl p-6 backdrop-blur-md">
-                <div class="flex items-center justify-between mb-6">
-                    <div>
-                        <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                            <i class="fa-solid fa-cloud-rain text-emerald-400"></i> 24-Hour Weather Track
-                        </h3>
-                        <p class="text-xs text-slate-400 mt-1">Rainfall backtest and forecast compared with the embedded ML weather prediction.</p>
-                    </div>
-                    <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-950/60 text-emerald-400 border border-emerald-900/40 uppercase font-bold">Hourly</span>
-                </div>
-
-                <div class="relative h-64 w-full">
-                    <canvas id="hourlyRainChart"></canvas>
-                </div>
-                <div class="mt-3 flex justify-end">
-                    <span id="rain-hourly-anomaly-status" class="text-[10px] font-mono text-slate-500 text-right">Rain anomaly: waiting for live data</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Full-width Past/Future Wind Trends -->
-        <div class="bg-slate-900/45 border border-slate-800/70 rounded-3xl p-6 backdrop-blur-md">
-            <div class="flex items-center justify-between mb-6">
-                <div>
-                    <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                        <i class="fa-solid fa-chart-line text-amber-400"></i> Past + Future 7 Days Velocity
-                    </h3>
-                    <p class="text-xs text-slate-400 mt-1">Backtested daily wind speed plus the upcoming forecast, compared with embedded ML predictions.</p>
-                </div>
-                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-amber-950/60 text-amber-400 border border-amber-900/40 uppercase font-bold">7-Day Outlines</span>
-            </div>
-
-            <div class="relative h-72 w-full">
-                <canvas id="weeklyChart"></canvas>
-            </div>
-            <div class="mt-3 flex justify-end">
-                <span id="weekly-wind-anomaly-status" class="text-[10px] font-mono text-slate-500 text-right">Daily wind anomaly: waiting for live data</span>
-            </div>
-        </div>
-
-        <!-- Full-width Past/Future Weather Trends -->
-        <div id="rain-outlook-section" class="bg-slate-900/45 border border-slate-800/70 rounded-3xl p-6 backdrop-blur-md">
-            <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5 mb-6">
-                <div>
-                    <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                        <i class="fa-solid fa-cloud-rain text-emerald-400"></i> Past + Future 7 Days Rainfall
-                    </h3>
-                    <p class="text-xs text-slate-400 mt-1">Observed and forecast rainfall compared with embedded ML weather prediction for <span class="active-city-inline">Bengaluru</span>.</p>
-                </div>
-                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-950/60 text-emerald-400 border border-emerald-900/40 uppercase font-bold self-start">Rain Models</span>
-            </div>
-
-            <div class="rounded-2xl border border-slate-800/80 bg-slate-950/45 p-4">
-                <div class="flex items-center justify-between gap-3 mb-3">
-                    <h4 class="text-sm font-bold text-white">Past + Future 7 Days Rainfall</h4>
-                    <span id="weather-rain-status" class="text-[10px] font-mono text-slate-500 text-right">Waiting for live forecast</span>
-                </div>
-                <div class="relative h-72 w-full">
-                    <canvas id="weatherRainChart"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- Live Weather Outlook, shown only when Open-Meteo provides weather forecast data -->
-        <div id="weather-outlook-section" class="hidden bg-slate-900/45 border border-slate-800/70 rounded-3xl p-6 backdrop-blur-md">
-            <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5 mb-6">
-                <div>
-                    <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                        <i class="fa-solid fa-temperature-half text-cyan-400"></i> Past + Future 7-Day Temperature Outlook
-                    </h3>
-                    <p class="text-xs text-slate-400 mt-1">Observed and forecast temperature for <span class="active-city-inline">Bengaluru</span>, compared with embedded ML weather predictions.</p>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 gap-4">
-                <div class="rounded-2xl border border-slate-800/80 bg-slate-950/45 p-4">
-                    <div class="flex items-center justify-between gap-3 mb-3">
-                        <h4 class="text-sm font-bold text-white">Max Temperature</h4>
-                        <span id="weather-max-status" class="text-[10px] font-mono text-slate-500 text-right">Waiting for live forecast</span>
-                    </div>
-                    <div class="relative h-72 w-full">
-                        <canvas id="weatherMaxChart"></canvas>
-                    </div>
-                </div>
-                <div class="rounded-2xl border border-slate-800/80 bg-slate-950/45 p-4">
-                    <div class="flex items-center justify-between gap-3 mb-3">
-                        <h4 class="text-sm font-bold text-white">Min Temperature</h4>
-                        <span id="weather-min-status" class="text-[10px] font-mono text-slate-500 text-right">Waiting for live forecast</span>
-                    </div>
-                    <div class="relative h-72 w-full">
-                        <canvas id="weatherMinChart"></canvas>
-                    </div>
-                </div>
-            </div>
-            <div class="mt-3 flex justify-end">
-                <span id="weather-graph-status" class="text-[10px] font-mono text-slate-500 text-right">Weather graph: waiting for live forecast</span>
-            </div>
-        </div>
-
-        <!-- Monthly Wind Characters Segment -->
-        <div class="bg-slate-900/20 border border-slate-800/60 rounded-3xl p-6 backdrop-blur-md space-y-6">
+        <section class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <div>
-                <h3 class="text-xl font-bold text-white flex items-center gap-2">
-                    <i class="fa-solid fa-calendar-days text-cyan-400"></i> <span id="monthly-city-name">Bengaluru</span> Monthly Wind Character
-                </h3>
-                <p class="text-xs text-slate-400 mt-1">Continuous climatological profiles. Select any card to expand deep analytical and atmospheric metrics.</p>
+                <h2 class="text-xl font-bold text-white">City Prediction Overview</h2>
+                <p class="text-xs text-slate-500 mt-1">Current-hour ML prediction with optional live comparison.</p>
             </div>
-
-            <div class="grid grid-cols-1 xl:grid-cols-4 gap-6">
-                <!-- 12-Month Always-Visible Grid -->
-                <div id="monthly-grid" class="xl:col-span-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                    <!-- Dynamically populated monthly selection cards -->
-                </div>
-
-                <!-- Focus Month Detailed Expansion Card -->
-                <div id="monthly-character-card" class="xl:col-span-1 bg-slate-950/60 rounded-2xl p-5 border border-slate-800/80 flex flex-col justify-between gap-5 h-full min-h-[350px] relative overflow-hidden">
-                    <div class="absolute top-5 right-5 w-14 h-14 rounded-full bg-slate-950 border border-slate-700/70 flex items-center justify-center text-slate-300 shadow-[0_0_14px_rgba(148,163,184,0.08)]" title="Dominant monthly direction">
-                        <i id="mon-detail-arrow" class="fa-solid fa-arrow-up text-xl transition-transform duration-300" style="transform: rotate(0deg)"></i>
-                    </div>
-                    <div class="space-y-3">
-                        <span id="mon-subtitle" class="text-[10px] font-mono text-cyan-400 uppercase tracking-widest block">Season segment</span>
-                        <h4 id="mon-title" class="text-2xl font-extrabold text-white pr-16">January</h4>
-                        <p id="mon-tagline" class="text-xs font-mono text-slate-400 italic">"Cool northerly trade winds"</p>
-                        
-                        <div class="border-t border-slate-800/60 pt-3 space-y-2 text-xs">
-                            <div class="flex justify-between py-1 border-b border-slate-900/60">
-                                <span class="text-slate-500">Speed Range</span>
-                                <span id="mon-speed" class="font-mono text-white font-bold">--</span>
-                            </div>
-                            <div class="flex justify-between py-1 border-b border-slate-900/60">
-                                <span class="text-slate-500">Dominant Dir</span>
-                                <span id="mon-direction" class="font-mono text-white font-bold">--</span>
-                            </div>
-                            <div class="flex justify-between py-1 border-b border-slate-900/60">
-                                <span class="text-slate-500">Prediction Trust</span>
-                                <span id="mon-moisture" class="font-mono text-cyan-400 font-bold">--</span>
-                            </div>
-                            <div class="flex justify-between py-1">
-                                <span class="text-slate-500">Peak Hour</span>
-                                <span id="mon-activity" class="font-mono text-amber-400 font-bold">--</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-slate-900/40 border border-slate-800/40 rounded-xl p-4">
-                        <span class="text-[9px] text-slate-500 font-mono uppercase tracking-wider block mb-1">Climatology Analysis</span>
-                        <p id="mon-analysis" class="text-xs text-slate-400 leading-relaxed">
-                            Loading climate matrices...
-                        </p>
-                    </div>
-                </div>
+            <div class="flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-950/60 px-3 py-2 text-xs font-mono text-slate-400">
+                <span class="h-2 w-2 rounded-full bg-amber-400"></span>
+                Prediction
+                <span class="h-2 w-2 rounded-full bg-cyan-400 ml-2"></span>
+                Live
             </div>
-        </div>
+        </section>
 
-        <!-- How Reliable Is This Section -->
-        <div class="bg-slate-900/30 border border-slate-800/60 rounded-3xl p-6 backdrop-blur-md">
-            <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-4">
-                <div>
-                    <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                        <i class="fa-solid fa-cloud-sun-rain text-emerald-400"></i> Daily Weather Cards
-                    </h3>
-                    <p class="text-xs text-slate-400 mt-1">Observed and forecast daily weather notes for <span class="active-city-inline">Bengaluru</span>.</p>
-                </div>
-                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-950/60 text-emerald-400 border border-emerald-900/40 uppercase font-bold self-start sm:self-auto">Weather Cards</span>
+        <section id="city-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+            <div class="rounded-3xl border border-slate-800/70 bg-slate-900/40 p-6 text-slate-400">
+                Loading city prediction cards...
             </div>
-            <div id="weather-condition-strip" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 text-xs">
-                <!-- Filled from live API weather data -->
-            </div>
-        </div>
-
-        <!-- How Reliable Is This Section -->
-        <div class="bg-slate-900/45 border border-slate-800/70 rounded-3xl p-6 backdrop-blur-md">
-            <h3 class="text-xl font-bold text-white mb-2"><i class="fa-solid fa-circle-question text-cyan-400"></i> Dynamic Model Reliability Check</h3>
-            <p class="text-sm text-slate-400 mb-6">Transparency in wind and weather prediction modeling, based on the 2025 back-test against historical Open-Meteo archive data.</p>
-            
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="bg-slate-950 p-4 rounded-2xl border border-slate-900 flex flex-col justify-between">
-                    <span class="text-xs text-slate-500 font-mono uppercase tracking-wider">Learned From</span>
-                    <span id="stats-learned" class="text-lg font-bold text-white mt-1">--</span>
-                    <span id="stats-learned-note" class="text-[10px] text-slate-400 mt-1">Open-Meteo archive rows</span>
-                </div>
-                <div class="bg-slate-950 p-4 rounded-2xl border border-slate-900 flex flex-col justify-between">
-                    <span class="text-xs text-slate-500 font-mono uppercase tracking-wider">Typical Direction Miss</span>
-                    <span id="stats-dir-miss" class="text-lg font-bold text-cyan-400 mt-1">--</span>
-                    <span class="text-[10px] text-slate-400 mt-1">2025 validation average</span>
-                </div>
-                <div class="bg-slate-950 p-4 rounded-2xl border border-slate-900 flex flex-col justify-between">
-                    <span class="text-xs text-slate-500 font-mono uppercase tracking-wider">Typical Speed Miss</span>
-                    <span id="stats-speed-miss" class="text-lg font-bold text-cyan-400 mt-1">--</span>
-                    <span class="text-[10px] text-slate-400 mt-1">2025 validation average</span>
-                </div>
-                <div class="bg-slate-950 p-4 rounded-2xl border border-slate-900 flex flex-col justify-between">
-                    <span class="text-xs text-slate-500 font-mono uppercase tracking-wider">Prediction Trust index</span>
-                    <span id="stats-trust" class="text-lg font-bold text-emerald-400 mt-1">--</span>
-                    <span class="text-[10px] text-slate-400 mt-1">Current hourly model confidence</span>
-                </div>
-            </div>
-
-            <div class="mt-6 pt-6 border-t border-slate-800/70">
-                <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 mb-4">
-                    <div>
-                        <span class="text-[10px] font-mono text-emerald-400 uppercase tracking-widest">Weather Prediction Details</span>
-                        <h4 class="text-base font-bold text-white mt-1">How the weather model is performing</h4>
-                    </div>
-                    <span id="weather-reliability-note" class="text-[10px] font-mono text-slate-500">Current hourly weather baseline</span>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-6 gap-4">
-                    <div class="bg-slate-950 p-4 rounded-2xl border border-slate-900 flex flex-col justify-between">
-                        <span class="text-xs text-slate-500 font-mono uppercase tracking-wider">Weather Trust</span>
-                        <span id="weather-stats-trust" class="text-lg font-bold text-emerald-400 mt-1">--</span>
-                        <span class="text-[10px] text-slate-400 mt-1">Current hour confidence</span>
-                    </div>
-                    <div class="bg-slate-950 p-4 rounded-2xl border border-slate-900 flex flex-col justify-between">
-                        <span class="text-xs text-slate-500 font-mono uppercase tracking-wider">Predicted Now</span>
-                        <span id="weather-stats-now" class="text-lg font-bold text-white mt-1">--</span>
-                        <span id="weather-stats-now-note" class="text-[10px] text-slate-400 mt-1">Condition baseline</span>
-                    </div>
-                    <div class="bg-slate-950 p-4 rounded-2xl border border-slate-900 flex flex-col justify-between">
-                        <span class="text-xs text-slate-500 font-mono uppercase tracking-wider">Temp Miss</span>
-                        <span id="weather-stats-temp" class="text-lg font-bold text-amber-400 mt-1">--</span>
-                        <span class="text-[10px] text-slate-400 mt-1">2025 validation average</span>
-                    </div>
-                    <div class="bg-slate-950 p-4 rounded-2xl border border-slate-900 flex flex-col justify-between">
-                        <span class="text-xs text-slate-500 font-mono uppercase tracking-wider">Humidity Miss</span>
-                        <span id="weather-stats-humidity" class="text-lg font-bold text-cyan-400 mt-1">--</span>
-                        <span class="text-[10px] text-slate-400 mt-1">2025 validation average</span>
-                    </div>
-                    <div class="bg-slate-950 p-4 rounded-2xl border border-slate-900 flex flex-col justify-between">
-                        <span class="text-xs text-slate-500 font-mono uppercase tracking-wider">Rain Miss</span>
-                        <span id="weather-stats-rain" class="text-lg font-bold text-emerald-400 mt-1">--</span>
-                        <span class="text-[10px] text-slate-400 mt-1">Hourly precipitation error</span>
-                    </div>
-                    <div class="bg-slate-950 p-4 rounded-2xl border border-slate-900 flex flex-col justify-between">
-                        <span class="text-xs text-slate-500 font-mono uppercase tracking-wider">Wet Hour Hit</span>
-                        <span id="weather-stats-wet" class="text-lg font-bold text-emerald-400 mt-1">--</span>
-                        <span class="text-[10px] text-slate-400 mt-1">Rain/no-rain classification</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
+        </section>
     </main>
 
-    <!-- Footer Segment -->
-    <footer class="border-t border-slate-900 bg-slate-950 py-8 mt-12 text-center text-slate-600 text-xs">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-3">
-            <div class="flex items-center justify-center gap-2">
-                <i class="fa-solid fa-wind text-cyan-600"></i>
-                <span class="font-extrabold tracking-wider text-slate-400">WINDFYRE</span>
-            </div>
-            <p>Designed and generated for real-time microclimate research across selected city winds.</p>
-            <p class="font-mono text-[10px] text-slate-700">Open-Meteo Free API License Model Integration // Client-side prediction model</p>
-        </div>
-    </footer>
-
-    <script id="wind-data" type="application/json"></script>
-
-    <!-- Core Javascript Code -->
     <script>
-        // UI State Variables
-        const SCRUBBER_REST_HOUR = 12;
-        let selectedHour = new Date().getHours();
-        let telemetryData = null; 
-        let hourlyChart = null;
-        let hourlyRainChart = null;
-        let weeklyChart = null;
-        let weatherCharts = {};
-        let lastCurrentTimeLineMinute = null;
-
-        let payload = null;
-        let BENGALURU_LOCATION = {
-            lat: null,
-            lon: null,
-            name: "Loading city",
-            short: "City",
-            timezone: "Asia/Kolkata"
-        };
-        const UNIT_LABEL = "km/h";
-        let records = [];
-        let recordMap = new Map();
-        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-        const shortMonthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
         const appBaseUrl = new URL('.', window.location.href);
         const indexUrl = new URL('predictions/city-index.json', appBaseUrl).href;
+        const cityGrid = document.getElementById('city-grid');
+        const loadStatus = document.getElementById('load-status');
+        const liveToggle = document.getElementById('live-toggle');
+        const liveToggleNote = document.getElementById('live-toggle-note');
         const cityPayloadCache = new Map();
+        const cityStates = [];
         let cityIndex = null;
-        let activeCityMeta = null;
-        let bengaluruFormatter = buildDateFormatter(BENGALURU_LOCATION.timezone);
+        let liveRunId = 0;
 
-        const currentTimeLinePlugin = {
-            id: 'currentTimeLine',
-            afterDatasetsDraw(chart, args, pluginOptions) {
-                const options = chart.options.plugins?.currentTimeLine;
-                if (!options?.enabled || !chart.chartArea || !chart.scales?.x) return;
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>"']/g, char => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            }[char]));
+        }
 
-                const parts = bengaluruParts(new Date());
-                const hour = Math.max(0, Math.min(23, parts.hour));
-                const minute = Math.max(0, Math.min(59, parts.minute));
-                const xScale = chart.scales.x;
-                const startX = xScale.getPixelForValue(hour);
-                const endX = hour < 23 ? xScale.getPixelForValue(hour + 1) : xScale.right;
-                const x = startX + ((endX - startX) * (minute / 60));
-                const { top, bottom } = chart.chartArea;
-                const ctx = chart.ctx;
+        function delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
 
-                ctx.save();
-                ctx.beginPath();
-                ctx.moveTo(x, top + 4);
-                ctx.lineTo(x, bottom);
-                ctx.lineWidth = options.lineWidth || 1.5;
-                ctx.strokeStyle = options.color || 'rgba(226, 232, 240, 0.72)';
-                ctx.setLineDash(options.dash || [4, 5]);
-                ctx.shadowColor = options.glow || 'rgba(34, 211, 238, 0.35)';
-                ctx.shadowBlur = 8;
-                ctx.stroke();
-                ctx.setLineDash([]);
-                ctx.shadowBlur = 0;
+        function formatSpeed(value) {
+            return typeof value === 'number' ? `${Math.round(value * 10) / 10} km/h` : '-- km/h';
+        }
 
-                const label = options.label || 'Now';
-                ctx.font = '700 10px "Plus Jakarta Sans", sans-serif';
-                const textWidth = ctx.measureText(label).width;
-                const labelX = Math.max(chart.chartArea.left + 4, Math.min(x - (textWidth / 2) - 7, chart.chartArea.right - textWidth - 14));
-                const labelY = top + 6;
+        function formatTemp(value) {
+            return typeof value === 'number' ? `${Math.round(value * 10) / 10}°C` : '--°C';
+        }
 
-                ctx.fillStyle = options.badgeFill || 'rgba(15, 23, 42, 0.88)';
-                ctx.strokeStyle = options.badgeStroke || 'rgba(226, 232, 240, 0.18)';
-                ctx.lineWidth = 1;
-                ctx.beginPath();
-                ctx.roundRect(labelX, labelY, textWidth + 14, 18, 6);
-                ctx.fill();
-                ctx.stroke();
-                ctx.fillStyle = options.textColor || '#e2e8f0';
-                ctx.fillText(label, labelX + 7, labelY + 12.5);
-                ctx.restore();
-            }
-        };
+        function getCardinal(deg) {
+            if (typeof deg !== 'number') return '--';
+            const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+            return directions[Math.round(((deg % 360) / 45)) % 8];
+        }
 
-        Chart.register(currentTimeLinePlugin);
+        function weatherText(code) {
+            if (code === 0) return 'Clear';
+            if ([1, 2].includes(code)) return 'Partly cloudy';
+            if (code === 3) return 'Cloudy';
+            if ([45, 48].includes(code)) return 'Fog';
+            if ([51, 53, 55].includes(code)) return 'Drizzle';
+            if ([61, 63, 65, 80, 81, 82].includes(code)) return 'Rain';
+            if ([95, 96, 99].includes(code)) return 'Storm';
+            return 'Mixed';
+        }
 
-        function buildDateFormatter(timeZone) {
-            return new Intl.DateTimeFormat('en-GB', {
-                timeZone,
+        function weatherIcon(code) {
+            if (code === 0) return 'fa-solid fa-sun text-amber-300';
+            if ([1, 2].includes(code)) return 'fa-solid fa-cloud-sun text-amber-200';
+            if (code === 3) return 'fa-solid fa-cloud text-slate-300';
+            if ([45, 48].includes(code)) return 'fa-solid fa-smog text-slate-400';
+            if ([51, 53, 55, 61, 63, 65, 80, 81, 82].includes(code)) return 'fa-solid fa-cloud-rain text-emerald-300';
+            if ([95, 96, 99].includes(code)) return 'fa-solid fa-cloud-bolt text-amber-300';
+            return 'fa-solid fa-cloud-sun text-slate-300';
+        }
+
+        function localParts(dateObj, timezone) {
+            const formatter = new Intl.DateTimeFormat('en-CA', {
+                timeZone: timezone || 'Asia/Kolkata',
                 year: 'numeric',
                 month: '2-digit',
                 day: '2-digit',
                 hour: '2-digit',
                 minute: '2-digit',
-                hour12: false
+                hourCycle: 'h23'
             });
-        }
-
-        function bengaluruParts(date = new Date()) {
-            const parts = Object.fromEntries(bengaluruFormatter.formatToParts(date).map(part => [part.type, part.value]));
+            const parts = Object.fromEntries(formatter.formatToParts(dateObj).map(part => [part.type, part.value]));
             return {
                 year: Number(parts.year),
                 month: Number(parts.month),
                 day: Number(parts.day),
-                hour: Number(parts.hour),
-                minute: Number(parts.minute)
+                hour: Number(parts.hour)
             };
         }
 
-        function recordKeyFor(dateObj = new Date(), hourValue = null) {
-            const parts = bengaluruParts(dateObj);
+        function recordKey(payload, dateObj = new Date(), hourValue = null) {
+            const parts = localParts(dateObj, payload.timezone);
             const hour = hourValue === null ? parts.hour : Number(hourValue);
-            return `${payload.metrics.target_year}-${String(parts.month).padStart(2, '0')}-${String(parts.day).padStart(2, '0')}T${String(hour).padStart(2, '0')}:00`;
+            const targetYear = payload.metrics?.target_year || cityIndex?.target_year || new Date().getFullYear();
+            return `${targetYear}-${String(parts.month).padStart(2, '0')}-${String(parts.day).padStart(2, '0')}T${String(hour).padStart(2, '0')}:00`;
         }
 
-        function recordForDateHour(dateObj = new Date(), hourValue = null) {
-            const key = recordKeyFor(dateObj, hourValue);
-            const found = recordMap.get(key);
-            if (found) return found.record;
-            const parts = bengaluruParts(dateObj);
-            const fallbackIndex = Math.max(0, Math.min(records.length - 1, (((parts.month - 1) * 31 + (parts.day - 1)) * 24) + (hourValue ?? parts.hour)));
-            return records[fallbackIndex] || records[0];
+        function recordFor(payload, dateObj = new Date(), hourValue = null) {
+            const key = recordKey(payload, dateObj, hourValue);
+            const exact = payload._recordMap.get(key);
+            if (exact) return exact;
+
+            const parts = localParts(dateObj, payload.timezone);
+            const fallbackIndex = Math.max(0, Math.min(payload.records.length - 1, (((parts.month - 1) * 31 + (parts.day - 1)) * 24) + (hourValue ?? parts.hour)));
+            return payload.records[fallbackIndex] || payload.records[0];
         }
 
-        function localDateKeyFor(dateObj = new Date()) {
-            const parts = bengaluruParts(dateObj);
-            return `${parts.year}-${String(parts.month).padStart(2, '0')}-${String(parts.day).padStart(2, '0')}`;
-        }
-
-        function localHourKeyFor(dateObj = new Date(), hourValue = null) {
-            const parts = bengaluruParts(dateObj);
-            const hour = hourValue === null ? parts.hour : Number(hourValue);
-            return `${parts.year}-${String(parts.month).padStart(2, '0')}-${String(parts.day).padStart(2, '0')}T${String(hour).padStart(2, '0')}:00`;
-        }
-
-        function cityDateWithOffset(dayOffset = 0) {
-            const date = new Date();
-            date.setDate(date.getDate() + dayOffset);
-            date.setHours(12, 0, 0, 0);
-            return date;
-        }
-
-        function telemetryHourlyIndex(dateObj = new Date(), hourValue = null) {
-            const times = telemetryData?.hourly?.time;
-            if (!Array.isArray(times)) return -1;
-            return times.indexOf(localHourKeyFor(dateObj, hourValue));
-        }
-
-        function telemetryHourlyValue(field, dateObj = new Date(), hourValue = null) {
-            if (!telemetryData || telemetryData.predictionOnly || !telemetryData.hourly) return null;
-            const values = telemetryData.hourly[field];
-            if (!Array.isArray(values)) return null;
-            const index = telemetryHourlyIndex(dateObj, hourValue);
-            return index >= 0 ? values[index] : null;
-        }
-
-        function telemetryDailyIndex(dateObj = new Date()) {
-            const times = telemetryData?.daily?.time;
-            if (!Array.isArray(times)) return -1;
-            return times.indexOf(localDateKeyFor(dateObj));
-        }
-
-        function telemetryDailyValue(field, dateObj = new Date()) {
-            if (!telemetryData || telemetryData.predictionOnly || !telemetryData.daily) return null;
-            const values = telemetryData.daily[field];
-            if (!Array.isArray(values)) return null;
-            const index = telemetryDailyIndex(dateObj);
-            return index >= 0 ? values[index] : null;
-        }
-
-        function dayWindowOffsets() {
-            return Array.from({ length: 14 }, (_, index) => index - 7);
-        }
-
-        function dayWindowLabel(dateObj, offset) {
-            if (offset === 0) return 'Today';
-            return dateObj.toLocaleDateString('en-US', { weekday: 'short', day: '2-digit' });
-        }
-
-        function monthRecords(monthIndex) {
-            const month = String(monthIndex + 1).padStart(2, '0');
-            return records.filter(record => record.t.slice(5, 7) === month);
-        }
-
-        function average(values) {
-            return values.length ? values.reduce((total, value) => total + value, 0) / values.length : 0;
-        }
-
-        function peakHourForMonth(monthIndex) {
-            const bucket = monthRecords(monthIndex);
-            const hourly = Array.from({ length: 24 }, (_, hour) => {
-                const values = bucket.filter(record => Number(record.t.slice(11, 13)) === hour).map(record => record.s);
-                return average(values);
-            });
-            return hourly.indexOf(Math.max(...hourly));
-        }
-
-        let MONTHLY_PROFILES = [];
-
-        function rebuildMonthlyProfiles() {
-            MONTHLY_PROFILES = payload.monthly.map((month, index) => {
-            const bucket = monthRecords(index);
-            const speeds = bucket.map(record => record.s);
-            const confidences = bucket.map(record => record.c);
-            const minSpeed = Math.min(...speeds);
-            const maxSpeed = Math.max(...speeds);
-            const peakHour = peakHourForMonth(index);
-            return {
-                id: index,
-                name: monthNames[index],
-                subtitle: `${payload.metrics.target_year} prediction`,
-                tagline: `${month.sector} dominant wind, ${month.s.toFixed(1)} km/h average`,
-                speed: `${minSpeed.toFixed(1)} - ${maxSpeed.toFixed(1)} km/h`,
-                direction: `${month.sector} (${month.d}°)`,
-                confidence: `${Math.round(average(confidences))}%`,
-                activity: `${String(peakHour).padStart(2, '0')}:00 peak average`,
-                analysis: `${monthNames[index]} is predicted from ${bucket.length.toLocaleString('en-IN')} hourly model records. The expected mean wind is ${month.s.toFixed(1)} km/h from ${month.sector} (${month.d}°), with observed predicted hourly speeds ranging from ${minSpeed.toFixed(1)} to ${maxSpeed.toFixed(1)} km/h.`
-            };
-        });
-        }
-
-        let selectedMonthId = new Date().getMonth();
-
-        function getHistoricalPrediction(dateObj, hourValue) {
-            const record = recordForDateHour(dateObj, hourValue);
+        function predictionForCity(state) {
+            const record = recordFor(state.payload, new Date());
             return {
                 speed: record.s,
                 direction: record.d,
                 confidence: record.c,
-                sector: record.sector,
-                temperature: typeof record.tc === 'number' ? record.tc : null,
-                humidity: typeof record.rh === 'number' ? record.rh : null,
-                precipitation: typeof record.pr === 'number' ? record.pr : null,
-                weatherCode: typeof record.wx === 'number' ? record.wx : null,
-                weatherConfidence: typeof record.q === 'number' ? record.q : null,
-                stamp: record.t
+                temperature: record.tc,
+                humidity: record.rh,
+                rain: record.pr,
+                weatherCode: record.wx,
+                weatherConfidence: record.q,
+                sector: record.sector
             };
         }
 
-        // Display all wind speeds in km/h to match the trained prediction payload.
-        function formatSpeed(speedKmh) {
-            if (speedKmh === undefined || speedKmh === null) return "--.-";
-            return Math.round(speedKmh * 10) / 10;
+        function predicted24Hours(state) {
+            return Array.from({ length: 24 }, (_, hour) => recordFor(state.payload, new Date(), hour));
         }
 
-        // Get cardinal direction label
-        function getCardinal(deg) {
-            if (deg === undefined || deg === null) return "--";
-            const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
-            const idx = Math.round(((deg % 360) / 45)) % 8;
-            return directions[idx];
+        function localHourKey(payload, hourValue) {
+            const parts = localParts(new Date(), payload.timezone);
+            return `${parts.year}-${String(parts.month).padStart(2, '0')}-${String(parts.day).padStart(2, '0')}T${String(hourValue).padStart(2, '0')}:00`;
         }
 
-        function matchScoreClasses(score) {
-            if (score >= 88) return 'text-emerald-400';
-            if (score >= 72) return 'text-lime-400';
-            if (score >= 55) return 'text-amber-400';
-            return 'text-rose-400';
+        function liveHourlyValue(state, field, hourValue) {
+            const hourly = state.liveHourly;
+            const values = hourly?.[field];
+            const times = hourly?.time;
+            if (!Array.isArray(values) || !Array.isArray(times)) return null;
+            const index = times.indexOf(localHourKey(state.payload, hourValue));
+            return index >= 0 && typeof values[index] === 'number' ? values[index] : null;
         }
 
-        // Keep a compact status line instead of a large telemetry log panel.
-        function logToTerminal(message, type = 'info') {
-            const status = document.getElementById('last-updated-detail');
-            if (!status) return;
-            const timeStr = new Date().toLocaleTimeString('en-US', { hour12: false });
-            status.className = 'text-slate-500';
-            status.textContent = `Last updated ${timeStr}: ${message}`;
+        function liveHourlySeries(state, field) {
+            return Array.from({ length: 24 }, (_, hour) => liveHourlyValue(state, field, hour));
         }
 
-        // Toast Messages handler
-        function showToast(title, desc) {
-            const toast = document.getElementById('toast-message');
-            const tTitle = document.getElementById('toast-title');
-            const tDesc = document.getElementById('toast-desc');
-            
-            tTitle.innerText = title;
-            tDesc.innerText = desc;
-            
-            toast.classList.remove('hidden');
-            setTimeout(() => {
-                toast.classList.remove('scale-95', 'opacity-0');
-                toast.classList.add('scale-100', 'opacity-100');
-            }, 50);
-
-            // auto-dismiss
-            setTimeout(() => {
-                dismissToast();
-            }, 6000);
+        function detailUrlForCity(state) {
+            const url = new URL('weather-details.html', appBaseUrl);
+            url.searchParams.set('city', state.meta.slug);
+            return url.href;
         }
 
-        function dismissToast() {
-            const toast = document.getElementById('toast-message');
-            if (toast) {
-                toast.classList.remove('scale-100', 'opacity-100');
-                toast.classList.add('scale-95', 'opacity-0');
-                setTimeout(() => {
-                    toast.classList.add('hidden');
-                }, 300);
-            }
+        function predictedRainTotal(state) {
+            return predicted24Hours(state).reduce((total, record) => total + (typeof record.pr === 'number' ? record.pr : 0), 0);
         }
 
-        // -------------------------------------------------------------------------
-        // Dynamic Wind Flow Canvas System (Real-time particle rendering)
-        // -------------------------------------------------------------------------
-        const canvas = document.getElementById('windCanvas');
-        const ctx = canvas.getContext('2d');
-        let particles = [];
-        let particleAnimationId = null;
-        let activeWindFlow = { speed: 10, direction: 90 };
-
-        function resizeCanvas() {
-            const rect = canvas.getBoundingClientRect();
-            canvas.width = rect.width * window.devicePixelRatio;
-            canvas.height = rect.height * window.devicePixelRatio;
-            ctx.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
+        function liveRainTotal(state) {
+            const values = liveHourlySeries(state, 'precipitation').filter(value => typeof value === 'number');
+            return values.length ? values.reduce((total, value) => total + value, 0) : null;
         }
 
-        function clamp(value, min, max) {
-            return Math.max(min, Math.min(max, value));
+        function matchScore(live, prediction) {
+            if (!live || typeof live.wind_speed_10m !== 'number') return null;
+            const speedDelta = Math.abs(live.wind_speed_10m - prediction.speed);
+            let directionDelta = Math.abs(live.wind_direction_10m - prediction.direction) % 360;
+            if (directionDelta > 180) directionDelta = 360 - directionDelta;
+            const speedMatch = Math.max(0, 100 - (speedDelta * 6));
+            const directionMatch = Math.max(0, 100 - (directionDelta * 0.5));
+            return Math.round((speedMatch + directionMatch) / 2);
         }
 
-        function needleLengthForSpeed(speedKmh) {
-            const rect = canvas.getBoundingClientRect();
-            const radius = Math.max(120, Math.min(rect.width, rect.height) / 2);
-            const minLength = radius * 0.56;
-            const maxLength = radius * 0.88;
-            const speedRatio = clamp((Number(speedKmh) || 0) / 24, 0, 1);
-            return Math.round(minLength + ((maxLength - minLength) * speedRatio));
+        function predictionAccuracy(state, prediction) {
+            const windScore = matchScore(state.live, prediction);
+            if (windScore === null) return null;
+
+            const tempScore = typeof state.live.temperature_2m === 'number' && typeof prediction.temperature === 'number'
+                ? Math.max(0, 100 - (Math.abs(state.live.temperature_2m - prediction.temperature) * 12))
+                : null;
+            const humidityScore = typeof state.live.relative_humidity_2m === 'number' && typeof prediction.humidity === 'number'
+                ? Math.max(0, 100 - (Math.abs(state.live.relative_humidity_2m - prediction.humidity) * 1.5))
+                : null;
+            const liveRain = liveHourlyValue(state, 'precipitation', localParts(new Date(), state.payload.timezone).hour);
+            const rainScore = typeof liveRain === 'number' && typeof prediction.rain === 'number'
+                ? Math.max(0, 100 - (Math.abs(liveRain - prediction.rain) * 35))
+                : null;
+            const codeScore = typeof state.live.weather_code === 'number' && typeof prediction.weatherCode === 'number'
+                ? (weatherText(state.live.weather_code) === weatherText(prediction.weatherCode) ? 100 : 68)
+                : null;
+            const weatherScores = [tempScore, humidityScore, rainScore, codeScore].filter(value => typeof value === 'number');
+            const weatherScore = weatherScores.length
+                ? weatherScores.reduce((total, value) => total + value, 0) / weatherScores.length
+                : windScore;
+
+            return Math.round((windScore * 0.5) + (weatherScore * 0.5));
         }
 
-        function setNeedleLength(needleId, speedKmh) {
-            const needle = document.getElementById(needleId);
-            if (!needle) return;
-            const length = needleLengthForSpeed(speedKmh);
-            needle.style.height = `${length}px`;
-            needle.dataset.windSpeed = Number.isFinite(speedKmh) ? speedKmh.toFixed(1) : '';
-            needle.dataset.needleLength = String(length);
+        function matchClasses(score) {
+            if (score === null) return 'text-slate-500';
+            if (score >= 88) return 'text-emerald-300';
+            if (score >= 72) return 'text-lime-300';
+            if (score >= 55) return 'text-amber-300';
+            return 'text-rose-300';
         }
 
-        function setNeedleLengths(liveSpeedKmh, predictedSpeedKmh) {
-            setNeedleLength('needle-live', liveSpeedKmh);
-            setNeedleLength('needle-predicted', predictedSpeedKmh);
-        }
-
-        function estimatedGustForSpeed(speedKmh) {
-            if (!Number.isFinite(speedKmh)) return null;
-            return Math.round(Math.max(speedKmh + 3.5, speedKmh * 1.32) * 10) / 10;
-        }
-
-        function gustForHour(hour, steadySpeedKmh) {
-            const hourlyGust = telemetryHourlyValue('wind_gusts_10m', new Date(), hour);
-            if (typeof hourlyGust === 'number') {
-                return { value: hourlyGust, estimated: false };
-            }
-
-            const nowHour = new Date().getHours();
-            if (hour === nowHour && telemetryData && !telemetryData.predictionOnly && telemetryData.current && typeof telemetryData.current.wind_gusts_10m === 'number') {
-                return { value: telemetryData.current.wind_gusts_10m, estimated: false };
-            }
-
-            const estimated = estimatedGustForSpeed(steadySpeedKmh);
-            return estimated === null ? { value: null, estimated: true } : { value: estimated, estimated: true };
-        }
-
-        function setGustNeedle(gustSpeedKmh, directionDeg, steadySpeedKmh, isEstimated = false) {
-            const gustNeedle = document.getElementById('needle-gust');
-            const gustReadout = document.getElementById('comp-gust-val');
-            const hasGust = Number.isFinite(gustSpeedKmh) && Number.isFinite(directionDeg);
-            if (!gustNeedle) return;
-
-            if (!hasGust) {
-                gustNeedle.style.opacity = '0';
-                if (gustReadout) gustReadout.innerText = '--';
-                return;
-            }
-
-            const steady = Number.isFinite(steadySpeedKmh) ? steadySpeedKmh : 0;
-            const displayGust = Math.max(gustSpeedKmh, steady);
-            const burstDelta = Math.max(0, displayGust - steady);
-            const burstRatio = steady > 0 ? burstDelta / steady : burstDelta / 12;
-            const opacity = clamp(0.24 + (burstRatio * 0.28), 0.24, 0.58);
-
-            setNeedleLength('needle-gust', displayGust);
-            gustNeedle.style.transform = `rotate(${directionDeg}deg)`;
-            gustNeedle.style.opacity = String(opacity);
-            if (gustReadout) gustReadout.innerText = `${isEstimated ? 'Est. ' : ''}Up to ${formatSpeed(displayGust)} ${UNIT_LABEL}`;
-        }
-
-        function syncNeedleLengthsForCurrentState() {
-            const prediction = getHistoricalPrediction(new Date(), selectedHour);
-            setNeedleLengths(activeWindFlow.speed, prediction.speed);
-            const gustNeedle = document.getElementById('needle-gust');
-            const gustSpeed = gustNeedle ? Number(gustNeedle.dataset.windSpeed) : NaN;
-            if (Number.isFinite(gustSpeed)) {
-                setNeedleLength('needle-gust', gustSpeed);
-            }
-        }
-
-        function particleCountForSpeed(speed) {
-            return Math.round(clamp(42 + (speed * 3.6), 48, 135));
-        }
-
-        function setWindFlow(speed, direction) {
-            activeWindFlow = {
-                speed: Number.isFinite(speed) ? speed : 10,
-                direction: Number.isFinite(direction) ? direction : 90
-            };
-            canvas.dataset.flowSpeed = activeWindFlow.speed.toFixed(1);
-            canvas.dataset.flowDirection = Math.round(activeWindFlow.direction);
-            syncParticleDensity();
-        }
-
-        class WindParticle {
-            constructor(w, h) {
-                this.w = w;
-                this.h = h;
-                this.reset();
-            }
-
-            reset() {
-                this.x = Math.random() * this.w;
-                this.y = Math.random() * this.h;
-                this.life = Math.random() * 80 + 40;
-                this.maxLife = this.life;
-                this.alpha = 0;
-            }
-
-            update(speed, angle) {
-                this.life--;
-                const angleRad = (angle - 90) * Math.PI / 180;
-                const speedStep = clamp(speed * 0.24, 0.7, 7.5);
-                this.x += Math.cos(angleRad) * speedStep;
-                this.y += Math.sin(angleRad) * speedStep;
-
-                if (this.x < 0) this.x = this.w;
-                if (this.x > this.w) this.x = 0;
-                if (this.y < 0) this.y = this.h;
-                if (this.y > this.h) this.y = 0;
-
-                if (this.life > this.maxLife * 0.8) {
-                    this.alpha += 0.06;
-                    if (this.alpha > 0.58) this.alpha = 0.58;
-                } else if (this.life < this.maxLife * 0.2) {
-                    this.alpha -= 0.045;
-                    if (this.alpha < 0) this.alpha = 0;
-                }
-
-                if (this.life <= 0) {
-                    this.reset();
-                }
-            }
-
-            draw(ctx) {
-                const speedGlow = clamp(activeWindFlow.speed / 28, 0.35, 1);
-                ctx.strokeStyle = `rgba(103, 232, 249, ${this.alpha * speedGlow})`;
-                ctx.lineWidth = 1.15 + speedGlow;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, 1, 0, Math.PI * 2);
-                ctx.stroke();
-            }
-        }
-
-        function syncParticleDensity() {
-            const rect = canvas.getBoundingClientRect();
-            const targetCount = particleCountForSpeed(activeWindFlow.speed);
-            while (particles.length < targetCount) {
-                particles.push(new WindParticle(rect.width, rect.height));
-            }
-            if (particles.length > targetCount) {
-                particles.splice(targetCount);
-            }
-            canvas.dataset.particleCount = String(particles.length);
-        }
-
-        function initParticles() {
-            const rect = canvas.getBoundingClientRect();
-            particles = [];
-            const targetCount = particleCountForSpeed(activeWindFlow.speed);
-            for (let i = 0; i < targetCount; i++) {
-                particles.push(new WindParticle(rect.width, rect.height));
-            }
-            canvas.dataset.particleCount = String(particles.length);
-        }
-
-        function animateParticles() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            syncParticleDensity();
-
-            particles.forEach(p => {
-                p.update(activeWindFlow.speed, activeWindFlow.direction);
-                p.draw(ctx);
+        function pointsFor(values, maxValue) {
+            const width = 240;
+            const height = 54;
+            const usableHeight = 42;
+            return values.map((value, index) => {
+                if (typeof value !== 'number') return null;
+                const x = (index / 23) * width;
+                const y = height - 6 - ((value / maxValue) * usableHeight);
+                return `${Math.round(x * 10) / 10},${Math.round(y * 10) / 10}`;
             });
-
-            particleAnimationId = requestAnimationFrame(animateParticles);
         }
 
-        // -------------------------------------------------------------------------
-        // Core Open-Meteo Integration & Logic Hydration (Progressive Background Sync)
-        // -------------------------------------------------------------------------
-        async function syncLiveTelemetry() {
-            if (!payload || !BENGALURU_LOCATION.lat || !BENGALURU_LOCATION.lon) return;
-            const requestSlug = activeCityMeta?.slug;
-            // Streamlined URL requesting ONLY necessary rendering parameters
-            const url = `${payload.forecastUrl}?latitude=${BENGALURU_LOCATION.lat}&longitude=${BENGALURU_LOCATION.lon}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m&hourly=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m,precipitation&daily=wind_speed_10m_max,weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum&past_days=7&forecast_days=7&timezone=${encodeURIComponent(BENGALURU_LOCATION.timezone)}`;
-            
-            logToTerminal(`Initiating background sync with Open-Meteo [${BENGALURU_LOCATION.short}]...`, "system");
-            
-            let retries = 3;
-            let delay = 1000;
-            
-            while (retries > 0) {
-                try {
-                    const response = await fetch(url);
-                    if (!response.ok) throw new Error("HTTP " + response.status);
-                    
-                    const data = await response.json();
-                    if (!data || !data.current || !data.hourly || !data.daily) {
-                        throw new Error("Malformed JSON payload structure");
-                    }
-                    
-                    // Success! Hydrate telemetry and update interface
-                    if (requestSlug !== activeCityMeta?.slug) return;
-                    telemetryData = data;
-                    document.getElementById('offline-banner').classList.add('hidden');
-                    updateUI();
-                    
-                    logToTerminal(`Live weather telemetry successfully synchronized for ${BENGALURU_LOCATION.name}.`, "success");
-                    showToast(`Live Feed Connected`, `Live meteorological metrics loaded for ${BENGALURU_LOCATION.short}.`);
+        function linePath(points) {
+            let path = '';
+            let open = false;
+            points.forEach(point => {
+                if (!point) {
+                    open = false;
                     return;
-                } catch (error) {
-                    retries--;
-                    logToTerminal(`Background synchronization attempt failed (Error: ${error.message}). Retries remaining: ${retries}`, "warn");
-                    
-                    if (retries === 0) {
-                        logToTerminal("All synchronization retries offline. Retaining predictive baseline models.", "error");
-                        document.getElementById('offline-banner').classList.remove('hidden');
-                        return;
-                    }
-                    await new Promise(res => setTimeout(res, delay));
-                    delay *= 1.5;
                 }
-            }
-        }
-
-        // Prediction-only fallback uses the embedded ML records and does not invent live telemetry.
-        function buildPredictionOnlyData() {
-            const now = new Date();
-            const currentPrediction = getHistoricalPrediction(now, now.getHours());
-            
-            const hourlyTime = [];
-            const hourlySpeed = [];
-            const hourlyDirection = [];
-            const hourlyGusts = [];
-            const hourlyPrecipitation = [];
-            
-            for (let i = 0; i < 24; i++) {
-                const targetTime = new Date(now);
-                targetTime.setHours(i);
-                const hourlyPrediction = getHistoricalPrediction(targetTime, i);
-                
-                hourlyTime.push(targetTime.toISOString().substring(0, 16));
-                hourlySpeed.push(hourlyPrediction.speed);
-                hourlyDirection.push(hourlyPrediction.direction);
-                hourlyGusts.push(estimatedGustForSpeed(hourlyPrediction.speed));
-                hourlyPrecipitation.push(hourlyPrediction.precipitation);
-            }
-
-            const dailyTime = [];
-            const dailySpeedMax = [];
-            const dailyTempMax = [];
-            const dailyTempMin = [];
-            const dailyPrecipSum = [];
-            const dailyWeatherCode = [];
-            for (let i = 0; i < 7; i++) {
-                const targetDate = new Date(now);
-                targetDate.setDate(now.getDate() + i);
-                const dayPredictions = Array.from({ length: 24 }, (_, hour) => getHistoricalPrediction(targetDate, hour));
-                const daySpeeds = dayPredictions.map(item => item.speed);
-                const dayTemps = dayPredictions.map(item => item.temperature).filter(value => typeof value === 'number');
-                const dayRain = dayPredictions.map(item => item.precipitation).filter(value => typeof value === 'number');
-                const dayCodes = dayPredictions.map(item => item.weatherCode).filter(value => typeof value === 'number');
-                dailyTime.push(targetDate.toISOString().substring(0, 10));
-                dailySpeedMax.push(Math.max(...daySpeeds));
-                dailyTempMax.push(dayTemps.length ? Math.max(...dayTemps) : null);
-                dailyTempMin.push(dayTemps.length ? Math.min(...dayTemps) : null);
-                dailyPrecipSum.push(dayRain.length ? Math.round(dayRain.reduce((total, value) => total + value, 0) * 10) / 10 : null);
-                dailyWeatherCode.push(dayCodes.length ? dominantWeatherCode(dayCodes) : null);
-            }
-
-            return {
-                predictionOnly: true,
-                current: {
-                    temperature_2m: currentPrediction.temperature,
-                    relative_humidity_2m: currentPrediction.humidity,
-                    weather_code: currentPrediction.weatherCode,
-                    wind_speed_10m: currentPrediction.speed,
-                    wind_direction_10m: currentPrediction.direction,
-                    wind_gusts_10m: null
-                },
-                hourly: {
-                    time: hourlyTime,
-                    wind_speed_10m: hourlySpeed,
-                    wind_direction_10m: hourlyDirection,
-                    wind_gusts_10m: hourlyGusts,
-                    precipitation: hourlyPrecipitation
-                },
-                daily: {
-                    time: dailyTime,
-                    wind_speed_10m_max: dailySpeedMax,
-                    weather_code: dailyWeatherCode,
-                    temperature_2m_max: dailyTempMax,
-                    temperature_2m_min: dailyTempMin,
-                    precipitation_probability_max: Array(7).fill(null),
-                    precipitation_sum: dailyPrecipSum
-                }
-            };
-        }
-
-        // Hydrate GUI with telemetry data
-        function updateUI() {
-            if (!telemetryData) return;
-
-            const current = telemetryData.current;
-            const hasLiveTelemetry = !telemetryData.predictionOnly && current && typeof current.wind_speed_10m === 'number';
-
-            // Set Live Weather Cards
-            document.getElementById('live-weather-desc').innerText = hasLiveTelemetry ? interpretWeatherCode(current.weather_code) : 'Awaiting live feed';
-            document.getElementById('live-temp').innerText = hasLiveTelemetry && typeof current.temperature_2m === 'number' ? `${Math.round(current.temperature_2m * 10) / 10}°C` : '--°C';
-            document.getElementById('live-humidity').innerText = hasLiveTelemetry && typeof current.relative_humidity_2m === 'number' ? `Humidity: ${current.relative_humidity_2m}%` : 'Humidity: --%';
-
-            // Set Live Wind Speeds
-            const liveSpeedConverted = formatSpeed(current.wind_speed_10m);
-            const gustSpeedConverted = hasLiveTelemetry ? formatSpeed(current.wind_gusts_10m) : '--';
-            const unitLabel = UNIT_LABEL;
-
-            document.getElementById('live-wind-speed').innerText = hasLiveTelemetry ? liveSpeedConverted : '--.-';
-            document.getElementById('wind-unit-label').innerText = unitLabel;
-            document.getElementById('live-wind-dir').innerText = hasLiveTelemetry ? `${Math.round(current.wind_direction_10m)}° ${getCardinal(current.wind_direction_10m)}` : 'Live direction pending';
-            document.getElementById('live-wind-gusts').innerText = `Gusts: ${gustSpeedConverted} ${unitLabel}`;
-
-            // Calculate historical prediction comparisons
-            const now = new Date();
-            const prediction = getHistoricalPrediction(now, now.getHours());
-
-            // Alignment metrics
-            const comparisonSpeed = hasLiveTelemetry ? current.wind_speed_10m : prediction.speed;
-            const comparisonDirection = hasLiveTelemetry ? current.wind_direction_10m : prediction.direction;
-            const rawSpeedDelta = Math.abs(comparisonSpeed - prediction.speed);
-            let dirDelta = Math.abs(comparisonDirection - prediction.direction) % 360;
-            if (dirDelta > 180) dirDelta = 360 - dirDelta;
-
-            const speedMatch = Math.max(0, 100 - (rawSpeedDelta * 6));
-            const directionMatch = Math.max(0, 100 - (dirDelta * 0.5));
-            const matchPercentage = Math.round((speedMatch + directionMatch) / 2);
-
-            const matchScoreEl = document.getElementById('live-match-score');
-            matchScoreEl.innerText = hasLiveTelemetry ? `${matchPercentage}%` : '--%';
-            matchScoreEl.className = `text-2xl font-black font-mono ${hasLiveTelemetry ? matchScoreClasses(matchPercentage) : 'text-slate-500'}`;
-            document.getElementById('predicted-wind-baseline').innerText = `Predicted: ${formatSpeed(prediction.speed)} ${unitLabel}`;
-
-            // Update Compass Needle Vectors
-            const needleLive = document.getElementById('needle-live');
-            const needlePred = document.getElementById('needle-predicted');
-            const currentGust = gustForHour(now.getHours(), comparisonSpeed);
-            const liveGustSpeed = currentGust.value;
-
-            setNeedleLengths(comparisonSpeed, prediction.speed);
-            needleLive.style.transform = `rotate(${comparisonDirection}deg)`;
-            needlePred.style.transform = `rotate(${prediction.direction}deg)`;
-            setGustNeedle(liveGustSpeed, comparisonDirection, comparisonSpeed, currentGust.estimated);
-            setWindFlow(comparisonSpeed, comparisonDirection);
-
-            // Update Compass Text Overlays
-            document.getElementById('center-heading').innerText = `${Math.round(comparisonDirection)}° ${getCardinal(comparisonDirection)}`;
-            document.getElementById('center-speed').innerText = hasLiveTelemetry ? liveSpeedConverted : formatSpeed(prediction.speed);
-            document.getElementById('center-speed-unit').innerText = unitLabel;
-
-            document.getElementById('comp-live-val').innerText = hasLiveTelemetry ? `${liveSpeedConverted} ${unitLabel} @ ${Math.round(current.wind_direction_10m)}°` : 'Live feed pending';
-            document.getElementById('comp-pred-val').innerText = `${formatSpeed(prediction.speed)} ${unitLabel} @ ${Math.round(prediction.direction)}°`;
-            document.getElementById('comp-divergence-val').innerText = hasLiveTelemetry ? `${Math.round(dirDelta)}°` : '--°';
-
-            // Setup dynamic Seasonal Description
-            const curMonth = now.getMonth();
-            const prof = MONTHLY_PROFILES[curMonth];
-            document.getElementById('seasonal-desc').innerText = `${prof.name} uses ${monthRecords(curMonth).length.toLocaleString('en-IN')} embedded hourly prediction records. Current profile: ${prof.tagline.toLowerCase()}.`;
-
-            // Reliability panel dynamic updates
-            document.getElementById('stats-learned').innerText = Number(payload.metrics.training_rows).toLocaleString('en-IN');
-            document.getElementById('stats-learned-note').innerText = `${payload.metrics.validation_year} back-test validation`;
-            document.getElementById('stats-dir-miss').innerText = `±${payload.metrics.direction_mae_deg}°`;
-            document.getElementById('stats-speed-miss').innerText = `±${payload.metrics.speed_mae_kmh} km/h`;
-            document.getElementById('stats-trust').innerText = `${prediction.confidence}%`;
-            document.getElementById('weather-stats-trust').innerText = typeof prediction.weatherConfidence === 'number' ? `${prediction.weatherConfidence}%` : '--%';
-            document.getElementById('weather-stats-trust').className = `text-lg font-bold mt-1 ${typeof prediction.weatherConfidence === 'number' ? matchScoreClasses(prediction.weatherConfidence) : 'text-slate-500'}`;
-            document.getElementById('weather-stats-now').innerText = typeof prediction.temperature === 'number' ? `${prediction.temperature}°C` : '--';
-            document.getElementById('weather-stats-now-note').innerText = `${interpretWeatherCode(prediction.weatherCode)} · ${typeof prediction.humidity === 'number' ? prediction.humidity : '--'}% humidity`;
-            document.getElementById('weather-stats-temp').innerText = `±${payload.metrics.temperature_mae_c}°C`;
-            document.getElementById('weather-stats-humidity').innerText = `±${payload.metrics.humidity_mae_pct}%`;
-            document.getElementById('weather-stats-rain').innerText = `±${payload.metrics.precipitation_mae_mm} mm`;
-            document.getElementById('weather-stats-wet').innerText = `${payload.metrics.wet_hour_accuracy_pct}%`;
-            document.getElementById('weather-stats-wet').className = `text-lg font-bold mt-1 ${matchScoreClasses(payload.metrics.wet_hour_accuracy_pct)}`;
-            document.getElementById('weather-reliability-note').innerText = `${prediction.stamp} embedded weather prediction`;
-
-            // Render Charts
-            buildHourlyChart();
-            buildHourlyRainChart();
-            buildWeeklyChart();
-            buildWeatherChart();
-        }
-
-        // Handle dynamic scrubbing across the 24 hour timeline
-        function scrubHour(hourVal) {
-            selectedHour = parseInt(hourVal);
-            
-            const padHour = selectedHour.toString().padStart(2, '0');
-            document.getElementById('scrub-hour-label').innerText = `${padHour}:00`;
-
-            const targetTime = new Date();
-            targetTime.setHours(selectedHour);
-            
-            const prediction = getHistoricalPrediction(targetTime, selectedHour);
-
-            let targetSpeed = prediction.speed;
-            let targetDir = prediction.direction;
-
-            const hourlySpeed = telemetryHourlyValue('wind_speed_10m', targetTime, selectedHour);
-            const hourlyDir = telemetryHourlyValue('wind_direction_10m', targetTime, selectedHour);
-            if (typeof hourlySpeed === 'number') targetSpeed = hourlySpeed;
-            if (typeof hourlyDir === 'number') targetDir = hourlyDir;
-
-            const unitLabel = UNIT_LABEL;
-
-            document.getElementById('needle-live').style.transform = `rotate(${targetDir}deg)`;
-            document.getElementById('needle-predicted').style.transform = `rotate(${prediction.direction}deg)`;
-            setNeedleLengths(targetSpeed, prediction.speed);
-            const scrubGust = gustForHour(selectedHour, targetSpeed);
-            setGustNeedle(scrubGust.value, targetDir, targetSpeed, scrubGust.estimated);
-            setWindFlow(targetSpeed, targetDir);
-
-            document.getElementById('center-heading').innerText = `${Math.round(targetDir)}° ${getCardinal(targetDir)}`;
-            document.getElementById('center-speed').innerText = formatSpeed(targetSpeed);
-            document.getElementById('center-speed-unit').innerText = unitLabel;
-
-            document.getElementById('comp-live-val').innerText = `${formatSpeed(targetSpeed)} ${unitLabel} @ ${Math.round(targetDir)}°`;
-            document.getElementById('comp-pred-val').innerText = `${formatSpeed(prediction.speed)} ${unitLabel} @ ${Math.round(prediction.direction)}°`;
-
-            let deltaD = Math.abs(targetDir - prediction.direction) % 360;
-            if (deltaD > 180) deltaD = 360 - deltaD;
-            document.getElementById('comp-divergence-val').innerText = `${Math.round(deltaD)}°`;
-
-            logToTerminal(`Scrubbing clock vector timeline: hour=${padHour}:00 | Predicted direction=${prediction.direction}° | Forecasted direction=${targetDir}°`, 'info');
-        }
-
-        function resetScrubberToLive() {
-            const scrubber = document.getElementById('hour-scrubber');
-            const label = document.getElementById('scrub-hour-label');
-            selectedHour = new Date().getHours();
-            if (scrubber) scrubber.value = SCRUBBER_REST_HOUR;
-            if (label) label.innerText = `${SCRUBBER_REST_HOUR.toString().padStart(2, '0')}:00`;
-            updateUI();
-        }
-
-        function initScrubberControls() {
-            const scrubber = document.getElementById('hour-scrubber');
-            if (!scrubber || scrubber.dataset.bound === 'true') return;
-
-            scrubber.dataset.bound = 'true';
-            scrubber.addEventListener('input', event => scrubHour(event.target.value));
-            ['pointerup', 'mouseup', 'touchend', 'change', 'blur'].forEach(eventName => {
-                scrubber.addEventListener(eventName, resetScrubberToLive);
+                path += `${open ? ' L ' : 'M '}${point}`;
+                open = true;
             });
-            scrubber.addEventListener('keyup', event => {
-                if (event.key === 'Enter' || event.key === 'Escape') {
-                    resetScrubberToLive();
-                }
-            });
+            return path;
         }
 
-        window.scrubHour = scrubHour;
-        window.resetScrubberToLive = resetScrubberToLive;
+        function miniChart(records, predictedField, liveValues, config) {
+            const predicted = records.map(record => record[predictedField]).map(value => typeof value === 'number' ? value : null);
+            const allValues = predicted.concat(liveValues || []).filter(value => typeof value === 'number');
+            const maxValue = Math.max(config.minMax || 1, ...allValues);
+            const predictedPoints = pointsFor(predicted, maxValue);
+            const livePoints = pointsFor(liveValues || Array(24).fill(null), maxValue);
+            const nowHour = localParts(new Date(), 'Asia/Kolkata').hour;
+            const nowX = Math.round((nowHour / 23) * 240 * 10) / 10;
+            const livePath = linePath(livePoints);
+            const predictedPath = linePath(predictedPoints);
+            const liveDots = (liveValues || []).map((value, index) => {
+                if (typeof value !== 'number') return '';
+                const point = livePoints[index].split(',');
+                return `<circle cx="${point[0]}" cy="${point[1]}" r="1.8" fill="${config.liveColor}" opacity="0.85"></circle>`;
+            }).join('');
 
-        // Manual refresh trigger
-        async function refreshData() {
-            const icon = document.getElementById('refresh-icon');
-            icon.classList.add('animate-spin');
-            
-            logToTerminal("Initiating manual telemetry refresh...", "system");
-            await syncLiveTelemetry();
-            
-            setTimeout(() => {
-                icon.classList.remove('animate-spin');
-            }, 600);
+            return `
+                <div class="mini-chart h-16 rounded-xl border border-slate-800/60 bg-slate-950/55 p-2">
+                    <svg viewBox="0 0 240 60" class="h-full w-full" preserveAspectRatio="none" role="img" aria-label="${config.label}">
+                        <line x1="${nowX}" y1="4" x2="${nowX}" y2="56" stroke="rgba(148, 163, 184, 0.32)" stroke-width="1" stroke-dasharray="3 4"></line>
+                        <path d="${predictedPath}" fill="none" stroke="${config.predictedColor}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path>
+                        ${livePath ? `<path d="${livePath}" fill="none" stroke="${config.liveColor}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path>${liveDots}` : ''}
+                    </svg>
+                </div>
+            `;
         }
 
-        // -------------------------------------------------------------------------
-        // Chart.js Building Block Methods
-        // -------------------------------------------------------------------------
-        function seededRandom(seed) {
-            let value = seed >>> 0;
-            return () => {
-                value += 0x6D2B79F5;
-                let mixed = value;
-                mixed = Math.imul(mixed ^ (mixed >>> 15), mixed | 1);
-                mixed ^= mixed + Math.imul(mixed ^ (mixed >>> 7), mixed | 61);
-                return ((mixed ^ (mixed >>> 14)) >>> 0) / 4294967296;
-            };
-        }
-
-        function averagePathLength(size) {
-            if (size <= 1) return 0;
-            if (size === 2) return 1;
-            return 2 * (Math.log(size - 1) + 0.5772156649) - (2 * (size - 1) / size);
-        }
-
-        function buildIsolationTree(rows, depth, maxDepth, random) {
-            if (depth >= maxDepth || rows.length <= 1) {
-                return { external: true, size: rows.length };
-            }
-
-            const featureCount = rows[0].features.length;
-            const featureIndex = Math.floor(random() * featureCount);
-            const values = rows.map(row => row.features[featureIndex]);
-            const min = Math.min(...values);
-            const max = Math.max(...values);
-
-            if (min === max) {
-                return { external: true, size: rows.length };
-            }
-
-            const split = min + random() * (max - min);
-            const left = rows.filter(row => row.features[featureIndex] < split);
-            const right = rows.filter(row => row.features[featureIndex] >= split);
-
-            if (!left.length || !right.length) {
-                return { external: true, size: rows.length };
-            }
-
-            return {
-                external: false,
-                featureIndex,
-                split,
-                left: buildIsolationTree(left, depth + 1, maxDepth, random),
-                right: buildIsolationTree(right, depth + 1, maxDepth, random)
-            };
-        }
-
-        function isolationPathLength(row, node, depth = 0) {
-            if (node.external) {
-                return depth + averagePathLength(node.size);
-            }
-            return row.features[node.featureIndex] < node.split
-                ? isolationPathLength(row, node.left, depth + 1)
-                : isolationPathLength(row, node.right, depth + 1);
-        }
-
-        function detectHourlyWindAnomalies(rows) {
-            if (rows.length < 8) {
-                return { byHour: new Map(), count: 0, message: "Anomaly scan: waiting for live data" };
-            }
-
-            const random = seededRandom(20260522);
-            const treeCount = 72;
-            const sampleSize = Math.min(16, rows.length);
-            const maxDepth = Math.ceil(Math.log2(sampleSize));
-            const trees = [];
-
-            for (let i = 0; i < treeCount; i++) {
-                const sample = [];
-                const used = new Set();
-                while (sample.length < sampleSize) {
-                    const pick = Math.floor(random() * rows.length);
-                    if (!used.has(pick)) {
-                        used.add(pick);
-                        sample.push(rows[pick]);
-                    }
-                }
-                trees.push(buildIsolationTree(sample, 0, maxDepth, random));
-            }
-
-            const normalization = averagePathLength(sampleSize) || 1;
-            const scores = rows.map(row => {
-                const path = trees.reduce((total, tree) => total + isolationPathLength(row, tree), 0) / treeCount;
-                return { ...row, score: Math.pow(2, -path / normalization) };
-            });
-
-            const flagged = scores
-                .filter(row => row.score >= 0.62 || (row.speedDelta >= 8 && row.directionDelta >= 55))
-                .sort((a, b) => b.score - a.score)
-                .slice(0, 4);
-
-            const byHour = new Map(flagged.map(row => [row.hour, row]));
-            const message = flagged.length
-                ? `Anomaly scan: ${flagged.length} unusual hour${flagged.length > 1 ? "s" : ""} flagged`
-                : "Anomaly scan: no unusual live hours";
-
-            return { byHour, count: flagged.length, message };
-        }
-
-        function detectHourlyRainAnomalies(rows) {
-            if (rows.length < 8) {
-                return { byHour: new Map(), count: 0, message: "Rain anomaly: waiting for live data" };
-            }
-
-            const random = seededRandom(20260523);
-            const treeCount = 72;
-            const sampleSize = Math.min(16, rows.length);
-            const maxDepth = Math.ceil(Math.log2(sampleSize));
-            const trees = [];
-
-            for (let i = 0; i < treeCount; i++) {
-                const sample = [];
-                const used = new Set();
-                while (sample.length < sampleSize) {
-                    const pick = Math.floor(random() * rows.length);
-                    if (!used.has(pick)) {
-                        used.add(pick);
-                        sample.push(rows[pick]);
-                    }
-                }
-                trees.push(buildIsolationTree(sample, 0, maxDepth, random));
-            }
-
-            const normalization = averagePathLength(sampleSize) || 1;
-            const scores = rows.map(row => {
-                const path = trees.reduce((total, tree) => total + isolationPathLength(row, tree), 0) / treeCount;
-                return { ...row, score: Math.pow(2, -path / normalization) };
-            });
-
-            const flagged = scores
-                .filter(row => row.score >= 0.64 || row.rainDelta >= 2 || (row.liveRain >= 1.5 && row.predictedRain <= 0.15))
-                .sort((a, b) => b.score - a.score)
-                .slice(0, 4);
-
-            const byHour = new Map(flagged.map(row => [row.hour, row]));
-            const message = flagged.length
-                ? `Rain anomaly: ${flagged.length} unusual hour${flagged.length > 1 ? "s" : ""} flagged`
-                : "Rain anomaly: no unusual live hours";
-
-            return { byHour, count: flagged.length, message };
-        }
-
-        function detectDailyWindAnomalies(rows) {
-            if (rows.length < 6) {
-                return { byIndex: new Map(), count: 0, message: "Daily wind anomaly: waiting for live data" };
-            }
-
-            const random = seededRandom(20260524);
-            const treeCount = 64;
-            const sampleSize = Math.min(12, rows.length);
-            const maxDepth = Math.ceil(Math.log2(sampleSize));
-            const trees = [];
-
-            for (let i = 0; i < treeCount; i++) {
-                const sample = [];
-                const used = new Set();
-                while (sample.length < sampleSize) {
-                    const pick = Math.floor(random() * rows.length);
-                    if (!used.has(pick)) {
-                        used.add(pick);
-                        sample.push(rows[pick]);
-                    }
-                }
-                trees.push(buildIsolationTree(sample, 0, maxDepth, random));
-            }
-
-            const normalization = averagePathLength(sampleSize) || 1;
-            const scores = rows.map(row => {
-                const path = trees.reduce((total, tree) => total + isolationPathLength(row, tree), 0) / treeCount;
-                return { ...row, score: Math.pow(2, -path / normalization) };
-            });
-
-            const flagged = scores
-                .filter(row => row.score >= 0.62 || row.speedDelta >= 6)
-                .sort((a, b) => b.score - a.score)
-                .slice(0, 4);
-
-            const byIndex = new Map(flagged.map(row => [row.index, row]));
-            const message = flagged.length
-                ? `Daily wind anomaly: ${flagged.length} unusual day${flagged.length > 1 ? "s" : ""} flagged`
-                : "Daily wind anomaly: no unusual days";
-
-            return { byIndex, count: flagged.length, message };
-        }
-
-        function buildHourlyChart() {
-            const ctx = document.getElementById('hourlyChart').getContext('2d');
-            
-            if (hourlyChart) {
-                hourlyChart.destroy();
-            }
-
-            const now = new Date();
-            const predictionDataset = [];
-            const liveDataset = [];
-            const anomalyDataset = [];
-            const anomalyRows = [];
-            const labels = [];
-            const currentHour = bengaluruParts(now).hour;
-
-            for (let i = 0; i < 24; i++) {
-                const targetTime = new Date(now);
-                targetTime.setHours(i, 0, 0, 0);
-                
-                const predictedObj = getHistoricalPrediction(targetTime, i);
-                const predictedSpeed = formatSpeed(predictedObj.speed);
-                predictionDataset.push(predictedSpeed);
-
-                if (telemetryData && !telemetryData.predictionOnly && telemetryData.hourly && telemetryData.hourly.wind_speed_10m) {
-                    const liveSpeedRaw = telemetryHourlyValue('wind_speed_10m', targetTime, i);
-                    const liveDirection = telemetryHourlyValue('wind_direction_10m', targetTime, i);
-                    const liveSpeed = typeof liveSpeedRaw === 'number' ? formatSpeed(liveSpeedRaw) : null;
-                    liveDataset.push(liveSpeed);
-
-                    if (typeof liveSpeedRaw === 'number' && typeof liveDirection === 'number') {
-                        let directionDelta = Math.abs(liveDirection - predictedObj.direction) % 360;
-                        if (directionDelta > 180) directionDelta = 360 - directionDelta;
-                        const speedDelta = Math.abs(liveSpeedRaw - predictedObj.speed);
-                        const directionRad = liveDirection * Math.PI / 180;
-
-                        anomalyRows.push({
-                            hour: i,
-                            speed: liveSpeed,
-                            phase: i <= currentHour ? 'backtest' : 'forecast',
-                            speedDelta,
-                            directionDelta,
-                            features: [
-                                liveSpeedRaw / 35,
-                                Math.sin(directionRad),
-                                Math.cos(directionRad),
-                                speedDelta / 18,
-                                directionDelta / 180,
-                                i / 23
-                            ]
-                        });
-                    }
-                } else {
-                    liveDataset.push(null);
-                }
-
-                labels.push(`${i.toString().padStart(2, '0')}:00`);
-            }
-
-            const anomalyScan = detectHourlyWindAnomalies(anomalyRows);
-            for (let i = 0; i < 24; i++) {
-                anomalyDataset.push(anomalyScan.byHour.get(i)?.speed ?? null);
-            }
-
-            const anomalyStatus = document.getElementById('anomaly-scan-status');
-            if (anomalyStatus) {
-                anomalyStatus.textContent = anomalyScan.message;
-                anomalyStatus.className = anomalyScan.count
-                    ? 'text-[10px] font-mono text-rose-400 text-right'
-                    : 'text-[10px] font-mono text-slate-500 text-right';
-            }
-
-            const unitStr = UNIT_LABEL;
-
-            hourlyChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: `ML Prediction (${unitStr})`,
-                            data: predictionDataset,
-                            borderColor: '#fbbf24',
-                            borderWidth: 2,
-                            borderDash: [5, 5],
-                            pointStyle: 'circle',
-                            pointRadius: 0,
-                            fill: false,
-                            tension: 0.4
-                        },
-                        {
-                            label: `Observed / Forecast (${unitStr})`,
-                            data: liveDataset,
-                            borderColor: '#22d3ee',
-                            borderWidth: 3,
-                            backgroundColor: 'rgba(34, 211, 238, 0.05)',
-                            fill: true,
-                            tension: 0.4,
-                            pointStyle: 'line',
-                            pointBackgroundColor: '#22d3ee',
-                            pointHoverRadius: 6
-                        },
-                        {
-                            label: 'Anomaly',
-                            data: anomalyDataset,
-                            borderColor: '#fb7185',
-                            backgroundColor: '#fb7185',
-                            pointBorderColor: '#fecdd3',
-                            pointBorderWidth: 2,
-                            pointRadius: 6,
-                            pointHoverRadius: 8,
-                            pointStyle: 'circle',
-                            showLine: false,
-                            fill: false,
-                            order: 0
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: true,
-                            position: 'top',
-                            labels: {
-                                color: '#94a3b8',
-                                usePointStyle: true,
-                                pointStyle: 'line',
-                                boxWidth: 28,
-                                boxHeight: 6,
-                                font: { family: 'Plus Jakarta Sans', size: 11 }
-                            }
-                        },
-                        tooltip: {
-                            mode: 'index',
-                            intersect: false,
-                            backgroundColor: '#0f172a',
-                            borderColor: '#1e293b',
-                            borderWidth: 1,
-                            titleColor: '#f1f5f9',
-                            bodyColor: '#cbd5e1'
-                        },
-                        currentTimeLine: {
-                            enabled: true,
-                            label: 'Now',
-                            color: 'rgba(226, 232, 240, 0.78)',
-                            glow: 'rgba(34, 211, 238, 0.34)'
-                        }
-                    },
-                    scales: {
-                        x: {
-                            grid: { color: 'rgba(255,255,255,0.03)' },
-                            ticks: { color: '#64748b', font: { family: 'JetBrains Mono', size: 10 } }
-                        },
-                        y: {
-                            grid: { color: 'rgba(255,255,255,0.05)' },
-                            ticks: { color: '#64748b', font: { family: 'JetBrains Mono', size: 10 } }
-                        }
-                    }
-                }
-            });
-        }
-
-        function buildHourlyRainChart() {
-            const canvasEl = document.getElementById('hourlyRainChart');
-            if (!canvasEl) return;
-
-            if (hourlyRainChart) {
-                hourlyRainChart.destroy();
-            }
-
-            const now = new Date();
-            const labels = [];
-            const predictionDataset = [];
-            const liveDataset = [];
-            const anomalyRows = [];
-            const anomalyDataset = [];
-            const currentHour = bengaluruParts(now).hour;
-
-            for (let i = 0; i < 24; i++) {
-                const targetTime = new Date(now);
-                targetTime.setHours(i, 0, 0, 0);
-
-                const predictedObj = getHistoricalPrediction(targetTime, i);
-                const predictedRain = typeof predictedObj.precipitation === 'number' ? Math.round(predictedObj.precipitation * 100) / 100 : null;
-                predictionDataset.push(predictedRain);
-
-                if (telemetryData && !telemetryData.predictionOnly && telemetryData.hourly && Array.isArray(telemetryData.hourly.precipitation)) {
-                    const liveRainRaw = telemetryHourlyValue('precipitation', targetTime, i);
-                    const liveRain = typeof liveRainRaw === 'number' ? Math.round(liveRainRaw * 100) / 100 : null;
-                    liveDataset.push(liveRain);
-
-                    if (typeof liveRainRaw === 'number' && typeof predictedRain === 'number') {
-                        const rainDelta = Math.abs(liveRainRaw - predictedRain);
-                        anomalyRows.push({
-                            hour: i,
-                            rain: liveRain,
-                            phase: i <= currentHour ? 'backtest' : 'forecast',
-                            liveRain: liveRainRaw,
-                            predictedRain,
-                            rainDelta,
-                            features: [
-                                Math.min(liveRainRaw / 12, 1),
-                                Math.min(predictedRain / 12, 1),
-                                Math.min(rainDelta / 8, 1),
-                                i / 23,
-                                liveRainRaw > 0 ? 1 : 0,
-                                predictedRain > 0 ? 1 : 0
-                            ]
-                        });
-                    }
-                } else {
-                    liveDataset.push(null);
-                }
-
-                labels.push(`${i.toString().padStart(2, '0')}:00`);
-            }
-
-            const anomalyScan = detectHourlyRainAnomalies(anomalyRows);
-            for (let i = 0; i < 24; i++) {
-                anomalyDataset.push(anomalyScan.byHour.get(i)?.rain ?? null);
-            }
-
-            const anomalyStatus = document.getElementById('rain-hourly-anomaly-status');
-            if (anomalyStatus) {
-                anomalyStatus.textContent = anomalyScan.message;
-                anomalyStatus.className = anomalyScan.count
-                    ? 'text-[10px] font-mono text-rose-400 text-right'
-                    : 'text-[10px] font-mono text-slate-500 text-right';
-            }
-
-            hourlyRainChart = new Chart(canvasEl.getContext('2d'), {
-                type: 'line',
-                data: {
-                    labels,
-                    datasets: [
-                        {
-                            label: 'ML Predicted Rainfall (mm)',
-                            data: predictionDataset,
-                            borderColor: 'rgba(74, 222, 128, 0.76)',
-                            backgroundColor: 'rgba(74, 222, 128, 0.04)',
-                            pointBackgroundColor: '#4ade80',
-                            pointBorderColor: '#0f172a',
-                            pointBorderWidth: 2,
-                            pointRadius: 3,
-                            pointHoverRadius: 7,
-                            borderWidth: 2,
-                            borderDash: [5, 5],
-                            fill: false,
-                            tension: 0.35,
-                            order: 2
-                        },
-                        {
-                            label: 'Observed / Forecast Rainfall (mm)',
-                            data: liveDataset,
-                            borderColor: '#22c55e',
-                            backgroundColor: 'rgba(34, 197, 94, 0.08)',
-                            pointBackgroundColor: '#22c55e',
-                            pointBorderColor: '#0f172a',
-                            pointBorderWidth: 2,
-                            pointRadius: 4,
-                            pointHoverRadius: 7,
-                            borderWidth: 3,
-                            fill: true,
-                            tension: 0.35,
-                            order: 1
-                        },
-                        {
-                            label: 'Anomaly',
-                            data: anomalyDataset,
-                            borderColor: '#fb7185',
-                            backgroundColor: '#fb7185',
-                            pointBorderColor: '#fecdd3',
-                            pointBorderWidth: 2,
-                            pointRadius: 6,
-                            pointHoverRadius: 8,
-                            pointStyle: 'circle',
-                            showLine: false,
-                            fill: false,
-                            order: 0
-                        }
-                    ]
-                },
-                options: weatherChartOptions('Rainfall mm', true, true)
-            });
-        }
-
-        function buildWeeklyChart() {
-            const ctx = document.getElementById('weeklyChart').getContext('2d');
-            
-            if (weeklyChart) {
-                weeklyChart.destroy();
-            }
-
-            const labels = [];
-            const liveSpeedDataset = [];
-            const predictedSpeedDataset = [];
-            const anomalyDataset = [];
-            const anomalyRows = [];
-            const unitStr = UNIT_LABEL;
-            const now = new Date();
-            const offsets = dayWindowOffsets();
-
-            offsets.forEach((dayOffset, index) => {
-                const targetDate = cityDateWithOffset(dayOffset);
-                
-                labels.push(dayWindowLabel(targetDate, dayOffset));
-                
-                const liveSpeedRaw = telemetryDailyValue('wind_speed_10m_max', targetDate);
-                const predictedDaySpeeds = Array.from({ length: 24 }, (_, hour) => getHistoricalPrediction(targetDate, hour).speed);
-                const predictedSpeed = formatSpeed(Math.max(...predictedDaySpeeds));
-                predictedSpeedDataset.push(predictedSpeed);
-
-                if (typeof liveSpeedRaw === 'number') {
-                    const liveSpeed = formatSpeed(liveSpeedRaw);
-                    liveSpeedDataset.push(liveSpeed);
-                    const speedDelta = Math.abs(liveSpeedRaw - predictedSpeed);
-                    anomalyRows.push({
-                        index,
-                        speed: liveSpeed,
-                        speedDelta,
-                        features: [
-                            liveSpeedRaw / 45,
-                            predictedSpeed / 45,
-                            speedDelta / 18,
-                            (index + 1) / offsets.length
-                        ]
-                    });
-                } else {
-                    liveSpeedDataset.push(null);
-                }
-            });
-
-            const anomalyScan = detectDailyWindAnomalies(anomalyRows);
-            for (let index = 0; index < offsets.length; index++) {
-                anomalyDataset.push(anomalyScan.byIndex.get(index)?.speed ?? null);
-            }
-
-            const anomalyStatus = document.getElementById('weekly-wind-anomaly-status');
-            if (anomalyStatus) {
-                anomalyStatus.textContent = anomalyScan.message;
-                anomalyStatus.className = anomalyScan.count
-                    ? 'text-[10px] font-mono text-rose-400 text-right'
-                    : 'text-[10px] font-mono text-slate-500 text-right';
-            }
-
-            weeklyChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            type: 'line',
-                            label: `ML Predicted Max (${unitStr})`,
-                            data: predictedSpeedDataset,
-                            borderColor: '#fbbf24', 
-                            borderWidth: 2,
-                            borderDash: [5, 5],
-                            pointStyle: 'circle',
-                            pointBackgroundColor: '#fbbf24',
-                            pointHoverRadius: 8,
-                            pointRadius: 7,
-                            pointBorderColor: '#0f172a',
-                            pointBorderWidth: 3,
-                            pointHitRadius: 12,
-                            fill: false,
-                            tension: 0.3,
-                            order: 1 
-                        },
-                        {
-                            type: 'bar',
-                            label: `Observed / Forecast Max (${unitStr})`,
-                            data: liveSpeedDataset,
-                            backgroundColor: 'rgba(34, 211, 238, 0.25)', 
-                            borderColor: '#06b6d4',
-                            hoverBackgroundColor: 'rgba(34, 211, 238, 0.55)',
-                            borderWidth: 1.5,
-                            borderRadius: 6,
-                            pointStyle: 'line',
-                            order: 2 
-                        },
-                        {
-                            type: 'line',
-                            label: 'Anomaly',
-                            data: anomalyDataset,
-                            borderColor: '#fb7185',
-                            backgroundColor: '#fb7185',
-                            pointBorderColor: '#fecdd3',
-                            pointBorderWidth: 2,
-                            pointRadius: 6,
-                            pointHoverRadius: 8,
-                            pointStyle: 'circle',
-                            showLine: false,
-                            fill: false,
-                            order: 0
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { 
-                            display: true,
-                            position: 'top',
-                            labels: {
-                                color: '#94a3b8',
-                                usePointStyle: true,
-                                pointStyle: 'line',
-                                boxWidth: 28,
-                                boxHeight: 6,
-                                font: { family: 'Plus Jakarta Sans', size: 11 }
-                            }
-                        },
-                        tooltip: {
-                            backgroundColor: '#0f172a',
-                            borderColor: '#1e293b',
-                            borderWidth: 1,
-                            titleColor: '#f1f5f9',
-                            bodyColor: '#cbd5e1'
-                        }
-                    },
-                    scales: {
-                        x: {
-                            grid: { display: false },
-                            ticks: { color: '#64748b', font: { family: 'Plus Jakarta Sans', size: 11 } }
-                        },
-                        y: {
-                            grid: { color: 'rgba(255,255,255,0.05)' },
-                            ticks: { color: '#64748b', font: { family: 'JetBrains Mono', size: 10 } }
-                        }
-                    }
-                }
-            });
-        }
-
-        function hasDailyWeatherData() {
-            return Boolean(
-                telemetryData &&
-                telemetryData.daily &&
-                Array.isArray(telemetryData.daily.temperature_2m_max) &&
-                telemetryData.daily.temperature_2m_max.some(value => typeof value === 'number') &&
-                getDailyWeatherPrediction(new Date()).hasWeather
-            );
-        }
-
-        function getDailyWeatherPrediction(dateObj) {
-            const hourly = Array.from({ length: 24 }, (_, hour) => getHistoricalPrediction(dateObj, hour));
-            const temps = hourly.map(item => item.temperature).filter(value => typeof value === 'number');
-            const rain = hourly.map(item => item.precipitation).filter(value => typeof value === 'number');
-            const codes = hourly.map(item => item.weatherCode).filter(value => typeof value === 'number');
-            const confidences = hourly.map(item => item.weatherConfidence).filter(value => typeof value === 'number');
-
-            return {
-                hasWeather: temps.length > 0,
-                maxTemp: temps.length ? Math.round(Math.max(...temps) * 10) / 10 : null,
-                minTemp: temps.length ? Math.round(Math.min(...temps) * 10) / 10 : null,
-                rain: rain.length ? Math.round(rain.reduce((total, value) => total + value, 0) * 10) / 10 : null,
-                weatherCode: codes.length ? dominantWeatherCode(codes) : null,
-                confidence: confidences.length ? Math.round(confidences.reduce((total, value) => total + value, 0) / confidences.length) : null
-            };
-        }
-
-        function detectWeatherParameterAnomalies(rows, options) {
-            const flagged = rows
-                .filter(row => {
-                    if (!row.hasLive || typeof row.live !== 'number' || typeof row.predicted !== 'number') return false;
-                    const delta = Math.abs(row.live - row.predicted);
-                    return delta >= options.deltaThreshold || (
-                        typeof options.heavyLiveThreshold === 'number' &&
-                        row.live >= options.heavyLiveThreshold &&
-                        row.predicted <= (options.lowPredictionThreshold || 0)
-                    );
-                })
-                .map(row => ({ ...row, delta: Math.abs(row.live - row.predicted) }))
-                .sort((a, b) => b.delta - a.delta)
-                .slice(0, 3);
-
-            const byIndex = new Map(flagged.map(row => [row.index, row]));
-            const message = flagged.length
-                ? `${options.label}: ${flagged.length} unusual day${flagged.length > 1 ? "s" : ""}`
-                : rows.some(row => row.hasLive) ? `${options.label}: no unusual days` : `${options.label}: waiting for live forecast`;
-
-            return { byIndex, count: flagged.length, message };
-        }
-
-        function weatherChartOptions(yTitle, beginAtZero = false, showCurrentTimeLine = false) {
-            return {
-                responsive: true,
-                maintainAspectRatio: false,
-                interaction: { mode: 'index', intersect: false },
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top',
-                        labels: {
-                            color: '#94a3b8',
-                            usePointStyle: true,
-                            pointStyle: 'line',
-                            boxWidth: 26,
-                            boxHeight: 6,
-                            font: { family: 'Plus Jakarta Sans', size: 11 }
-                        }
-                    },
-                    tooltip: {
-                        backgroundColor: '#0f172a',
-                        borderColor: '#1e293b',
-                        borderWidth: 1,
-                        titleColor: '#f1f5f9',
-                        bodyColor: '#cbd5e1'
-                    },
-                    currentTimeLine: {
-                        enabled: showCurrentTimeLine,
-                        label: 'Now',
-                        color: 'rgba(226, 232, 240, 0.78)',
-                        glow: 'rgba(34, 197, 94, 0.26)'
-                    }
-                },
-                scales: {
-                    x: {
-                        grid: { display: false },
-                        ticks: { color: '#64748b', font: { family: 'Plus Jakarta Sans', size: 11 } }
-                    },
-                    y: {
-                        beginAtZero,
-                        grid: { color: 'rgba(255,255,255,0.05)' },
-                        title: { display: true, text: yTitle, color: '#64748b', font: { family: 'Plus Jakarta Sans', size: 11 } },
-                        ticks: { color: '#64748b', font: { family: 'JetBrains Mono', size: 10 } }
-                    }
-                }
-            };
-        }
-
-        function renderWeatherParameterChart(config) {
-            const canvasEl = document.getElementById(config.canvasId);
-            const status = document.getElementById(config.statusId);
-            if (!canvasEl) return { count: 0, message: `${config.anomalyLabel}: chart unavailable` };
-
-            if (weatherCharts[config.key]) {
-                weatherCharts[config.key].destroy();
-            }
-
-            const anomalyScan = detectWeatherParameterAnomalies(config.rows, {
-                label: config.anomalyLabel,
-                deltaThreshold: config.deltaThreshold,
-                heavyLiveThreshold: config.heavyLiveThreshold,
-                lowPredictionThreshold: config.lowPredictionThreshold
-            });
-            const anomalyPoints = config.rows.map(row => anomalyScan.byIndex.get(row.index)?.marker ?? null);
-
-            weatherCharts[config.key] = new Chart(canvasEl.getContext('2d'), {
-                type: 'line',
-                data: {
-                    labels: config.labels,
-                    datasets: [
-                        {
-                            type: 'line',
-                            label: config.liveLabel,
-                            data: config.liveData,
-                            borderColor: config.liveColor,
-                            backgroundColor: config.liveFill,
-                            pointBackgroundColor: config.liveColor,
-                            pointBorderColor: '#0f172a',
-                            pointBorderWidth: 2,
-                            pointRadius: 5,
-                            pointHoverRadius: 7,
-                            borderWidth: 3,
-                            fill: config.fillLive,
-                            tension: 0.35,
-                            order: 1
-                        },
-                        {
-                            type: 'line',
-                            label: config.predictedLabel,
-                            data: config.predictedData,
-                            borderColor: config.predictedColor,
-                            backgroundColor: config.predictedFill,
-                            pointBackgroundColor: config.predictedPointColor,
-                            pointBorderColor: '#0f172a',
-                            pointBorderWidth: 2,
-                            pointRadius: 4,
-                            pointHoverRadius: 7,
-                            borderWidth: 2,
-                            borderDash: [5, 5],
-                            fill: false,
-                            tension: 0.35,
-                            order: 2
-                        },
-                        {
-                            type: 'line',
-                            label: 'Anomaly',
-                            data: anomalyPoints,
-                            borderColor: '#fb7185',
-                            backgroundColor: '#fb7185',
-                            pointBorderColor: '#fecdd3',
-                            pointBorderWidth: 2,
-                            pointRadius: 6,
-                            pointHoverRadius: 8,
-                            pointStyle: 'circle',
-                            showLine: false,
-                            fill: false,
-                            order: 0
-                        }
-                    ]
-                },
-                options: weatherChartOptions(config.yTitle, config.beginAtZero)
-            });
-
-            if (status) {
-                status.textContent = anomalyScan.message;
-                status.className = anomalyScan.count
-                    ? 'text-[10px] font-mono text-rose-400 text-right'
-                    : 'text-[10px] font-mono text-slate-500 text-right';
-            }
-
-            return anomalyScan;
-        }
-
-        function buildWeatherChart() {
-            const section = document.getElementById('weather-outlook-section');
-            const status = document.getElementById('weather-graph-status');
-            const strip = document.getElementById('weather-condition-strip');
-            const canvases = ['weatherMaxChart', 'weatherMinChart', 'weatherRainChart'];
-            
-            if (!section) return;
-
-            if (!hasDailyWeatherData()) {
-                section.classList.add('hidden');
-                Object.values(weatherCharts).forEach(chart => chart.destroy());
-                weatherCharts = {};
-                if (status) status.textContent = 'Temperature graph: waiting for live forecast';
-                canvases.forEach(id => {
-                    const canvasStatus = document.getElementById(id.replace('Chart', '-status').replace('weatherMax', 'weather-max').replace('weatherMin', 'weather-min').replace('weatherRain', 'weather-rain'));
-                    if (canvasStatus) canvasStatus.textContent = 'Waiting for live forecast';
-                });
-                return;
-            }
-
-            section.classList.remove('hidden');
-
-            const daily = telemetryData.daily;
-            const labels = [];
-            const predictedMaxTemps = [];
-            const predictedMinTemps = [];
-            const predictedRain = [];
-            const liveMaxTemps = [];
-            const liveMinTemps = [];
-            const liveRain = [];
-            const maxRows = [];
-            const minRows = [];
-            const rainRows = [];
-            const offsets = dayWindowOffsets();
-
-            offsets.forEach((dayOffset, index) => {
-                const date = cityDateWithOffset(dayOffset);
-                labels.push(dayWindowLabel(date, dayOffset));
-
-                const predicted = getDailyWeatherPrediction(date);
-                const liveMaxRaw = telemetryDailyValue('temperature_2m_max', date);
-                const liveMinRaw = telemetryDailyValue('temperature_2m_min', date);
-                const liveRainRaw = telemetryDailyValue('precipitation_sum', date);
-                const liveMax = typeof liveMaxRaw === 'number' ? Math.round(liveMaxRaw * 10) / 10 : null;
-                const liveMin = typeof liveMinRaw === 'number' ? Math.round(liveMinRaw * 10) / 10 : null;
-                const liveRainSum = typeof liveRainRaw === 'number' ? Math.round(liveRainRaw * 10) / 10 : null;
-                const hasLiveMax = !telemetryData.predictionOnly && typeof liveMax === 'number' && typeof predicted.maxTemp === 'number';
-                const hasLiveMin = !telemetryData.predictionOnly && typeof liveMin === 'number' && typeof predicted.minTemp === 'number';
-                const hasLiveRain = !telemetryData.predictionOnly && typeof liveRainSum === 'number' && typeof predicted.rain === 'number';
-
-                predictedMaxTemps.push(predicted.maxTemp);
-                predictedMinTemps.push(predicted.minTemp);
-                predictedRain.push(predicted.rain);
-                liveMaxTemps.push(telemetryData.predictionOnly ? null : liveMax);
-                liveMinTemps.push(telemetryData.predictionOnly ? null : liveMin);
-                liveRain.push(telemetryData.predictionOnly ? null : liveRainSum);
-
-                maxRows.push({ index, hasLive: hasLiveMax, live: liveMax, predicted: predicted.maxTemp, marker: liveMax });
-                minRows.push({ index, hasLive: hasLiveMin, live: liveMin, predicted: predicted.minTemp, marker: liveMin });
-                rainRows.push({ index, hasLive: hasLiveRain, live: liveRainSum, predicted: predicted.rain, marker: liveRainSum });
-            });
-
-            if (strip) {
-                strip.innerHTML = labels.map((label, index) => {
-                    const date = cityDateWithOffset(offsets[index]);
-                    const predicted = getDailyWeatherPrediction(date);
-                    const code = telemetryDailyValue('weather_code', date) ?? predicted.weatherCode;
-                    const rainChance = telemetryDailyValue('precipitation_probability_max', date);
-                    const rainValue = liveRain[index] ?? predicted.rain;
-                    const rainText = typeof rainChance === 'number'
-                        ? `${rainChance}% rain`
-                        : typeof rainValue === 'number' ? `${rainValue} mm`
-                        : '--';
-                    const confidenceText = typeof predicted.confidence === 'number' ? `${predicted.confidence}% ML` : 'ML pending';
-                    return `
-                        <div class="rounded-xl border border-slate-800/80 bg-slate-950/55 px-3 py-2 min-w-0">
-                            <div class="flex items-center justify-between gap-2">
-                                <span class="font-mono text-[10px] text-slate-500">${label}</span>
-                                <i class="${weatherIconForCode(code)} text-slate-300"></i>
-                            </div>
-                            <div class="mt-1 truncate text-[11px] font-semibold text-slate-200">${interpretWeatherCode(code)}</div>
-                            <div class="mt-0.5 flex items-center justify-between gap-2 text-[10px] font-mono">
-                                <span class="text-cyan-400">${rainText}</span>
-                                <span class="text-slate-500">${confidenceText}</span>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-            }
-
-            const maxScan = renderWeatherParameterChart({
-                key: 'max',
-                canvasId: 'weatherMaxChart',
-                statusId: 'weather-max-status',
-                labels,
-                rows: maxRows,
-                liveData: liveMaxTemps,
-                predictedData: predictedMaxTemps,
-                liveLabel: 'Live Max (°C)',
-                predictedLabel: 'ML Predicted Max (°C)',
-                yTitle: 'Max temperature °C',
-                anomalyLabel: 'Max temp anomaly',
-                deltaThreshold: 4.5,
-                liveColor: '#fbbf24',
-                liveFill: 'rgba(251, 191, 36, 0.08)',
-                predictedColor: 'rgba(251, 191, 36, 0.72)',
-                predictedFill: 'rgba(251, 191, 36, 0.03)',
-                predictedPointColor: '#fbbf24',
-                fillLive: true,
-                beginAtZero: false
-            });
-
-            const minScan = renderWeatherParameterChart({
-                key: 'min',
-                canvasId: 'weatherMinChart',
-                statusId: 'weather-min-status',
-                labels,
-                rows: minRows,
-                liveData: liveMinTemps,
-                predictedData: predictedMinTemps,
-                liveLabel: 'Live Min (°C)',
-                predictedLabel: 'ML Predicted Min (°C)',
-                yTitle: 'Min temperature °C',
-                anomalyLabel: 'Min temp anomaly',
-                deltaThreshold: 4.5,
-                liveColor: '#22d3ee',
-                liveFill: 'rgba(34, 211, 238, 0.06)',
-                predictedColor: 'rgba(34, 211, 238, 0.70)',
-                predictedFill: 'rgba(34, 211, 238, 0.03)',
-                predictedPointColor: '#22d3ee',
-                fillLive: false,
-                beginAtZero: false
-            });
-
-            const rainScan = renderWeatherParameterChart({
-                key: 'rain',
-                canvasId: 'weatherRainChart',
-                statusId: 'weather-rain-status',
-                labels,
-                rows: rainRows,
-                liveData: liveRain,
-                predictedData: predictedRain,
-                liveLabel: 'Live Rainfall (mm)',
-                predictedLabel: 'ML Predicted Rainfall (mm)',
-                yTitle: 'Rainfall mm',
-                anomalyLabel: 'Rainfall anomaly',
-                deltaThreshold: 8,
-                heavyLiveThreshold: 12,
-                lowPredictionThreshold: 1.5,
-                liveColor: '#22c55e',
-                liveFill: 'rgba(34, 197, 94, 0.08)',
-                predictedColor: 'rgba(74, 222, 128, 0.74)',
-                predictedFill: 'rgba(74, 222, 128, 0.05)',
-                predictedPointColor: '#4ade80',
-                fillLive: false,
-                beginAtZero: true
-            });
-
-            const totalAnomalies = maxScan.count + minScan.count;
-            if (status) {
-                status.textContent = totalAnomalies
-                    ? `Temperature anomaly: ${totalAnomalies} parameter alert${totalAnomalies > 1 ? 's' : ''} across 7 days`
-                    : 'Temperature anomaly: no unusual parameter days';
-                status.className = totalAnomalies
-                    ? 'text-[10px] font-mono text-rose-400 text-right'
-                    : 'text-[10px] font-mono text-slate-500 text-right';
-            }
-        }
-
-        // Initialize Month Cards Grid (Continuous display of core metrics)
-        function buildMonthlyCards() {
-            const gridContainer = document.getElementById('monthly-grid');
-            if (!gridContainer) return;
-            
-            gridContainer.innerHTML = '';
-
-            MONTHLY_PROFILES.forEach((profile) => {
-                const card = document.createElement('div');
-                card.id = `mon-card-${profile.id}`;
-                card.onclick = () => focusMonth(profile.id);
-
-                const degMatch = profile.direction.match(/\((\d+)°\)/);
-                const deg = degMatch ? parseInt(degMatch[1]) : 0;
-
-                card.className = "cursor-pointer bg-slate-900/40 p-4 rounded-2xl border border-slate-800/80 hover:border-slate-700/80 hover:bg-slate-900/60 transition-all duration-300 flex flex-col justify-between min-h-[175px]";
-                
-                card.innerHTML = `
-                    <div>
-                        <span class="text-[9px] font-mono text-slate-500 uppercase tracking-wider block">${profile.subtitle.split(' ')[0]} Season</span>
-                        <h4 class="text-sm font-extrabold text-white mt-0.5">${profile.name}</h4>
-                    </div>
-
-                    <div class="w-full flex items-center justify-center py-3">
-                        <div class="w-14 h-14 rounded-full bg-slate-950 border border-slate-700/70 flex items-center justify-center text-slate-300 shadow-[0_0_14px_rgba(148,163,184,0.08)] transition-transform duration-300 hover:scale-110" title="Dominant direction: ${profile.direction}">
-                            <i class="fa-solid fa-arrow-up text-xl" style="transform: rotate(${deg}deg)"></i>
-                        </div>
-                    </div>
-                    
-                    <div class="flex items-center justify-between">
-                        <div class="flex flex-col">
-                            <span class="text-[9px] text-slate-500 font-mono">AVG SPEED</span>
-                            <span class="text-xs font-black font-mono text-cyan-400">${profile.speed}</span>
-                        </div>
-                    </div>
-                    
-                    <div class="border-t border-slate-800/30 pt-2 flex items-center justify-between text-[10px] text-slate-400 font-mono">
-                        <span>Dir: ${profile.direction.split(' ')[0]}</span>
-                        <span class="text-slate-600">${profile.direction}</span>
+        function livePanel(state, prediction) {
+            if (!liveToggle.checked) {
+                return `
+                    <div class="rounded-2xl border border-slate-800/70 bg-slate-950/45 p-3 text-xs text-slate-500">
+                        Live data is off. Toggle it when you want real-time comparison.
                     </div>
                 `;
-                gridContainer.appendChild(card);
-            });
-
-            focusMonth(selectedMonthId);
-        }
-
-        // Handle focused climatology expansion display
-        function focusMonth(monthId) {
-            selectedMonthId = monthId;
-            const profile = MONTHLY_PROFILES[monthId];
-
-            MONTHLY_PROFILES.forEach((p) => {
-                const card = document.getElementById(`mon-card-${p.id}`);
-                if (card) {
-                    if (p.id === monthId) {
-                        card.className = "cursor-pointer bg-slate-950 p-4 rounded-2xl border-2 border-cyan-500/80 shadow-[0_0_15px_rgba(6,182,212,0.15)] transition-all duration-300 flex flex-col justify-between min-h-[175px]";
-                    } else {
-                        card.className = "cursor-pointer bg-slate-900/40 p-4 rounded-2xl border border-slate-800/80 hover:border-slate-700/80 hover:bg-slate-900/60 transition-all duration-300 flex flex-col justify-between min-h-[175px]";
-                    }
-                }
-            });
-
-            document.getElementById('mon-subtitle').innerText = profile.subtitle;
-            document.getElementById('mon-title').innerText = profile.name;
-            document.getElementById('mon-tagline').innerText = `"${profile.tagline}"`;
-            document.getElementById('mon-speed').innerText = profile.speed;
-            document.getElementById('mon-direction').innerText = profile.direction;
-            document.getElementById('mon-moisture').innerText = profile.confidence;
-            document.getElementById('mon-activity').innerText = profile.activity;
-            document.getElementById('mon-analysis').innerText = profile.analysis;
-
-            const degMatch = profile.direction.match(/\((\d+)°\)/);
-            const deg = degMatch ? parseInt(degMatch[1]) : 0;
-            const detailArrow = document.getElementById('mon-detail-arrow');
-            if (detailArrow) {
-                detailArrow.style.transform = `rotate(${deg}deg)`;
-            }
-        }
-
-        function dominantWeatherCode(codes) {
-            const priority = [99, 96, 95, 82, 81, 80, 65, 63, 61, 55, 53, 51, 48, 45, 3, 2, 1, 0];
-            const counts = codes.reduce((map, code) => {
-                map.set(code, (map.get(code) || 0) + 1);
-                return map;
-            }, new Map());
-            return priority.find(code => counts.has(code)) ?? codes[0] ?? null;
-        }
-
-        function interpretWeatherCode(code) {
-            const codes = {
-                0: "Clear Sky",
-                1: "Mainly Clear",
-                2: "Partly Cloudy",
-                3: "Overcast",
-                45: "Fog",
-                48: "Depositing Rime Fog",
-                51: "Light Drizzle",
-                53: "Moderate Drizzle",
-                55: "Dense Drizzle",
-                61: "Slight Rain",
-                63: "Moderate Rain",
-                65: "Heavy Rain",
-                71: "Slight Snow",
-                73: "Moderate Snow",
-                75: "Heavy Snow",
-                77: "Snow Grains",
-                80: "Slight Showers",
-                81: "Moderate Showers",
-                82: "Violent Showers",
-                95: "Thunderstorm",
-                96: "Thunderstorm + Slight Hail",
-                99: "Thunderstorm + Heavy Hail"
-            };
-            return codes[code] || "Stable Atmosphere";
-        }
-
-        function weatherIconForCode(code) {
-            if (code === 0) return "fa-solid fa-sun text-amber-300";
-            if ([1, 2].includes(code)) return "fa-solid fa-cloud-sun text-amber-200";
-            if (code === 3) return "fa-solid fa-cloud text-slate-300";
-            if ([45, 48].includes(code)) return "fa-solid fa-smog text-slate-400";
-            if ([51, 53, 55, 61, 63, 65, 80, 81, 82].includes(code)) return "fa-solid fa-cloud-rain text-cyan-300";
-            if ([95, 96, 99].includes(code)) return "fa-solid fa-cloud-bolt text-amber-300";
-            return "fa-solid fa-cloud-sun text-slate-300";
-        }
-
-        function initTickingClock() {
-            setInterval(() => {
-                const now = new Date();
-                const clockStr = now.toLocaleTimeString('en-US', { hour12: false, timeZone: BENGALURU_LOCATION.timezone || 'Asia/Kolkata' });
-                document.getElementById('live-time').innerText = clockStr;
-                const parts = bengaluruParts(now);
-                const minuteKey = `${parts.hour}:${parts.minute}`;
-                if (minuteKey !== lastCurrentTimeLineMinute) {
-                    lastCurrentTimeLineMinute = minuteKey;
-                    hourlyChart?.update('none');
-                    hourlyRainChart?.update('none');
-                }
-            }, 1000);
-        }
-
-        // -------------------------------------------------------------------------
-        // Multi-city runtime loading
-        // -------------------------------------------------------------------------
-        function setCityLoading(message, isError = false) {
-            const status = document.getElementById('city-load-status');
-            if (!status) return;
-            const dotClass = isError ? 'bg-rose-400' : 'bg-cyan-400 animate-pulse';
-            status.className = `text-xs font-mono min-h-[1.5rem] flex items-center gap-2 ${isError ? 'text-rose-400' : 'text-slate-500'}`;
-            status.innerHTML = `<span class="w-1.5 h-1.5 rounded-full ${dotClass}"></span>${message}`;
-        }
-
-        function updateCityLabels() {
-            const shortName = BENGALURU_LOCATION.short || 'City';
-            const fullName = BENGALURU_LOCATION.name || shortName;
-            const timezone = BENGALURU_LOCATION.timezone || 'Asia/Kolkata';
-            const setText = (id, value) => {
-                const el = document.getElementById(id);
-                if (el) el.textContent = value;
-            };
-            setText('dashboard-city-title', shortName);
-            setText('active-city-badge', shortName);
-            setText('active-timezone-label', timezone);
-            setText('monthly-city-name', shortName);
-            document.querySelectorAll('.active-city-inline').forEach(el => { el.textContent = shortName; });
-            document.title = `Windfyre // ${shortName} Wind Dashboard`;
-            showToast('City Loaded', `${fullName} prediction payload is ready.`);
-        }
-
-        function resetCityRuntimeState() {
-            telemetryData = null;
-            if (hourlyChart) { hourlyChart.destroy(); hourlyChart = null; }
-            if (hourlyRainChart) { hourlyRainChart.destroy(); hourlyRainChart = null; }
-            if (weeklyChart) { weeklyChart.destroy(); weeklyChart = null; }
-            Object.values(weatherCharts).forEach(chart => chart.destroy());
-            weatherCharts = {};
-            selectedMonthId = new Date().getMonth();
-        }
-
-        function applyCityPayload(cityMeta, cityPayload) {
-            activeCityMeta = cityMeta;
-            payload = cityPayload;
-            BENGALURU_LOCATION = {
-                lat: payload.latitude,
-                lon: payload.longitude,
-                name: payload.location,
-                short: payload.displayName || cityMeta.displayName || payload.location || 'City',
-                timezone: payload.timezone || cityMeta.timezone || 'Asia/Kolkata'
-            };
-            records = Array.isArray(payload.records) ? payload.records : [];
-            recordMap = new Map(records.map((record, index) => [record.t, { record, index }]));
-            bengaluruFormatter = buildDateFormatter(BENGALURU_LOCATION.timezone);
-            resetCityRuntimeState();
-            rebuildMonthlyProfiles();
-            updateCityLabels();
-            buildMonthlyCards();
-            telemetryData = buildPredictionOnlyData();
-            updateUI();
-            syncLiveTelemetry();
-        }
-
-        function populateCitySelector() {
-            const select = document.getElementById('city-select');
-            if (!select || !cityIndex) return;
-            select.innerHTML = cityIndex.cities.map(city => {
-                const label = `${city.displayName || city.slug} · ${city.location || ''}`.trim();
-                return `<option value="${city.slug}">${label}</option>`;
-            }).join('');
-            select.onchange = () => loadCityBySlug(select.value);
-        }
-
-        async function loadCityIndex() {
-            setCityLoading('Loading city index');
-            const response = await fetch(indexUrl, { cache: 'no-cache' });
-            if (!response.ok) throw new Error(`City index failed: HTTP ${response.status}`);
-            cityIndex = await response.json();
-            if (!cityIndex || !Array.isArray(cityIndex.cities) || !cityIndex.cities.length) {
-                throw new Error('City index has no cities');
-            }
-            populateCitySelector();
-            await loadCityBySlug(cityIndex.cities[0].slug);
-        }
-
-        async function loadCityBySlug(slug) {
-            const city = cityIndex?.cities?.find(item => item.slug === slug);
-            if (!city) throw new Error(`Unknown city slug: ${slug}`);
-            const select = document.getElementById('city-select');
-            if (select) select.value = slug;
-            setCityLoading(`Loading ${city.displayName || city.slug} prediction`);
-
-            let cityPayload = cityPayloadCache.get(slug);
-            if (!cityPayload) {
-                const cityUrl = new URL(city.predictionPath, appBaseUrl).href;
-                const response = await fetch(cityUrl, { cache: 'no-cache' });
-                if (!response.ok) throw new Error(`${city.displayName || slug} payload failed: HTTP ${response.status}`);
-                cityPayload = await response.json();
-                cityPayloadCache.set(slug, cityPayload);
             }
 
-            applyCityPayload(city, cityPayload);
-            setCityLoading(`${city.displayName || city.slug} loaded · ${records.length.toLocaleString('en-IN')} hourly predictions`);
+            if (state.liveStatus === 'queued') {
+                return `
+                    <div class="rounded-2xl border border-slate-800/70 bg-slate-950/45 p-3 text-xs font-mono text-slate-500">
+                        Live sync queued...
+                    </div>
+                `;
+            }
+
+            if (state.liveStatus === 'loading') {
+                return `
+                    <div class="rounded-2xl border border-cyan-900/40 bg-cyan-950/10 p-3 text-xs font-mono text-cyan-300">
+                        <i class="fa-solid fa-circle-notch animate-spin mr-2"></i>Fetching live data...
+                    </div>
+                `;
+            }
+
+            if (state.liveStatus === 'error') {
+                return `
+                    <div class="rounded-2xl border border-rose-900/50 bg-rose-950/15 p-3 text-xs text-rose-300">
+                        Live sync failed. Prediction remains available.
+                    </div>
+                `;
+            }
+
+            if (!state.live) {
+                return `
+                    <div class="rounded-2xl border border-slate-800/70 bg-slate-950/45 p-3 text-xs font-mono text-slate-500">
+                        Waiting for live sync...
+                    </div>
+                `;
+            }
+
+            const score = predictionAccuracy(state, prediction);
+            return `
+                <div class="rounded-2xl border border-cyan-900/40 bg-cyan-950/10 p-3">
+                    <div class="flex items-center justify-between gap-3">
+                        <span class="text-[10px] font-mono uppercase tracking-widest text-cyan-300">Live now</span>
+                        <span class="text-[10px] font-mono ${matchClasses(score)}">${score === null ? '--' : `${score}% prediction accuracy`}</span>
+                    </div>
+                    <div class="mt-2 grid grid-cols-2 gap-3 text-sm">
+                        <div>
+                            <div class="text-slate-500 text-[10px] uppercase font-mono">Wind</div>
+                            <div class="font-bold text-cyan-100">${formatSpeed(state.live.wind_speed_10m)} · ${getCardinal(state.live.wind_direction_10m)}</div>
+                        </div>
+                        <div>
+                            <div class="text-slate-500 text-[10px] uppercase font-mono">Weather</div>
+                            <div class="font-bold text-slate-100">${formatTemp(state.live.temperature_2m)} · ${weatherText(state.live.weather_code)}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
         }
 
-        // -------------------------------------------------------------------------
-        // Application Startup Initialization
-        // -------------------------------------------------------------------------
-        window.onload = async function() {
-            resizeCanvas();
-            window.addEventListener('resize', () => {
-                resizeCanvas();
-                syncNeedleLengthsForCurrentState();
-                initParticles();
-            });
+        function cityCard(state) {
+            const prediction = predictionForCity(state);
+            const records24 = predicted24Hours(state);
+            const rainTotal = predictedRainTotal(state);
+            const liveWindSeries = liveToggle.checked ? liveHourlySeries(state, 'wind_speed_10m') : Array(24).fill(null);
+            const liveRainSeries = liveToggle.checked ? liveHourlySeries(state, 'precipitation') : Array(24).fill(null);
+            const accuracy = predictionAccuracy(state, prediction);
+            const predictedArrowRotation = Number.isFinite(prediction.direction) ? prediction.direction : 0;
+            const liveArrowRotation = state.live && Number.isFinite(state.live.wind_direction_10m) ? state.live.wind_direction_10m : null;
+            const monthly = state.payload.monthly?.[localParts(new Date(), state.payload.timezone).month - 1];
 
-            initParticles();
-            animateParticles();
-            initTickingClock();
-            initScrubberControls();
+            return `
+                <article class="rounded-3xl border border-slate-800/75 bg-slate-900/45 p-5 backdrop-blur-md shadow-2xl shadow-black/10 flex flex-col gap-4">
+                    <div class="flex items-start justify-between gap-4">
+                        <div class="min-w-0">
+                            <h3 class="text-lg font-extrabold text-white truncate">${escapeHtml(state.meta.displayName || state.payload.displayName || state.meta.slug)}</h3>
+                            <p class="text-xs text-slate-500 truncate">${escapeHtml(state.meta.location || state.payload.location)}</p>
+                        </div>
+                        <div class="flex items-start gap-2 shrink-0">
+                            <div class="space-y-1 text-center">
+                                <div class="h-14 w-14 rounded-full border border-amber-700/45 bg-slate-950/70 flex items-center justify-center relative">
+                                    <i class="fa-solid fa-arrow-up text-amber-300 transition-transform absolute" title="Predicted direction" style="transform: rotate(${predictedArrowRotation}deg)"></i>
+                                </div>
+                                <div class="text-[8px] font-mono uppercase tracking-wider text-amber-300/80">Pred</div>
+                            </div>
+                            ${liveToggle.checked && liveArrowRotation !== null ? `
+                                <div class="space-y-1 text-center">
+                                    <div class="h-14 w-14 rounded-full border border-cyan-600/50 bg-cyan-950/10 flex items-center justify-center relative shadow-[0_0_18px_rgba(34,211,238,0.08)]">
+                                        <i class="fa-solid fa-arrow-up text-cyan-300 transition-transform absolute drop-shadow-[0_0_8px_rgba(34,211,238,0.65)]" title="Live direction" style="transform: rotate(${liveArrowRotation}deg)"></i>
+                                    </div>
+                                    <div class="text-[8px] font-mono uppercase tracking-wider text-cyan-300/80">Live</div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
 
+                    <div class="rounded-2xl border border-slate-800/60 bg-slate-950/45 p-3 flex items-center justify-between gap-3">
+                        <div>
+                            <span class="text-[10px] font-mono uppercase tracking-widest text-slate-500">Prediction accuracy</span>
+                            <div class="mt-1 text-lg font-black ${matchClasses(accuracy)}">${accuracy === null ? '--' : `${accuracy}%`}</div>
+                        </div>
+                        <div class="text-[10px] font-mono text-slate-500 text-right">
+                            ${liveToggle.checked ? 'Wind + weather live match' : 'Enable live data to calculate'}
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="rounded-2xl border border-amber-900/30 bg-amber-950/10 p-3">
+                            <span class="text-[10px] font-mono uppercase tracking-widest text-amber-300">Predicted wind</span>
+                            <div class="mt-1 text-xl font-black text-white">${formatSpeed(prediction.speed)}</div>
+                            <div class="text-xs text-slate-400">${Math.round(prediction.direction)}° ${getCardinal(prediction.direction)} · ${prediction.confidence}% trust</div>
+                        </div>
+                        <div class="rounded-2xl border border-emerald-900/30 bg-emerald-950/10 p-3">
+                            <span class="text-[10px] font-mono uppercase tracking-widest text-emerald-300">Predicted weather</span>
+                            <div class="mt-1 flex items-center gap-2 text-xl font-black text-white">
+                                <i class="${weatherIcon(prediction.weatherCode)} text-base"></i>
+                                ${formatTemp(prediction.temperature)}
+                            </div>
+                            <div class="text-xs text-slate-400">${weatherText(prediction.weatherCode)} · ${Math.round(rainTotal * 10) / 10} mm next 24h</div>
+                        </div>
+                    </div>
+
+                    <div class="rounded-2xl border border-slate-800/60 bg-slate-950/45 p-3 space-y-2">
+                        <div class="flex items-center justify-between gap-3 mb-2">
+                            <span class="text-[10px] font-mono uppercase tracking-widest text-slate-500">24h wind</span>
+                            <span class="text-[10px] font-mono text-slate-500">${monthly ? `${monthly.sector} month` : 'Monthly profile'}</span>
+                        </div>
+                        ${miniChart(records24, 's', liveWindSeries, {
+                            label: '24-hour wind speed',
+                            predictedColor: '#fbbf24',
+                            liveColor: '#22d3ee',
+                            minMax: 1
+                        })}
+                        <div class="flex items-center gap-3 text-[10px] font-mono text-slate-500">
+                            <span><span class="inline-block h-1.5 w-5 rounded-full bg-amber-400 mr-1"></span>Predicted</span>
+                            <span><span class="inline-block h-1.5 w-5 rounded-full bg-cyan-400 mr-1"></span>Live</span>
+                        </div>
+                    </div>
+
+                    <div class="rounded-2xl border border-slate-800/60 bg-slate-950/45 p-3 space-y-2">
+                        <div class="flex items-center justify-between gap-3 mb-2">
+                            <span class="text-[10px] font-mono uppercase tracking-widest text-slate-500">24h rain</span>
+                            <span class="text-[10px] font-mono text-emerald-300">${Math.round(rainTotal * 10) / 10} mm predicted</span>
+                        </div>
+                        ${miniChart(records24, 'pr', liveRainSeries, {
+                            label: '24-hour rainfall',
+                            predictedColor: '#34d399',
+                            liveColor: '#22d3ee',
+                            minMax: 0.25
+                        })}
+                    </div>
+
+                    ${livePanel(state, prediction)}
+
+                    <a href="${detailUrlForCity(state)}" class="inline-flex items-center justify-center gap-2 rounded-2xl border border-cyan-900/45 bg-cyan-950/20 px-4 py-3 text-sm font-bold text-cyan-200 hover:bg-cyan-950/35 hover:border-cyan-700/70 transition-all">
+                        View details
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </a>
+                </article>
+            `;
+        }
+
+        function renderSummary() {
+            document.getElementById('summary-cities').textContent = cityStates.length || '--';
+
+            if (!cityStates.length) return;
+            const liveReadyStates = cityStates.filter(state => state.liveStatus === 'ready' && state.live);
+            const windSource = liveToggle.checked && liveReadyStates.length ? liveReadyStates : cityStates;
+            const rainSource = liveToggle.checked && liveReadyStates.length ? liveReadyStates : cityStates;
+            const windValue = state => liveToggle.checked && state.live
+                ? state.live.wind_speed_10m
+                : predictionForCity(state).speed;
+            const rainValue = state => liveToggle.checked && state.liveHourly
+                ? (liveRainTotal(state) ?? predictedRainTotal(state))
+                : predictedRainTotal(state);
+            const rankedByWind = [...windSource].sort((a, b) => windValue(b) - windValue(a));
+            const rankedByRain = [...rainSource].sort((a, b) => rainValue(b) - rainValue(a));
+
+            const windTop = rankedByWind[0];
+            const rainTop = rankedByRain[0];
+            const liveSuffix = liveToggle.checked && liveReadyStates.length ? ' live' : ' predicted';
+            document.getElementById('summary-windiest').innerHTML = `
+                <span class="block truncate">${escapeHtml(windTop.meta.displayName)}</span>
+                <span class="mt-1 block text-xl font-black text-cyan-300">${formatSpeed(windValue(windTop))}</span>
+                <span class="block text-[10px] font-mono uppercase tracking-wider text-slate-500">${liveSuffix.trim()}</span>
+            `;
+            document.getElementById('summary-wettest').innerHTML = `
+                <span class="block truncate">${escapeHtml(rainTop.meta.displayName)}</span>
+                <span class="mt-1 block text-xl font-black text-emerald-300">${Math.round(rainValue(rainTop) * 10) / 10} mm</span>
+                <span class="block text-[10px] font-mono uppercase tracking-wider text-slate-500">${liveSuffix.trim()}</span>
+            `;
+
+            const readyCount = cityStates.filter(state => state.liveStatus === 'ready').length;
+            const loadingCount = cityStates.filter(state => state.liveStatus === 'loading').length;
+            document.getElementById('summary-live').textContent = liveToggle.checked
+                ? `${readyCount}/${cityStates.length} live${loadingCount ? ' syncing' : ''}`
+                : 'Off';
+        }
+
+        function render() {
+            renderSummary();
+            cityGrid.innerHTML = cityStates.length
+                ? cityStates.map(cityCard).join('')
+                : '<div class="rounded-3xl border border-slate-800/70 bg-slate-900/40 p-6 text-slate-400">Loading city prediction cards...</div>';
+        }
+
+        async function loadCityPayload(city) {
+            if (cityPayloadCache.has(city.slug)) return cityPayloadCache.get(city.slug);
+            const cityUrl = new URL(city.predictionPath, appBaseUrl).href;
+            const response = await fetch(cityUrl, { cache: 'no-cache' });
+            if (!response.ok) throw new Error(`${city.displayName || city.slug} failed: HTTP ${response.status}`);
+            const payload = await response.json();
+            payload._recordMap = new Map(payload.records.map(record => [record.t, record]));
+            cityPayloadCache.set(city.slug, payload);
+            return payload;
+        }
+
+        async function loadPredictions() {
+            loadStatus.textContent = 'Loading city index...';
+            const indexResponse = await fetch(indexUrl, { cache: 'no-cache' });
+            if (!indexResponse.ok) throw new Error(`City index failed: HTTP ${indexResponse.status}`);
+            cityIndex = await indexResponse.json();
+            if (!cityIndex?.cities?.length) throw new Error('No cities found in city-index.json');
+
+            loadStatus.textContent = `Loading ${cityIndex.cities.length} prediction files...`;
+            const payloads = await Promise.all(cityIndex.cities.map(async city => ({
+                meta: city,
+                payload: await loadCityPayload(city),
+                live: null,
+                liveHourly: null,
+                liveStatus: 'off'
+            })));
+
+            cityStates.splice(0, cityStates.length, ...payloads);
+            loadStatus.textContent = `${cityStates.length} cities loaded · generated ${cityIndex.generated_at || 'unknown'}`;
+            render();
+        }
+
+        async function fetchLiveForCity(state, runId) {
+            state.liveStatus = 'loading';
+            render();
+
+            const url = `${state.payload.forecastUrl}?latitude=${state.payload.latitude}&longitude=${state.payload.longitude}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m&hourly=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m,precipitation&past_days=1&forecast_days=1&timezone=${encodeURIComponent(state.payload.timezone)}`;
             try {
-                await loadCityIndex();
+                const response = await fetch(url, { cache: 'no-cache' });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const data = await response.json();
+                if (runId !== liveRunId || !liveToggle.checked) return;
+                state.live = data.current;
+                state.liveHourly = data.hourly || null;
+                state.liveStatus = 'ready';
             } catch (error) {
-                console.error(error);
-                setCityLoading(error.message || 'Unable to load city predictions', true);
-                document.getElementById('offline-banner')?.classList.remove('hidden');
-                showToast('Prediction Load Failed', error.message || 'Unable to load city prediction files.');
+                if (runId !== liveRunId || !liveToggle.checked) return;
+                state.liveStatus = 'error';
+                state.liveError = error.message;
             }
-        };
+
+            render();
+        }
+
+        async function runLiveSync() {
+            const runId = ++liveRunId;
+            cityStates.forEach(state => {
+                state.live = null;
+                state.liveHourly = null;
+                state.liveStatus = 'queued';
+            });
+            liveToggleNote.textContent = 'syncing slowly...';
+            render();
+
+            for (const state of cityStates) {
+                if (runId !== liveRunId || !liveToggle.checked) break;
+                await fetchLiveForCity(state, runId);
+                if (runId !== liveRunId || !liveToggle.checked) break;
+                await delay(2000);
+            }
+
+            if (runId === liveRunId && liveToggle.checked) {
+                liveToggleNote.textContent = 'live sync complete';
+            }
+            renderSummary();
+        }
+
+        function disableLiveSync() {
+            liveRunId++;
+            cityStates.forEach(state => {
+                state.live = null;
+                state.liveHourly = null;
+                state.liveStatus = 'off';
+            });
+            liveToggleNote.textContent = '2s delay per city';
+            render();
+        }
+
+        liveToggle.addEventListener('change', () => {
+            if (liveToggle.checked) {
+                runLiveSync();
+            } else {
+                disableLiveSync();
+            }
+        });
+
+        loadPredictions().catch(error => {
+            console.error(error);
+            loadStatus.textContent = error.message;
+            cityGrid.innerHTML = `<div class="rounded-3xl border border-rose-900/60 bg-rose-950/20 p-6 text-rose-200">${escapeHtml(error.message)}</div>`;
+        });
     </script>
 </body>
 </html>
