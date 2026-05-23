@@ -41,15 +41,6 @@
             background: #172033;
             border-radius: 4px;
         }
-        .live-toggle:checked + .toggle-track {
-            background: rgba(8, 145, 178, 0.55);
-            border-color: rgba(34, 211, 238, 0.6);
-        }
-        .live-toggle:checked + .toggle-track .toggle-thumb {
-            transform: translateX(1.55rem);
-            background: #67e8f9;
-            box-shadow: 0 0 18px rgba(103, 232, 249, 0.42);
-        }
         .mini-chart svg {
             overflow: visible;
         }
@@ -72,10 +63,6 @@
                 </div>
                 <span class="hidden sm:inline-block px-2 py-0.5 text-[10px] uppercase font-mono font-bold tracking-widest bg-cyan-950 text-cyan-400 border border-cyan-800/60 rounded">v2.5</span>
             </a>
-            <nav class="flex items-center gap-2 text-xs font-mono uppercase tracking-wider">
-                <a href="index.html" class="rounded-lg border border-cyan-800/50 bg-cyan-950/40 px-3 py-2 text-cyan-300">Dashboard</a>
-                <a href="weather-details.html" class="rounded-lg border border-slate-800 bg-slate-900/80 px-3 py-2 text-slate-400 hover:text-slate-100 hover:border-slate-700 transition-all">Details</a>
-            </nav>
         </div>
     </header>
 
@@ -88,21 +75,15 @@
                 </div>
                 <div>
                     <h1 class="text-3xl sm:text-5xl font-black tracking-tight text-white">Prediction Dashboard</h1>
-                    <p class="mt-2 max-w-2xl text-sm text-slate-400">All city prediction files are loaded from this repo. Live Open-Meteo data is optional and fetched slowly when enabled.</p>
+                    <p class="mt-2 max-w-2xl text-sm text-slate-400">All city prediction files load from this repo, then one bulk Open-Meteo request overlays live weather for every city.</p>
                 </div>
             </div>
 
             <div class="flex flex-col sm:flex-row gap-3 sm:items-center">
-                <label class="flex items-center gap-3 rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 cursor-pointer select-none">
-                    <input id="live-toggle" type="checkbox" class="live-toggle sr-only">
-                    <span class="toggle-track relative h-7 w-14 rounded-full border border-slate-700 bg-slate-900 transition-colors">
-                        <span class="toggle-thumb absolute left-1 top-1 h-5 w-5 rounded-full bg-slate-500 transition-all"></span>
-                    </span>
-                    <span class="flex flex-col">
-                        <span class="text-sm font-bold text-white">Load live data</span>
-                        <span id="live-toggle-note" class="text-[10px] font-mono uppercase tracking-wider text-slate-500">2s delay per city</span>
-                    </span>
-                </label>
+                <div class="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3">
+                    <span class="text-[10px] font-mono uppercase tracking-wider text-slate-500">Live sync</span>
+                    <div id="live-sync-note" class="mt-1 text-sm font-bold text-cyan-200">Preparing bulk weather request...</div>
+                </div>
             </div>
         </section>
 
@@ -149,11 +130,9 @@
         const appBaseUrl = new URL('.', window.location.href);
         const indexUrl = new URL('predictions/city-index.json', appBaseUrl).href;
         const cityGrid = document.getElementById('city-grid');
-        const liveToggle = document.getElementById('live-toggle');
-        const liveToggleNote = document.getElementById('live-toggle-note');
+        const liveSyncNote = document.getElementById('live-sync-note');
         const cityPayloadCache = new Map();
         const cityStates = [];
-        const DEFAULT_LIVE_SLUGS = new Set(['bengaluru-nandini-layout', 'nagamangala']);
         let cityIndex = null;
         let liveRunId = 0;
 
@@ -165,10 +144,6 @@
                 '"': '&quot;',
                 "'": '&#39;'
             }[char]));
-        }
-
-        function delay(ms) {
-            return new Promise(resolve => setTimeout(resolve, ms));
         }
 
         function formatSpeed(value) {
@@ -391,8 +366,6 @@
         }
 
         function livePanel(state, prediction) {
-            if (!state.live && state.liveStatus === 'off') return '';
-
             if (state.liveStatus === 'queued') {
                 return `
                     <div class="rounded-2xl border border-slate-800/70 bg-slate-950/45 p-3 text-xs font-mono text-slate-500">
@@ -416,6 +389,8 @@
                     </div>
                 `;
             }
+
+            if (!state.live && state.liveStatus === 'off') return '';
 
             if (!state.live) {
                 return `
@@ -582,9 +557,9 @@
 
             const readyCount = cityStates.filter(state => state.liveStatus === 'ready').length;
             const loadingCount = cityStates.filter(state => state.liveStatus === 'loading').length;
-            document.getElementById('summary-live').textContent = liveToggle.checked
-                ? `${readyCount}/${cityStates.length} live${loadingCount ? ' syncing' : ''}`
-                : (readyCount || loadingCount ? `${readyCount} default live${loadingCount ? ' syncing' : ''}` : 'Off');
+            document.getElementById('summary-live').textContent = readyCount
+                ? `${readyCount}/${cityStates.length} live`
+                : (loadingCount ? 'Syncing...' : 'Queued');
         }
 
         function render() {
@@ -621,100 +596,55 @@
 
             cityStates.splice(0, cityStates.length, ...payloads);
             render();
-            syncDefaultLiveCities();
+            fetchBulkLiveData();
         }
 
-        async function fetchLiveForCity(state, runId, options = {}) {
-            const requireToggle = options.requireToggle !== false;
-            state.liveStatus = 'loading';
+        async function fetchBulkLiveData() {
+            const runId = ++liveRunId;
+            if (!cityStates.length) return;
+
+            cityStates.forEach(state => {
+                state.live = null;
+                state.liveHourly = null;
+                state.liveStatus = 'loading';
+            });
+            if (liveSyncNote) liveSyncNote.textContent = `Syncing ${cityStates.length} cities in one request...`;
             render();
 
-            const url = `${state.payload.forecastUrl}?latitude=${state.payload.latitude}&longitude=${state.payload.longitude}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m&hourly=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m,precipitation&past_days=1&forecast_days=1&timezone=${encodeURIComponent(state.payload.timezone)}`;
+            const latitudes = cityStates.map(state => state.payload.latitude).join(',');
+            const longitudes = cityStates.map(state => state.payload.longitude).join(',');
+            const forecastUrl = cityStates[0]?.payload?.forecastUrl || 'https://api.open-meteo.com/v1/forecast';
+            const url = `${forecastUrl}?latitude=${latitudes}&longitude=${longitudes}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m&hourly=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m,precipitation&past_days=1&forecast_days=1&timezone=auto`;
+
             try {
                 const response = await fetch(url, { cache: 'no-cache' });
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 const data = await response.json();
-                if (runId !== liveRunId || (requireToggle && !liveToggle.checked)) return;
-                state.live = data.current;
-                state.liveHourly = data.hourly || null;
-                state.liveStatus = 'ready';
+                if (runId !== liveRunId) return;
+
+                const results = Array.isArray(data) ? data : [data];
+                cityStates.forEach((state, index) => {
+                    const result = results[index];
+                    if (result?.current) {
+                        state.live = result.current;
+                        state.liveHourly = result.hourly || null;
+                        state.liveStatus = 'ready';
+                    } else {
+                        state.liveStatus = 'error';
+                        state.liveError = 'Missing live payload';
+                    }
+                });
+                if (liveSyncNote) liveSyncNote.textContent = `${cityStates.filter(state => state.liveStatus === 'ready').length}/${cityStates.length} cities live`;
             } catch (error) {
-                if (runId !== liveRunId || (requireToggle && !liveToggle.checked)) return;
-                state.liveStatus = 'error';
-                state.liveError = error.message;
+                if (runId !== liveRunId) return;
+                cityStates.forEach(state => {
+                    state.liveStatus = 'error';
+                    state.liveError = error.message;
+                });
+                if (liveSyncNote) liveSyncNote.textContent = 'Live sync failed';
             }
-
             render();
         }
-
-        async function syncDefaultLiveCities() {
-            const runId = ++liveRunId;
-            const defaultStates = cityStates.filter(state => DEFAULT_LIVE_SLUGS.has(state.meta.slug));
-            if (!defaultStates.length) return;
-
-            defaultStates.forEach(state => {
-                state.live = null;
-                state.liveHourly = null;
-                state.liveStatus = 'queued';
-            });
-            liveToggleNote.textContent = 'Bengaluru + Nagamangala live';
-            render();
-
-            for (const state of defaultStates) {
-                if (runId !== liveRunId || liveToggle.checked) break;
-                await fetchLiveForCity(state, runId, { requireToggle: false });
-                if (runId !== liveRunId || liveToggle.checked) break;
-                await delay(2000);
-            }
-
-            if (runId === liveRunId && !liveToggle.checked) {
-                liveToggleNote.textContent = '2 default cities live';
-            }
-            renderSummary();
-        }
-
-        async function runLiveSync() {
-            const runId = ++liveRunId;
-            cityStates.forEach(state => {
-                state.live = null;
-                state.liveHourly = null;
-                state.liveStatus = 'queued';
-            });
-            liveToggleNote.textContent = 'syncing slowly...';
-            render();
-
-            for (const state of cityStates) {
-                if (runId !== liveRunId || !liveToggle.checked) break;
-                await fetchLiveForCity(state, runId);
-                if (runId !== liveRunId || !liveToggle.checked) break;
-                await delay(2000);
-            }
-
-            if (runId === liveRunId && liveToggle.checked) {
-                liveToggleNote.textContent = 'live sync complete';
-            }
-            renderSummary();
-        }
-
-        function disableLiveSync() {
-            liveRunId++;
-            cityStates.forEach(state => {
-                state.live = null;
-                state.liveHourly = null;
-                state.liveStatus = 'off';
-            });
-            liveToggleNote.textContent = '2s delay per city';
-            render();
-            syncDefaultLiveCities();
-        }
-
-        liveToggle.addEventListener('change', () => {
-            if (liveToggle.checked) {
-                runLiveSync();
-            } else {
-                disableLiveSync();
-            }
-        });
 
         loadPredictions().catch(error => {
             console.error(error);
