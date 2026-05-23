@@ -473,13 +473,8 @@
                     </div>
 
                     <div class="rounded-2xl border border-slate-800/60 bg-slate-950/45 p-3 flex items-center justify-between gap-3">
-                        <div>
-                            <span class="text-[10px] font-mono uppercase tracking-widest text-slate-500">Prediction accuracy</span>
-                            <div class="mt-1 text-lg font-black ${matchClasses(accuracy)}">${accuracy === null ? '--' : `${accuracy}%`}</div>
-                        </div>
-                        <div class="text-[10px] font-mono text-slate-500 text-right">
-                            ${liveToggle.checked ? 'Wind + weather live match' : 'Enable live data to calculate'}
-                        </div>
+                        <span class="text-[10px] font-mono uppercase tracking-widest text-slate-500">Prediction accuracy</span>
+                        <span class="text-lg font-black ${matchClasses(accuracy)}">${accuracy === null ? '--' : `${accuracy}%`}</span>
                     </div>
 
                     <div class="grid grid-cols-2 gap-3">
@@ -498,34 +493,38 @@
                         </div>
                     </div>
 
-                    <div class="rounded-2xl border border-slate-800/60 bg-slate-950/45 p-3 space-y-2">
-                        <div class="flex items-center justify-between gap-3 mb-2">
-                            <span class="text-[10px] font-mono uppercase tracking-widest text-slate-500">24h wind</span>
-                            <span class="text-[10px] font-mono text-slate-500">${monthly ? `${monthly.sector} month` : 'Monthly profile'}</span>
+                    <div class="rounded-2xl border border-slate-800/60 bg-slate-950/45 p-3 space-y-3">
+                        <div class="flex items-center justify-between gap-3">
+                            <span class="text-[10px] font-mono uppercase tracking-widest text-slate-500">24h tracks</span>
+                            <div class="flex items-center gap-3 text-[10px] font-mono text-slate-500">
+                                <span><span class="inline-block h-1.5 w-5 rounded-full bg-amber-400 mr-1"></span>Predicted</span>
+                                <span><span class="inline-block h-1.5 w-5 rounded-full bg-cyan-400 mr-1"></span>Live</span>
+                            </div>
                         </div>
-                        ${miniChart(records24, 's', liveWindSeries, {
-                            label: '24-hour wind speed',
-                            predictedColor: '#fbbf24',
-                            liveColor: '#22d3ee',
-                            minMax: 1
-                        })}
-                        <div class="flex items-center gap-3 text-[10px] font-mono text-slate-500">
-                            <span><span class="inline-block h-1.5 w-5 rounded-full bg-amber-400 mr-1"></span>Predicted</span>
-                            <span><span class="inline-block h-1.5 w-5 rounded-full bg-cyan-400 mr-1"></span>Live</span>
+                        <div>
+                            <div class="flex items-center justify-between gap-3 mb-2">
+                                <span class="text-[10px] font-mono uppercase tracking-widest text-slate-500">Wind</span>
+                                <span class="text-[10px] font-mono text-slate-500">${monthly ? `${monthly.sector} month` : 'Monthly profile'}</span>
+                            </div>
+                            ${miniChart(records24, 's', liveWindSeries, {
+                                label: '24-hour wind speed',
+                                predictedColor: '#fbbf24',
+                                liveColor: '#22d3ee',
+                                minMax: 1
+                            })}
                         </div>
-                    </div>
-
-                    <div class="rounded-2xl border border-slate-800/60 bg-slate-950/45 p-3 space-y-2">
-                        <div class="flex items-center justify-between gap-3 mb-2">
-                            <span class="text-[10px] font-mono uppercase tracking-widest text-slate-500">24h rain</span>
-                            <span class="text-[10px] font-mono text-emerald-300">${Math.round(rainTotal * 10) / 10} mm predicted</span>
+                        <div>
+                            <div class="flex items-center justify-between gap-3 mb-2">
+                                <span class="text-[10px] font-mono uppercase tracking-widest text-slate-500">Rain</span>
+                                <span class="text-[10px] font-mono text-slate-500">${Math.round(rainTotal * 10) / 10} mm predicted</span>
+                            </div>
+                            ${miniChart(records24, 'pr', liveRainSeries, {
+                                label: '24-hour rainfall',
+                                predictedColor: '#fbbf24',
+                                liveColor: '#22d3ee',
+                                minMax: 0.25
+                            })}
                         </div>
-                        ${miniChart(records24, 'pr', liveRainSeries, {
-                            label: '24-hour rainfall',
-                            predictedColor: '#34d399',
-                            liveColor: '#22d3ee',
-                            minMax: 0.25
-                        })}
                     </div>
 
                     ${livePanel(state, prediction)}
