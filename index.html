@@ -60,8 +60,27 @@
     </style>
 </head>
 <body class="min-h-screen text-slate-100 selection:bg-cyan-500/30 selection:text-cyan-200">
+    <header class="border-b border-slate-800/60 bg-slate-950/80 backdrop-blur-md sticky top-0 z-40 transition-colors">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <a href="index.html" class="flex items-center gap-3">
+                <div class="relative">
+                    <div class="absolute -inset-1.5 bg-gradient-to-r from-cyan-500 to-amber-500 rounded-lg blur opacity-45 transition duration-1000"></div>
+                    <div class="relative bg-slate-950 px-3 py-1.5 rounded-md border border-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-wind text-cyan-400 animate-pulse"></i>
+                        <span class="font-extrabold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-slate-400 text-sm md:text-base">WINDFYRE</span>
+                    </div>
+                </div>
+                <span class="hidden sm:inline-block px-2 py-0.5 text-[10px] uppercase font-mono font-bold tracking-widest bg-cyan-950 text-cyan-400 border border-cyan-800/60 rounded">v2.5</span>
+            </a>
+            <nav class="flex items-center gap-2 text-xs font-mono uppercase tracking-wider">
+                <a href="index.html" class="rounded-lg border border-cyan-800/50 bg-cyan-950/40 px-3 py-2 text-cyan-300">Dashboard</a>
+                <a href="weather-details.html" class="rounded-lg border border-slate-800 bg-slate-900/80 px-3 py-2 text-slate-400 hover:text-slate-100 hover:border-slate-700 transition-all">Details</a>
+            </nav>
+        </div>
+    </header>
+
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-7">
-        <header class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 border-b border-slate-900 pb-6">
+        <section class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 border-b border-slate-900 pb-6">
             <div class="space-y-3">
                 <div class="inline-flex items-center gap-2 rounded-full border border-cyan-500/20 bg-cyan-950/20 px-3 py-1 text-[11px] font-mono uppercase tracking-[0.22em] text-cyan-300">
                     <i class="fa-solid fa-wind"></i>
@@ -74,9 +93,6 @@
             </div>
 
             <div class="flex flex-col sm:flex-row gap-3 sm:items-center">
-                <div id="load-status" class="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-xs font-mono text-slate-400">
-                    Loading prediction index...
-                </div>
                 <label class="flex items-center gap-3 rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 cursor-pointer select-none">
                     <input id="live-toggle" type="checkbox" class="live-toggle sr-only">
                     <span class="toggle-track relative h-7 w-14 rounded-full border border-slate-700 bg-slate-900 transition-colors">
@@ -88,7 +104,7 @@
                     </span>
                 </label>
             </div>
-        </header>
+        </section>
 
         <section id="summary-grid" class="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <div class="rounded-2xl border border-slate-800/80 bg-slate-900/45 p-4">
@@ -133,11 +149,11 @@
         const appBaseUrl = new URL('.', window.location.href);
         const indexUrl = new URL('predictions/city-index.json', appBaseUrl).href;
         const cityGrid = document.getElementById('city-grid');
-        const loadStatus = document.getElementById('load-status');
         const liveToggle = document.getElementById('live-toggle');
         const liveToggleNote = document.getElementById('live-toggle-note');
         const cityPayloadCache = new Map();
         const cityStates = [];
+        const DEFAULT_LIVE_SLUGS = new Set(['bengaluru-nandini-layout', 'nagamangala']);
         let cityIndex = null;
         let liveRunId = 0;
 
@@ -375,13 +391,7 @@
         }
 
         function livePanel(state, prediction) {
-            if (!liveToggle.checked) {
-                return `
-                    <div class="rounded-2xl border border-slate-800/70 bg-slate-950/45 p-3 text-xs text-slate-500">
-                        Live data is off. Toggle it when you want real-time comparison.
-                    </div>
-                `;
-            }
+            if (!state.live && state.liveStatus === 'off') return '';
 
             if (state.liveStatus === 'queued') {
                 return `
@@ -440,12 +450,18 @@
             const prediction = predictionForCity(state);
             const records24 = predicted24Hours(state);
             const rainTotal = predictedRainTotal(state);
-            const liveWindSeries = liveToggle.checked ? liveHourlySeries(state, 'wind_speed_10m') : Array(24).fill(null);
-            const liveRainSeries = liveToggle.checked ? liveHourlySeries(state, 'precipitation') : Array(24).fill(null);
+            const liveWindSeries = state.liveHourly ? liveHourlySeries(state, 'wind_speed_10m') : Array(24).fill(null);
+            const liveRainSeries = state.liveHourly ? liveHourlySeries(state, 'precipitation') : Array(24).fill(null);
             const accuracy = predictionAccuracy(state, prediction);
             const predictedArrowRotation = Number.isFinite(prediction.direction) ? prediction.direction : 0;
             const liveArrowRotation = state.live && Number.isFinite(state.live.wind_direction_10m) ? state.live.wind_direction_10m : null;
             const monthly = state.payload.monthly?.[localParts(new Date(), state.payload.timezone).month - 1];
+            const accuracyPanel = state.live ? `
+                <div class="rounded-2xl border border-slate-800/60 bg-slate-950/45 p-3 flex items-center justify-between gap-3">
+                    <span class="text-[10px] font-mono uppercase tracking-widest text-slate-500">Prediction accuracy</span>
+                    <span class="text-lg font-black ${matchClasses(accuracy)}">${accuracy === null ? '--' : `${accuracy}%`}</span>
+                </div>
+            ` : '';
 
             return `
                 <article class="rounded-3xl border border-slate-800/75 bg-slate-900/45 p-5 backdrop-blur-md shadow-2xl shadow-black/10 flex flex-col gap-4">
@@ -461,7 +477,7 @@
                                 </div>
                                 <div class="text-[8px] font-mono uppercase tracking-wider text-amber-300/80">Pred</div>
                             </div>
-                            ${liveToggle.checked && liveArrowRotation !== null ? `
+                            ${liveArrowRotation !== null ? `
                                 <div class="space-y-1 text-center">
                                     <div class="h-14 w-14 rounded-full border border-cyan-600/50 bg-cyan-950/10 flex items-center justify-center relative shadow-[0_0_18px_rgba(34,211,238,0.08)]">
                                         <i class="fa-solid fa-arrow-up text-cyan-300 transition-transform absolute drop-shadow-[0_0_8px_rgba(34,211,238,0.65)]" title="Live direction" style="transform: rotate(${liveArrowRotation}deg)"></i>
@@ -472,10 +488,7 @@
                         </div>
                     </div>
 
-                    <div class="rounded-2xl border border-slate-800/60 bg-slate-950/45 p-3 flex items-center justify-between gap-3">
-                        <span class="text-[10px] font-mono uppercase tracking-widest text-slate-500">Prediction accuracy</span>
-                        <span class="text-lg font-black ${matchClasses(accuracy)}">${accuracy === null ? '--' : `${accuracy}%`}</span>
-                    </div>
+                    ${accuracyPanel}
 
                     <div class="grid grid-cols-2 gap-3">
                         <div class="rounded-2xl border border-amber-900/30 bg-amber-950/10 p-3">
@@ -542,12 +555,12 @@
 
             if (!cityStates.length) return;
             const liveReadyStates = cityStates.filter(state => state.liveStatus === 'ready' && state.live);
-            const windSource = liveToggle.checked && liveReadyStates.length ? liveReadyStates : cityStates;
-            const rainSource = liveToggle.checked && liveReadyStates.length ? liveReadyStates : cityStates;
-            const windValue = state => liveToggle.checked && state.live
+            const windSource = liveReadyStates.length ? liveReadyStates : cityStates;
+            const rainSource = liveReadyStates.length ? liveReadyStates : cityStates;
+            const windValue = state => state.live
                 ? state.live.wind_speed_10m
                 : predictionForCity(state).speed;
-            const rainValue = state => liveToggle.checked && state.liveHourly
+            const rainValue = state => state.liveHourly
                 ? (liveRainTotal(state) ?? predictedRainTotal(state))
                 : predictedRainTotal(state);
             const rankedByWind = [...windSource].sort((a, b) => windValue(b) - windValue(a));
@@ -555,7 +568,7 @@
 
             const windTop = rankedByWind[0];
             const rainTop = rankedByRain[0];
-            const liveSuffix = liveToggle.checked && liveReadyStates.length ? ' live' : ' predicted';
+            const liveSuffix = liveReadyStates.length ? ' live' : ' predicted';
             document.getElementById('summary-windiest').innerHTML = `
                 <span class="block truncate">${escapeHtml(windTop.meta.displayName)}</span>
                 <span class="mt-1 block text-xl font-black text-cyan-300">${formatSpeed(windValue(windTop))}</span>
@@ -571,7 +584,7 @@
             const loadingCount = cityStates.filter(state => state.liveStatus === 'loading').length;
             document.getElementById('summary-live').textContent = liveToggle.checked
                 ? `${readyCount}/${cityStates.length} live${loadingCount ? ' syncing' : ''}`
-                : 'Off';
+                : (readyCount || loadingCount ? `${readyCount} default live${loadingCount ? ' syncing' : ''}` : 'Off');
         }
 
         function render() {
@@ -593,13 +606,11 @@
         }
 
         async function loadPredictions() {
-            loadStatus.textContent = 'Loading city index...';
             const indexResponse = await fetch(indexUrl, { cache: 'no-cache' });
             if (!indexResponse.ok) throw new Error(`City index failed: HTTP ${indexResponse.status}`);
             cityIndex = await indexResponse.json();
             if (!cityIndex?.cities?.length) throw new Error('No cities found in city-index.json');
 
-            loadStatus.textContent = `Loading ${cityIndex.cities.length} prediction files...`;
             const payloads = await Promise.all(cityIndex.cities.map(async city => ({
                 meta: city,
                 payload: await loadCityPayload(city),
@@ -609,11 +620,12 @@
             })));
 
             cityStates.splice(0, cityStates.length, ...payloads);
-            loadStatus.textContent = `${cityStates.length} cities loaded · generated ${cityIndex.generated_at || 'unknown'}`;
             render();
+            syncDefaultLiveCities();
         }
 
-        async function fetchLiveForCity(state, runId) {
+        async function fetchLiveForCity(state, runId, options = {}) {
+            const requireToggle = options.requireToggle !== false;
             state.liveStatus = 'loading';
             render();
 
@@ -622,17 +634,43 @@
                 const response = await fetch(url, { cache: 'no-cache' });
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 const data = await response.json();
-                if (runId !== liveRunId || !liveToggle.checked) return;
+                if (runId !== liveRunId || (requireToggle && !liveToggle.checked)) return;
                 state.live = data.current;
                 state.liveHourly = data.hourly || null;
                 state.liveStatus = 'ready';
             } catch (error) {
-                if (runId !== liveRunId || !liveToggle.checked) return;
+                if (runId !== liveRunId || (requireToggle && !liveToggle.checked)) return;
                 state.liveStatus = 'error';
                 state.liveError = error.message;
             }
 
             render();
+        }
+
+        async function syncDefaultLiveCities() {
+            const runId = ++liveRunId;
+            const defaultStates = cityStates.filter(state => DEFAULT_LIVE_SLUGS.has(state.meta.slug));
+            if (!defaultStates.length) return;
+
+            defaultStates.forEach(state => {
+                state.live = null;
+                state.liveHourly = null;
+                state.liveStatus = 'queued';
+            });
+            liveToggleNote.textContent = 'Bengaluru + Nagamangala live';
+            render();
+
+            for (const state of defaultStates) {
+                if (runId !== liveRunId || liveToggle.checked) break;
+                await fetchLiveForCity(state, runId, { requireToggle: false });
+                if (runId !== liveRunId || liveToggle.checked) break;
+                await delay(2000);
+            }
+
+            if (runId === liveRunId && !liveToggle.checked) {
+                liveToggleNote.textContent = '2 default cities live';
+            }
+            renderSummary();
         }
 
         async function runLiveSync() {
@@ -667,6 +705,7 @@
             });
             liveToggleNote.textContent = '2s delay per city';
             render();
+            syncDefaultLiveCities();
         }
 
         liveToggle.addEventListener('change', () => {
@@ -679,7 +718,6 @@
 
         loadPredictions().catch(error => {
             console.error(error);
-            loadStatus.textContent = error.message;
             cityGrid.innerHTML = `<div class="rounded-3xl border border-rose-900/60 bg-rose-950/20 p-6 text-rose-200">${escapeHtml(error.message)}</div>`;
         });
     </script>
