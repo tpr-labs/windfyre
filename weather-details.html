@@ -725,7 +725,7 @@
                     </h4>
                     <span class="text-[10px] font-mono uppercase tracking-wider text-slate-500">Travel friendly picks</span>
                 </div>
-                <div id="visit-places-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3"></div>
+                <div id="visit-places-grid" class="overflow-hidden rounded-2xl border border-slate-800/80 bg-slate-950/35"></div>
             </div>
             <div class="mt-4 pt-4 border-t border-slate-800/70 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs">
                 <p id="visit-reason" class="text-slate-400 leading-relaxed">--</p>
@@ -2973,18 +2973,21 @@
             if (placesGrid) {
                 const places = Array.isArray(recommendation.places_to_visit) ? recommendation.places_to_visit.slice(0, 10) : [];
                 placesGrid.innerHTML = places.length ? places.map((place, index) => `
-                    <div class="rounded-2xl border border-slate-800/80 bg-slate-950/45 p-4">
-                        <div class="flex items-start justify-between gap-3">
-                            <div>
-                                <span class="text-[10px] font-mono uppercase tracking-wider text-slate-500">${escapeHtml(place.type || `Pick ${index + 1}`)}</span>
-                                <div class="mt-1 font-black text-white">${escapeHtml(place.name || 'Place to visit')}</div>
+                    <div class="grid grid-cols-[44px_1fr] md:grid-cols-[52px_1.15fr_0.85fr] gap-3 md:gap-5 items-start px-4 py-3 border-b border-slate-800/70 last:border-b-0 hover:bg-slate-900/40 transition-colors">
+                        <div class="h-8 w-8 rounded-full border border-cyan-500/30 bg-cyan-950/30 text-cyan-400 grid place-items-center text-xs font-mono font-bold">${String(index + 1).padStart(2, '0')}</div>
+                        <div>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="font-bold text-white">${escapeHtml(place.name || 'Place to visit')}</span>
+                                <span class="md:hidden px-2 py-0.5 rounded-full border border-slate-800/80 bg-slate-900/60 text-[10px] font-mono uppercase tracking-wider text-slate-400">${escapeHtml(place.type || `Pick ${index + 1}`)}</span>
                             </div>
-                            <span class="h-8 w-8 rounded-full border border-cyan-500/30 bg-cyan-950/30 text-cyan-400 grid place-items-center text-xs font-mono">${index + 1}</span>
+                            <p class="text-xs text-slate-400 mt-1 leading-relaxed">${escapeHtml(place.note || 'Check live weather before finalizing the day plan.')}</p>
                         </div>
-                        <p class="text-xs text-slate-400 mt-3 leading-relaxed">${escapeHtml(place.note || 'Check live weather before finalizing the day plan.')}</p>
+                        <div class="hidden md:flex justify-end">
+                            <span class="px-2 py-1 rounded-full border border-slate-800/80 bg-slate-900/60 text-[10px] font-mono uppercase tracking-wider text-slate-400">${escapeHtml(place.type || `Pick ${index + 1}`)}</span>
+                        </div>
                     </div>
                 `).join('') : `
-                    <div class="sm:col-span-2 lg:col-span-5 rounded-2xl border border-slate-800/80 bg-slate-950/45 p-4 text-sm text-slate-400">
+                    <div class="p-4 text-sm text-slate-400">
                         No sourced place list is stored for this city yet. The visit window above is still derived from the local weather prediction.
                     </div>
                 `;
