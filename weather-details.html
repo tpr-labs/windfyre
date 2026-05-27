@@ -90,6 +90,105 @@
         .needle-wobble-gust {
             animation: compassNeedleLive 1.55s ease-in-out infinite;
         }
+        body.light-mode {
+            background-color: #f8fafc !important;
+            background-image:
+                radial-gradient(circle at 20% 0%, rgba(8, 145, 178, 0.10), transparent 28%),
+                radial-gradient(circle at 80% 10%, rgba(245, 158, 11, 0.10), transparent 26%),
+                linear-gradient(180deg, #f8fafc 0%, #eef6fb 52%, #f8fafc 100%) !important;
+            color: #0f172a;
+        }
+        body.light-mode [class*="bg-slate-950"],
+        body.light-mode [class*="bg-slate-900"] {
+            background-color: rgba(255, 255, 255, 0.86) !important;
+        }
+        body.light-mode [class*="bg-slate-800"] {
+            background-color: #e2e8f0 !important;
+        }
+        body.light-mode [class*="border-slate-"] {
+            border-color: rgba(148, 163, 184, 0.38) !important;
+        }
+        body.light-mode .text-white,
+        body.light-mode [class*="text-slate-100"],
+        body.light-mode [class*="text-slate-200"],
+        body.light-mode [class*="text-slate-300"] {
+            color: #0f172a !important;
+        }
+        body.light-mode [class*="text-slate-400"],
+        body.light-mode [class*="text-slate-500"],
+        body.light-mode [class*="text-slate-600"],
+        body.light-mode [class*="text-slate-700"] {
+            color: #64748b !important;
+        }
+        body.light-mode [class*="text-cyan-100"],
+        body.light-mode [class*="text-cyan-200"],
+        body.light-mode [class*="text-cyan-300"],
+        body.light-mode [class*="text-cyan-400"],
+        body.light-mode [class*="text-cyan-500"] {
+            color: #0369a1 !important;
+        }
+        body.light-mode [class*="text-amber-200"],
+        body.light-mode [class*="text-amber-300"],
+        body.light-mode [class*="text-amber-400"],
+        body.light-mode [class*="text-amber-500"] {
+            color: #b45309 !important;
+        }
+        body.light-mode [class*="text-emerald-300"],
+        body.light-mode [class*="text-emerald-400"],
+        body.light-mode [class*="text-lime-300"],
+        body.light-mode [class*="text-lime-400"] {
+            color: #047857 !important;
+        }
+        body.light-mode [class*="text-rose-200"],
+        body.light-mode [class*="text-rose-300"],
+        body.light-mode [class*="text-rose-400"] {
+            color: #be123c !important;
+        }
+        body.light-mode [class*="bg-cyan-950"],
+        body.light-mode [class*="bg-amber-950"],
+        body.light-mode [class*="bg-emerald-950"],
+        body.light-mode [class*="bg-rose-950"] {
+            background-color: rgba(255, 255, 255, 0.72) !important;
+        }
+        body.light-mode [class*="border-cyan-"],
+        body.light-mode [class*="border-amber-"],
+        body.light-mode [class*="border-emerald-"],
+        body.light-mode [class*="border-rose-"] {
+            border-color: rgba(14, 116, 144, 0.28) !important;
+        }
+        body.light-mode button,
+        body.light-mode a,
+        body.light-mode select,
+        body.light-mode input {
+            color: #0f172a;
+        }
+        body.light-mode .windfyre-brand {
+            background-image: linear-gradient(90deg, #0f172a, #334155, #64748b) !important;
+        }
+        body.light-mode canvas {
+            opacity: 0.78;
+        }
+        .visit-outlook-good {
+            background: linear-gradient(135deg, rgba(5, 150, 105, 0.24), rgba(15, 23, 42, 0.72));
+            border-color: rgba(52, 211, 153, 0.45);
+        }
+        .visit-outlook-fair {
+            background: linear-gradient(135deg, rgba(217, 119, 6, 0.2), rgba(15, 23, 42, 0.72));
+            border-color: rgba(251, 191, 36, 0.42);
+        }
+        .visit-outlook-poor {
+            background: linear-gradient(135deg, rgba(225, 29, 72, 0.18), rgba(15, 23, 42, 0.72));
+            border-color: rgba(251, 113, 133, 0.42);
+        }
+        body.light-mode .visit-outlook-good {
+            background: linear-gradient(135deg, rgba(209, 250, 229, 0.92), rgba(255, 255, 255, 0.94)) !important;
+        }
+        body.light-mode .visit-outlook-fair {
+            background: linear-gradient(135deg, rgba(254, 243, 199, 0.95), rgba(255, 255, 255, 0.94)) !important;
+        }
+        body.light-mode .visit-outlook-poor {
+            background: linear-gradient(135deg, rgba(255, 228, 230, 0.94), rgba(255, 255, 255, 0.94)) !important;
+        }
     </style>
 </head>
 <body class="text-slate-100 min-h-screen flex flex-col selection:bg-cyan-500/30 selection:text-cyan-400 overflow-x-hidden">
@@ -111,7 +210,7 @@
                     <div class="absolute -inset-1.5 bg-gradient-to-r from-cyan-500 to-amber-500 rounded-lg blur opacity-45 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-tilt"></div>
                     <div class="relative bg-slate-950 px-3 py-1.5 rounded-md border border-slate-800 flex items-center gap-2">
                         <i class="fa-solid fa-wind text-cyan-400 animate-pulse"></i>
-                        <span class="font-extrabold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-slate-400 text-sm md:text-base">WINDFYRE</span>
+                        <span class="windfyre-brand font-extrabold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-slate-400 text-sm md:text-base">WINDFYRE</span>
                     </div>
                 </div>
                 <span class="hidden sm:inline-block px-2 py-0.5 text-[10px] uppercase font-mono font-bold tracking-widest bg-cyan-950 text-cyan-400 border border-cyan-800/60 rounded">v2.5</span>
@@ -119,6 +218,10 @@
 
             <!-- Refresh State -->
             <div class="flex items-center gap-4">
+                <button data-theme-toggle class="p-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-slate-100 transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500" title="Toggle light mode">
+                    <i data-theme-icon class="fa-solid fa-sun text-amber-300"></i>
+                    <span data-theme-label class="sr-only">Light</span>
+                </button>
                 <button onclick="refreshData()" class="p-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-slate-100 transition-all focus:outline-none focus:ring-1 focus:ring-cyan-500" title="Sync live telemetry">
                     <i id="refresh-icon" class="fa-solid fa-arrows-rotate"></i>
                 </button>
@@ -572,6 +675,64 @@
             </div>
         </div>
 
+        <!-- Best Time To Visit Section -->
+        <div id="travel-season-section" class="bg-slate-900/30 border border-slate-800/60 rounded-3xl p-6 backdrop-blur-md">
+            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-5">
+                <div>
+                    <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-map-location-dot text-amber-400"></i>
+                        Best Time To Visit <span id="visit-city-name">Bengaluru</span>
+                    </h3>
+                    <p id="visit-summary" class="text-sm text-slate-400 mt-1">Loading tourism season guidance for the selected city.</p>
+                </div>
+                <span id="visit-source-type" class="px-2 py-0.5 rounded text-[10px] font-mono bg-amber-950/60 text-amber-400 border border-amber-900/40 uppercase font-bold self-start">Loading</span>
+            </div>
+            <div id="visit-status-card" class="visit-outlook-fair rounded-3xl border p-5 mb-5 overflow-hidden relative">
+                <div class="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-cyan-400/10 blur-2xl"></div>
+                <div class="relative grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-4 items-center">
+                    <div>
+                        <span class="text-[10px] font-mono uppercase tracking-[0.22em] text-slate-500">Current Visit Outlook</span>
+                        <h4 id="visit-status-title" class="text-2xl md:text-3xl font-black text-white mt-1">Checking today...</h4>
+                        <p id="visit-status-reason" class="text-sm text-slate-400 mt-2 max-w-3xl">Live weather will be used when available; otherwise this uses the selected city's embedded prediction for the current hour.</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-800/80 bg-slate-950/50 p-4 min-w-[150px]">
+                        <span class="text-[10px] font-mono uppercase tracking-wider text-slate-500">Trip Comfort</span>
+                        <div id="visit-status-score" class="text-4xl font-black font-mono text-amber-400 leading-none mt-2">--%</div>
+                        <div id="visit-status-basis" class="text-[11px] text-slate-400 mt-2">Waiting for weather data</div>
+                    </div>
+                </div>
+            </div>
+            <div id="visit-window-grid" class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4"></div>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 text-sm">
+                <div class="rounded-2xl border border-slate-800/80 bg-slate-950/45 p-4">
+                    <span class="text-[10px] font-mono uppercase tracking-wider text-slate-500">Season / Travel Mood</span>
+                    <div id="visit-famous-season" class="mt-1 font-bold text-white">--</div>
+                </div>
+                <div class="rounded-2xl border border-slate-800/80 bg-slate-950/45 p-4">
+                    <span class="text-[10px] font-mono uppercase tracking-wider text-slate-500">Good For</span>
+                    <div id="visit-trip-type" class="mt-1 font-bold text-white">--</div>
+                </div>
+                <div class="rounded-2xl border border-slate-800/80 bg-slate-950/45 p-4">
+                    <span class="text-[10px] font-mono uppercase tracking-wider text-slate-500">Watch Out</span>
+                    <div id="visit-caution" class="mt-1 font-bold text-white">--</div>
+                </div>
+            </div>
+            <div class="mt-5">
+                <div class="flex items-center justify-between gap-3 mb-3">
+                    <h4 class="text-sm font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-location-dot text-cyan-400"></i>
+                        10 Places To Visit
+                    </h4>
+                    <span class="text-[10px] font-mono uppercase tracking-wider text-slate-500">Travel friendly picks</span>
+                </div>
+                <div id="visit-places-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3"></div>
+            </div>
+            <div class="mt-4 pt-4 border-t border-slate-800/70 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs">
+                <p id="visit-reason" class="text-slate-400 leading-relaxed">--</p>
+                <a id="visit-source-link" href="#" target="_blank" rel="noopener noreferrer" class="hidden shrink-0 text-cyan-400 hover:text-cyan-300 font-mono">View source</a>
+            </div>
+        </div>
+
         <!-- How Reliable Is This Section -->
         <div class="bg-slate-900/45 border border-slate-800/70 rounded-3xl p-6 backdrop-blur-md">
             <h3 class="text-xl font-bold text-white mb-2"><i class="fa-solid fa-circle-question text-cyan-400"></i> Dynamic Model Reliability Check</h3>
@@ -687,10 +848,35 @@
         const shortMonthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
         const appBaseUrl = new URL('.', window.location.href);
         const indexUrl = new URL('predictions/city-index.json', appBaseUrl).href;
+        const travelSeasonsUrl = new URL('predictions/travel-seasons.json', appBaseUrl).href;
         const cityPayloadCache = new Map();
+        let travelSeasonsData = null;
         let cityIndex = null;
         let activeCityMeta = null;
         let bengaluruFormatter = buildDateFormatter(BENGALURU_LOCATION.timezone);
+
+        function applyTheme(mode) {
+            const lightMode = mode === 'light';
+            document.body.classList.toggle('light-mode', lightMode);
+            localStorage.setItem('windfyre-theme', lightMode ? 'light' : 'dark');
+            document.querySelectorAll('[data-theme-icon]').forEach(icon => {
+                icon.className = lightMode ? 'fa-solid fa-moon text-cyan-500' : 'fa-solid fa-sun text-amber-300';
+            });
+            document.querySelectorAll('[data-theme-label]').forEach(label => {
+                label.textContent = lightMode ? 'Dark' : 'Light';
+            });
+        }
+
+        function initThemeToggle() {
+            applyTheme(localStorage.getItem('windfyre-theme') || 'dark');
+            document.querySelectorAll('[data-theme-toggle]').forEach(button => {
+                button.addEventListener('click', () => {
+                    applyTheme(document.body.classList.contains('light-mode') ? 'dark' : 'light');
+                });
+            });
+        }
+
+        initThemeToggle();
 
         const currentTimeLinePlugin = {
             id: 'currentTimeLine',
@@ -1358,6 +1544,7 @@
             document.getElementById('weather-stats-wet').innerText = `${payload.metrics.wet_hour_accuracy_pct}%`;
             document.getElementById('weather-stats-wet').className = `text-lg font-bold mt-1 ${matchScoreClasses(payload.metrics.wet_hour_accuracy_pct)}`;
             document.getElementById('weather-reliability-note').innerText = `${prediction.stamp} embedded weather prediction`;
+            renderTravelSeason();
 
             // Render Charts
             buildHourlyChart();
@@ -2597,6 +2784,226 @@
             showToast('City Loaded', `${fullName} prediction payload is ready.`);
         }
 
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>"']/g, char => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            }[char]));
+        }
+
+        function monthMetrics(monthIndex) {
+            const bucket = monthRecords(monthIndex);
+            const temperatures = bucket.map(record => record.tc).filter(value => typeof value === 'number');
+            const rainfall = bucket.map(record => record.pr).filter(value => typeof value === 'number');
+            const speeds = bucket.map(record => record.s).filter(value => typeof value === 'number');
+            return {
+                monthIndex,
+                temp: average(temperatures),
+                rain: rainfall.reduce((total, value) => total + value, 0),
+                wind: average(speeds)
+            };
+        }
+
+        function derivedVisitRecommendation() {
+            const scored = Array.from({ length: 12 }, (_, index) => {
+                const metric = monthMetrics(index);
+                const tempScore = Math.max(0, 100 - (Math.abs(metric.temp - 23) * 7));
+                const rainScore = Math.max(0, 100 - (metric.rain * 2.5));
+                const windScore = Math.max(0, 100 - (Math.abs(metric.wind - 8) * 4));
+                return {
+                    ...metric,
+                    score: (tempScore * 0.5) + (rainScore * 0.35) + (windScore * 0.15)
+                };
+            }).sort((a, b) => b.score - a.score);
+
+            const best = scored.slice(0, 3).sort((a, b) => a.monthIndex - b.monthIndex);
+            const windows = best.map(item => monthNames[item.monthIndex]);
+            const driest = [...scored].sort((a, b) => a.rain - b.rain)[0];
+            const mild = best[0];
+            return {
+                best_windows: windows,
+                window_details: best.map(item => `${Math.round(item.score)}% comfort score · ${item.temp.toFixed(1)}°C average · ${item.rain.toFixed(1)} mm predicted rain`),
+                famous_season: 'Not sourced; weather-derived comfort window',
+                avoid_or_caution: `Wettest predicted month: ${monthNames[[...scored].sort((a, b) => b.rain - a.rain)[0].monthIndex]}. Check live forecasts before outdoor plans.`,
+                ideal_trip_type: 'Weather-comfort sightseeing based on predicted temperature, rainfall, and wind',
+                reason: `${windows.join(', ')} score best in the embedded 2026 prediction data. Top month averages about ${mild.temp.toFixed(1)}°C with ${mild.rain.toFixed(1)} mm predicted rainfall; driest month is ${monthNames[driest.monthIndex]}.`,
+                places_to_visit: [],
+                source_label: 'Embedded 2026 Windfyre prediction data',
+                source_url: '',
+                source_type: 'weather-derived',
+                confidence: 'derived',
+                last_reviewed: travelSeasonsData?.generated_at || '2026-05-27'
+            };
+        }
+
+        function sourceBadgeClass(sourceType) {
+            if (sourceType === 'official') return 'bg-emerald-950/60 text-emerald-400 border-emerald-900/40';
+            if (sourceType === 'weather-derived') return 'bg-slate-950/60 text-slate-400 border-slate-800/70';
+            return 'bg-amber-950/60 text-amber-400 border-amber-900/40';
+        }
+
+        function visitOutlookClass(score) {
+            if (score >= 78) return 'visit-outlook-good';
+            if (score >= 55) return 'visit-outlook-fair';
+            return 'visit-outlook-poor';
+        }
+
+        function visitOutlookTone(score) {
+            if (score >= 82) return {
+                title: 'Good time to visit today',
+                color: 'text-emerald-400',
+                note: 'Weather is friendly for most sightseeing plans.'
+            };
+            if (score >= 66) return {
+                title: 'Good, with small planning',
+                color: 'text-lime-400',
+                note: 'Use the comfortable hours and keep one flexible indoor option.'
+            };
+            if (score >= 48) return {
+                title: 'Plan carefully today',
+                color: 'text-amber-400',
+                note: 'Outdoor-heavy plans may need timing adjustments.'
+            };
+            return {
+                title: 'Not ideal for outdoor-heavy plans',
+                color: 'text-rose-400',
+                note: 'Keep the plan light, covered, or easy to change.'
+            };
+        }
+
+        function rainyWeatherCode(code) {
+            return [51, 53, 55, 61, 63, 65, 80, 81, 82, 95, 96, 99].includes(Number(code));
+        }
+
+        function currentVisitSnapshot() {
+            const now = new Date();
+            const prediction = getHistoricalPrediction(now, now.getHours());
+            const hasLiveTelemetry = telemetryData && !telemetryData.predictionOnly && telemetryData.current;
+            const current = hasLiveTelemetry ? telemetryData.current : {};
+            const temp = typeof current.temperature_2m === 'number' ? current.temperature_2m : prediction.temperature;
+            const humidity = typeof current.relative_humidity_2m === 'number' ? current.relative_humidity_2m : prediction.humidity;
+            const wind = typeof current.wind_speed_10m === 'number' ? current.wind_speed_10m : prediction.speed;
+            const weatherCode = typeof current.weather_code === 'number' ? current.weather_code : prediction.weatherCode;
+            const liveRain = telemetryHourlyValue('precipitation', now, now.getHours());
+            const rain = typeof liveRain === 'number' ? liveRain : prediction.precipitation;
+
+            const tempScore = typeof temp === 'number' ? Math.max(0, 100 - (Math.abs(temp - 23) * 6.5)) : 65;
+            const humidityScore = typeof humidity === 'number' ? Math.max(0, 100 - Math.max(0, humidity - 68) * 1.15) : 68;
+            const rainScore = typeof rain === 'number' ? Math.max(0, 100 - (rain * 42)) : 70;
+            const windScore = typeof wind === 'number' ? Math.max(0, 100 - Math.max(0, wind - 18) * 5) : 75;
+            const weatherPenalty = rainyWeatherCode(weatherCode) ? 14 : 0;
+            const score = Math.round(Math.max(0, Math.min(100, (tempScore * 0.38) + (rainScore * 0.32) + (humidityScore * 0.18) + (windScore * 0.12) - weatherPenalty)));
+            const tone = visitOutlookTone(score);
+
+            const metrics = [];
+            if (typeof temp === 'number') metrics.push(`${Math.round(temp * 10) / 10}°C`);
+            if (typeof rain === 'number') metrics.push(`${Math.round(rain * 10) / 10} mm rain this hour`);
+            if (typeof humidity === 'number') metrics.push(`${Math.round(humidity)}% humidity`);
+            if (typeof wind === 'number') metrics.push(`${formatSpeed(wind)} ${UNIT_LABEL} wind`);
+            const weatherText = interpretWeatherCode(weatherCode);
+            const basis = hasLiveTelemetry ? 'Live weather + prediction model' : 'Prediction model only';
+
+            return {
+                score,
+                title: tone.title,
+                note: `${tone.note} ${weatherText ? `Current signal: ${weatherText.toLowerCase()}.` : ''}`,
+                color: tone.color,
+                basis,
+                metrics: metrics.join(' · ')
+            };
+        }
+
+        function renderTravelSeason() {
+            const cityName = BENGALURU_LOCATION.short || 'City';
+            const sourced = activeCityMeta?.slug ? travelSeasonsData?.cities?.[activeCityMeta.slug] : null;
+            const recommendation = sourced || derivedVisitRecommendation();
+            const sourceType = recommendation.source_type || 'weather-derived';
+            const setText = (id, value) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = value;
+            };
+
+            setText('visit-city-name', cityName);
+            setText('visit-summary', sourceType === 'weather-derived'
+                ? 'No reliable tourism season source is stored for this city yet, so this recommendation is derived from local predicted weather.'
+                : 'Tourism-season guidance with source attribution, paired with the local weather model context.');
+            setText('visit-famous-season', recommendation.famous_season || 'Weather-derived comfort window');
+            setText('visit-trip-type', recommendation.ideal_trip_type || '--');
+            setText('visit-caution', recommendation.avoid_or_caution || '--');
+            setText('visit-reason', recommendation.reason || '--');
+
+            const snapshot = currentVisitSnapshot();
+            const statusCard = document.getElementById('visit-status-card');
+            if (statusCard) {
+                statusCard.className = `${visitOutlookClass(snapshot.score)} rounded-3xl border p-5 mb-5 overflow-hidden relative`;
+            }
+            setText('visit-status-title', snapshot.title);
+            setText('visit-status-reason', `${snapshot.note} ${snapshot.metrics}`);
+            setText('visit-status-score', `${snapshot.score}%`);
+            setText('visit-status-basis', snapshot.basis);
+            const statusScore = document.getElementById('visit-status-score');
+            if (statusScore) {
+                statusScore.className = `text-4xl font-black font-mono leading-none mt-2 ${snapshot.color}`;
+            }
+
+            const badge = document.getElementById('visit-source-type');
+            if (badge) {
+                badge.textContent = sourceType === 'weather-derived' ? 'Derived from local predicted weather' : `${sourceType} source`;
+                badge.className = `px-2 py-0.5 rounded text-[10px] font-mono border uppercase font-bold self-start ${sourceBadgeClass(sourceType)}`;
+            }
+
+            const grid = document.getElementById('visit-window-grid');
+            if (grid) {
+                const windows = Array.isArray(recommendation.best_windows) && recommendation.best_windows.length
+                    ? recommendation.best_windows
+                    : ['Review monthly forecast'];
+                grid.innerHTML = windows.slice(0, 3).map((windowLabel, index) => `
+                    <div class="rounded-2xl border border-slate-800/80 bg-slate-950/45 p-4">
+                        <span class="text-[10px] font-mono uppercase tracking-wider text-slate-500">Window ${index + 1}</span>
+                        <div class="mt-1 text-lg font-black text-white">${escapeHtml(typeof windowLabel === 'string' ? windowLabel : windowLabel.label)}</div>
+                        <p class="text-xs text-slate-400 mt-2 leading-relaxed">${escapeHtml(recommendation.window_details?.[index] || (typeof windowLabel === 'object' ? windowLabel.note : 'Good candidate window for this city.'))}</p>
+                    </div>
+                `).join('');
+            }
+
+            const placesGrid = document.getElementById('visit-places-grid');
+            if (placesGrid) {
+                const places = Array.isArray(recommendation.places_to_visit) ? recommendation.places_to_visit.slice(0, 10) : [];
+                placesGrid.innerHTML = places.length ? places.map((place, index) => `
+                    <div class="rounded-2xl border border-slate-800/80 bg-slate-950/45 p-4">
+                        <div class="flex items-start justify-between gap-3">
+                            <div>
+                                <span class="text-[10px] font-mono uppercase tracking-wider text-slate-500">${escapeHtml(place.type || `Pick ${index + 1}`)}</span>
+                                <div class="mt-1 font-black text-white">${escapeHtml(place.name || 'Place to visit')}</div>
+                            </div>
+                            <span class="h-8 w-8 rounded-full border border-cyan-500/30 bg-cyan-950/30 text-cyan-400 grid place-items-center text-xs font-mono">${index + 1}</span>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-3 leading-relaxed">${escapeHtml(place.note || 'Check live weather before finalizing the day plan.')}</p>
+                    </div>
+                `).join('') : `
+                    <div class="sm:col-span-2 lg:col-span-5 rounded-2xl border border-slate-800/80 bg-slate-950/45 p-4 text-sm text-slate-400">
+                        No sourced place list is stored for this city yet. The visit window above is still derived from the local weather prediction.
+                    </div>
+                `;
+            }
+
+            const link = document.getElementById('visit-source-link');
+            if (link) {
+                if (recommendation.source_url) {
+                    link.href = recommendation.source_url;
+                    link.textContent = `${recommendation.source_label || 'View source'} · reviewed ${recommendation.last_reviewed || travelSeasonsData?.generated_at || 'recently'}`;
+                    link.classList.remove('hidden');
+                } else {
+                    link.href = '#';
+                    link.textContent = '';
+                    link.classList.add('hidden');
+                }
+            }
+        }
+
         function resetCityRuntimeState() {
             telemetryData = null;
             if (hourlyChart) { hourlyChart.destroy(); hourlyChart = null; }
@@ -2624,6 +3031,7 @@
             rebuildMonthlyProfiles();
             updateCityLabels();
             buildMonthlyCards();
+            renderTravelSeason();
             telemetryData = buildPredictionOnlyData();
             updateUI();
             syncLiveTelemetry();
@@ -2666,9 +3074,17 @@
 
         async function loadCityIndex() {
             setCityLoading('Loading city index');
-            const response = await fetch(indexUrl, { cache: 'no-cache' });
+            const [response, travelResponse] = await Promise.all([
+                fetch(indexUrl, { cache: 'no-cache' }),
+                fetch(travelSeasonsUrl, { cache: 'no-cache' }).catch(() => null)
+            ]);
             if (!response.ok) throw new Error(`City index failed: HTTP ${response.status}`);
             cityIndex = await response.json();
+            if (travelResponse?.ok) {
+                travelSeasonsData = await travelResponse.json();
+            } else {
+                travelSeasonsData = { generated_at: '2026-05-27', cities: {} };
+            }
             if (!cityIndex || !Array.isArray(cityIndex.cities) || !cityIndex.cities.length) {
                 throw new Error('City index has no cities');
             }
