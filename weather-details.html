@@ -482,7 +482,7 @@
         </div>
 
         <!-- 24-Hour Tracks: Wind and Weather -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div class="grid grid-cols-1 gap-8">
             
             <!-- Hourly Forecast Comparison Chart Card -->
             <div class="bg-slate-900/45 border border-slate-800/70 rounded-3xl p-6 backdrop-blur-md">
@@ -604,6 +604,39 @@
             </div>
         </div>
 
+        <!-- Full-Year Predicted Wind and Rain -->
+        <div class="bg-slate-900/30 border border-slate-800/60 rounded-3xl p-6 backdrop-blur-md">
+            <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-5">
+                <div>
+                    <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-chart-line text-cyan-400"></i> Full-Year Prediction Outlook
+                    </h3>
+                    <p class="text-xs text-slate-400 mt-1">Daily aggregates from the embedded 2026 ML prediction data for <span class="active-city-inline">Bengaluru</span>.</p>
+                </div>
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-cyan-950/60 text-cyan-400 border border-cyan-900/40 uppercase font-bold self-start sm:self-auto">2026 Model</span>
+            </div>
+            <div class="grid grid-cols-1 gap-4">
+                <div class="rounded-2xl border border-slate-800/80 bg-slate-950/45 p-4">
+                    <div class="flex items-center justify-between gap-3 mb-3">
+                        <h4 class="text-sm font-bold text-white">Year Predicted Wind</h4>
+                        <span id="year-wind-status" class="text-[10px] font-mono text-slate-500 text-right">Daily predicted average wind</span>
+                    </div>
+                    <div class="relative h-72 w-full">
+                        <canvas id="yearWindChart"></canvas>
+                    </div>
+                </div>
+                <div class="rounded-2xl border border-slate-800/80 bg-slate-950/45 p-4">
+                    <div class="flex items-center justify-between gap-3 mb-3">
+                        <h4 class="text-sm font-bold text-white">Year Predicted Rain</h4>
+                        <span id="year-rain-status" class="text-[10px] font-mono text-slate-500 text-right">Daily predicted rainfall total</span>
+                    </div>
+                    <div class="relative h-72 w-full">
+                        <canvas id="yearRainChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Monthly Wind Characters Segment -->
         <div class="bg-slate-900/20 border border-slate-800/60 rounded-3xl p-6 backdrop-blur-md space-y-6">
             <div>
@@ -656,22 +689,6 @@
                         </p>
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <!-- How Reliable Is This Section -->
-        <div class="bg-slate-900/30 border border-slate-800/60 rounded-3xl p-6 backdrop-blur-md">
-            <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-4">
-                <div>
-                    <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                        <i class="fa-solid fa-cloud-sun-rain text-emerald-400"></i> Daily Weather Cards
-                    </h3>
-                    <p class="text-xs text-slate-400 mt-1">Observed and forecast daily weather notes for <span class="active-city-inline">Bengaluru</span>.</p>
-                </div>
-                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-950/60 text-emerald-400 border border-emerald-900/40 uppercase font-bold self-start sm:self-auto">Weather Cards</span>
-            </div>
-            <div id="weather-condition-strip" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 text-xs">
-                <!-- Filled from live API weather data -->
             </div>
         </div>
 
@@ -830,6 +847,8 @@
         let hourlyChart = null;
         let hourlyRainChart = null;
         let weeklyChart = null;
+        let yearWindChart = null;
+        let yearRainChart = null;
         let weatherCharts = {};
         let lastCurrentTimeLineMinute = null;
 
@@ -884,13 +903,19 @@
                 const options = chart.options.plugins?.currentTimeLine;
                 if (!options?.enabled || !chart.chartArea || !chart.scales?.x) return;
 
-                const parts = bengaluruParts(new Date());
-                const hour = Math.max(0, Math.min(23, parts.hour));
-                const minute = Math.max(0, Math.min(59, parts.minute));
                 const xScale = chart.scales.x;
-                const startX = xScale.getPixelForValue(hour);
-                const endX = hour < 23 ? xScale.getPixelForValue(hour + 1) : xScale.right;
-                const x = startX + ((endX - startX) * (minute / 60));
+                let x;
+                if (typeof options.index === 'number') {
+                    const index = Math.max(0, Math.min(chart.data.labels.length - 1, options.index));
+                    x = xScale.getPixelForValue(index);
+                } else {
+                    const parts = bengaluruParts(new Date());
+                    const hour = Math.max(0, Math.min(23, parts.hour));
+                    const minute = Math.max(0, Math.min(59, parts.minute));
+                    const startX = xScale.getPixelForValue(hour);
+                    const endX = hour < 23 ? xScale.getPixelForValue(hour + 1) : xScale.right;
+                    x = startX + ((endX - startX) * (minute / 60));
+                }
                 const { top, bottom } = chart.chartArea;
                 const ctx = chart.ctx;
 
@@ -1551,6 +1576,7 @@
             buildHourlyRainChart();
             buildWeeklyChart();
             buildWeatherChart();
+            buildYearlyPredictionCharts();
         }
 
         // Handle dynamic scrubbing across the 24 hour timeline
@@ -2247,7 +2273,8 @@
                             borderWidth: 1,
                             titleColor: '#f1f5f9',
                             bodyColor: '#cbd5e1'
-                        }
+                        },
+                        currentTimeLine: todayLineOptions('rgba(251, 191, 36, 0.86)', 'rgba(251, 191, 36, 0.28)')
                     },
                     scales: {
                         x: {
@@ -2360,6 +2387,138 @@
             };
         }
 
+        function todayLineOptions(color = 'rgba(34, 211, 238, 0.82)', glow = 'rgba(34, 211, 238, 0.28)') {
+            return {
+                enabled: true,
+                index: dayWindowOffsets().indexOf(0),
+                label: 'Today',
+                color,
+                glow,
+                badgeFill: 'rgba(15, 23, 42, 0.88)',
+                badgeStroke: 'rgba(226, 232, 240, 0.18)'
+            };
+        }
+
+        function yearlyPredictionSeries() {
+            const grouped = new Map();
+            records.forEach(record => {
+                const dayKey = record.t.slice(5, 10);
+                if (!grouped.has(dayKey)) {
+                    grouped.set(dayKey, { speeds: [], rain: 0, rainCount: 0 });
+                }
+                const bucket = grouped.get(dayKey);
+                if (typeof record.s === 'number') bucket.speeds.push(record.s);
+                if (typeof record.pr === 'number') {
+                    bucket.rain += record.pr;
+                    bucket.rainCount += 1;
+                }
+            });
+
+            const ordered = Array.from(grouped.entries()).sort(([a], [b]) => a.localeCompare(b));
+            return {
+                labels: ordered.map(([dayKey]) => {
+                    const [month, day] = dayKey.split('-').map(Number);
+                    return `${monthNames[month - 1].slice(0, 3)} ${String(day).padStart(2, '0')}`;
+                }),
+                keys: ordered.map(([dayKey]) => dayKey),
+                wind: ordered.map(([, bucket]) => bucket.speeds.length ? Math.round(average(bucket.speeds) * 10) / 10 : null),
+                rain: ordered.map(([, bucket]) => bucket.rainCount ? Math.round(bucket.rain * 10) / 10 : null)
+            };
+        }
+
+        function yearlyChartOptions(yTitle, beginAtZero = false) {
+            const options = weatherChartOptions(yTitle, beginAtZero, false);
+            options.plugins.tooltip.mode = 'index';
+            options.scales.x.ticks = {
+                color: '#64748b',
+                maxRotation: 0,
+                autoSkip: true,
+                maxTicksLimit: 12,
+                font: { family: 'Plus Jakarta Sans', size: 10 }
+            };
+            return options;
+        }
+
+        function buildYearlyPredictionCharts() {
+            const windCanvas = document.getElementById('yearWindChart');
+            const rainCanvas = document.getElementById('yearRainChart');
+            if (!windCanvas || !rainCanvas) return;
+
+            if (yearWindChart) yearWindChart.destroy();
+            if (yearRainChart) yearRainChart.destroy();
+
+            const series = yearlyPredictionSeries();
+            const todayParts = bengaluruParts(new Date());
+            const todayKey = `${String(todayParts.month).padStart(2, '0')}-${String(todayParts.day).padStart(2, '0')}`;
+            const todayIndex = Math.max(0, series.keys.indexOf(todayKey));
+            const windStatus = document.getElementById('year-wind-status');
+            const rainStatus = document.getElementById('year-rain-status');
+            if (windStatus) windStatus.textContent = `${series.wind.length} daily predicted wind averages`;
+            if (rainStatus) rainStatus.textContent = `${series.rain.length} daily predicted rainfall totals · today marked`;
+
+            yearWindChart = new Chart(windCanvas.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: series.labels,
+                    datasets: [{
+                        label: `Predicted daily average wind (${UNIT_LABEL})`,
+                        data: series.wind,
+                        borderColor: '#22d3ee',
+                        backgroundColor: 'rgba(34, 211, 238, 0.08)',
+                        pointRadius: 0,
+                        pointHoverRadius: 5,
+                        borderWidth: 2.5,
+                        fill: true,
+                        tension: 0.32
+                    }]
+                },
+                options: (() => {
+                    const options = yearlyChartOptions(`Wind ${UNIT_LABEL}`, false);
+                    options.plugins.currentTimeLine = {
+                        enabled: true,
+                        index: todayIndex,
+                        label: 'Today',
+                        color: 'rgba(34, 211, 238, 0.84)',
+                        glow: 'rgba(34, 211, 238, 0.30)',
+                        badgeFill: 'rgba(8, 47, 73, 0.88)',
+                        badgeStroke: 'rgba(34, 211, 238, 0.32)'
+                    };
+                    return options;
+                })()
+            });
+
+            yearRainChart = new Chart(rainCanvas.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: series.labels,
+                    datasets: [{
+                        label: 'Predicted daily rainfall total (mm)',
+                        data: series.rain,
+                        borderColor: '#22c55e',
+                        backgroundColor: 'rgba(34, 197, 94, 0.09)',
+                        pointRadius: 0,
+                        pointHoverRadius: 5,
+                        borderWidth: 2.5,
+                        fill: true,
+                        tension: 0.28
+                    }]
+                },
+                options: (() => {
+                    const options = yearlyChartOptions('Rainfall mm', true);
+                    options.plugins.currentTimeLine = {
+                        enabled: true,
+                        index: todayIndex,
+                        label: 'Today',
+                        color: 'rgba(34, 197, 94, 0.82)',
+                        glow: 'rgba(34, 197, 94, 0.30)',
+                        badgeFill: 'rgba(6, 78, 59, 0.88)',
+                        badgeStroke: 'rgba(74, 222, 128, 0.32)'
+                    };
+                    return options;
+                })()
+            });
+        }
+
         function renderWeatherParameterChart(config) {
             const canvasEl = document.getElementById(config.canvasId);
             const status = document.getElementById(config.statusId);
@@ -2432,7 +2591,11 @@
                         }
                     ]
                 },
-                options: weatherChartOptions(config.yTitle, config.beginAtZero)
+                options: (() => {
+                    const options = weatherChartOptions(config.yTitle, config.beginAtZero);
+                    options.plugins.currentTimeLine = todayLineOptions(config.todayLineColor, config.todayLineGlow);
+                    return options;
+                })()
             });
 
             if (status) {
@@ -2510,6 +2673,7 @@
             if (strip) {
                 strip.innerHTML = labels.map((label, index) => {
                     const date = cityDateWithOffset(offsets[index]);
+                    const isToday = offsets[index] === 0;
                     const predicted = getDailyWeatherPrediction(date);
                     const code = telemetryDailyValue('weather_code', date) ?? predicted.weatherCode;
                     const rainChance = telemetryDailyValue('precipitation_probability_max', date);
@@ -2520,9 +2684,11 @@
                         : '--';
                     const confidenceText = typeof predicted.confidence === 'number' ? `${predicted.confidence}% ML` : 'ML pending';
                     return `
-                        <div class="rounded-xl border border-slate-800/80 bg-slate-950/55 px-3 py-2 min-w-0">
+                        <div class="relative rounded-xl border ${isToday ? 'border-cyan-500/60 bg-cyan-950/20 shadow-[0_0_18px_rgba(34,211,238,0.10)]' : 'border-slate-800/80 bg-slate-950/55'} px-3 py-2 min-w-0 overflow-hidden">
+                            ${isToday ? '<span class="absolute inset-y-2 left-0 w-1 rounded-r-full bg-cyan-400/80"></span>' : ''}
                             <div class="flex items-center justify-between gap-2">
-                                <span class="font-mono text-[10px] text-slate-500">${label}</span>
+                                <span class="font-mono text-[10px] ${isToday ? 'text-cyan-300' : 'text-slate-500'}">${label}</span>
+                                ${isToday ? '<span class="px-1.5 py-0.5 rounded-full bg-cyan-500/15 border border-cyan-400/30 text-[8px] font-mono uppercase tracking-wider text-cyan-300">Now</span>' : ''}
                                 <i class="${weatherIconForCode(code)} text-slate-300"></i>
                             </div>
                             <div class="mt-1 truncate text-[11px] font-semibold text-slate-200">${interpretWeatherCode(code)}</div>
@@ -2554,7 +2720,9 @@
                 predictedFill: 'rgba(251, 191, 36, 0.03)',
                 predictedPointColor: '#fbbf24',
                 fillLive: true,
-                beginAtZero: false
+                beginAtZero: false,
+                todayLineColor: 'rgba(251, 191, 36, 0.86)',
+                todayLineGlow: 'rgba(251, 191, 36, 0.28)'
             });
 
             const minScan = renderWeatherParameterChart({
@@ -2576,7 +2744,9 @@
                 predictedFill: 'rgba(34, 211, 238, 0.03)',
                 predictedPointColor: '#22d3ee',
                 fillLive: false,
-                beginAtZero: false
+                beginAtZero: false,
+                todayLineColor: 'rgba(34, 211, 238, 0.86)',
+                todayLineGlow: 'rgba(34, 211, 238, 0.28)'
             });
 
             const rainScan = renderWeatherParameterChart({
@@ -2600,7 +2770,9 @@
                 predictedFill: 'rgba(74, 222, 128, 0.05)',
                 predictedPointColor: '#4ade80',
                 fillLive: false,
-                beginAtZero: true
+                beginAtZero: true,
+                todayLineColor: 'rgba(34, 197, 94, 0.86)',
+                todayLineGlow: 'rgba(34, 197, 94, 0.28)'
             });
 
             const totalAnomalies = maxScan.count + minScan.count;
@@ -3012,6 +3184,8 @@
             if (hourlyChart) { hourlyChart.destroy(); hourlyChart = null; }
             if (hourlyRainChart) { hourlyRainChart.destroy(); hourlyRainChart = null; }
             if (weeklyChart) { weeklyChart.destroy(); weeklyChart = null; }
+            if (yearWindChart) { yearWindChart.destroy(); yearWindChart = null; }
+            if (yearRainChart) { yearRainChart.destroy(); yearRainChart = null; }
             Object.values(weatherCharts).forEach(chart => chart.destroy());
             weatherCharts = {};
             selectedMonthId = new Date().getMonth();
