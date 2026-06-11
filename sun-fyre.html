@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Solar Labs // Off-Grid Solar Designer</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        slate: {
+                            950: '#060a13',
+                            900: '#0b111e',
+                            800: '#172033',
+                            700: '#24324f',
+                        },
+                        cyan: {
+                            400: '#22d3ee',
+                            500: '#06b6d4',
+                            600: '#0891b2',
+                        },
+                        amber: {
+                            400: '#fbbf24',
+                            500: '#f59e0b',
+                            600: '#d97706',
+                        },
+                        rose: {
+                            500: '#f43f5e',
+                            600: '#e11d48',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #060a13;
+        }
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #060a13;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #172033;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #24324f;
+        }
+        /* Range input styling matching Windfyre specs */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            background: #172033;
+            height: 6px;
+            border-radius: 8px;
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #22d3ee;
+            cursor: pointer;
+            border: 2px solid #060a13;
+            box-shadow: 0 0 10px rgba(34, 211, 238, 0.5);
+            transition: all 0.15s ease;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.25);
+            background: #fbbf24;
+            box-shadow: 0 0 12px rgba(251, 191, 36, 0.7);
+        }
+    </style>
+</head>
+<body class="text-slate-100 min-h-screen flex flex-col selection:bg-cyan-500/30 selection:text-cyan-400 overflow-x-hidden">
+
+    <!-- Top Status bar -->
+    <div id="offline-banner" class="hidden bg-amber-600/20 border-b border-amber-500/30 text-amber-400 px-4 py-2 text-xs md:text-sm text-center font-mono flex items-center justify-center gap-2 transition-all duration-300">
+        <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+        </span>
+        Operating in Offline Simulated Mode. Live telemetry streams are currently un-synchronized.
+    </div>
+
+    <!-- Navigation Header -->
+    <header class="border-b border-slate-800/60 bg-slate-950/80 backdrop-blur-md sticky top-0 z-40 transition-colors">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="relative">
+                    <div class="absolute -inset-1.5 bg-gradient-to-r from-amber-500 to-cyan-500 rounded-lg blur opacity-45 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-tilt"></div>
+                    <div class="relative bg-slate-950 px-3 py-1.5 rounded-md border border-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-solar-panel text-amber-400 animate-pulse"></i>
+                        <span class="font-extrabold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-slate-400 text-sm md:text-base">SOLAR LABS</span>
+                    </div>
+                </div>
+                <span class="hidden sm:inline-block px-2 py-0.5 text-[10px] uppercase font-mono font-bold tracking-widest bg-cyan-950 text-cyan-400 border border-cyan-800/60 rounded">Off-Grid Designer</span>
+            </div>
+            
+            <div class="text-right text-xs text-slate-500 font-mono hidden sm:block">
+                SYS STATUS: <span class="text-emerald-400 font-bold animate-pulse">OPTIMIZED</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace App Wrapper (Contained Width) -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8 space-y-6">
+        
+        <!-- Top Statistics Grid -->
+        <section aria-label="Main results">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-4 flex flex-col justify-between h-24 hover:border-slate-700/80 transition-all duration-300">
+                    <span class="text-[10px] text-slate-500 uppercase tracking-widest font-mono">Daily Solar</span>
+                    <strong id="dailySolar" class="text-xl md:text-3xl font-black font-mono text-amber-400 mt-1">0Wh</strong>
+                    <span class="text-[10px] text-slate-500 block truncate">Net generated</span>
+                </div>
+                <div class="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-4 flex flex-col justify-between h-24 hover:border-slate-700/80 transition-all duration-300">
+                    <span class="text-[10px] text-slate-500 uppercase tracking-widest font-mono">Daily Load</span>
+                    <strong id="dailyLoad" class="text-xl md:text-3xl font-black font-mono text-rose-500 mt-1">0Wh</strong>
+                    <span class="text-[10px] text-slate-500 block truncate">Simulated draw</span>
+                </div>
+                <div class="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-4 flex flex-col justify-between h-24 hover:border-slate-700/80 transition-all duration-300">
+                    <span class="text-[10px] text-slate-500 uppercase tracking-widest font-mono">Battery Size</span>
+                    <strong id="batteryWh" class="text-xl md:text-3xl font-black font-mono text-cyan-400 mt-1">0Wh</strong>
+                    <span class="text-[10px] text-slate-500 block truncate">12.8V nominal</span>
+                </div>
+                <div class="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-4 flex flex-col justify-between h-24 hover:border-slate-700/80 transition-all duration-300 relative overflow-hidden">
+                    <span class="text-[10px] text-slate-500 uppercase tracking-widest font-mono">System Verdict</span>
+                    <strong id="verdict" class="text-lg md:text-2xl font-black uppercase text-emerald-400 mt-1">Ready</strong>
+                    <span id="verdictNote" class="text-[9px] text-slate-400 truncate">Adjust inputs</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Configuration Ribbon -->
+        <section class="bg-slate-900/20 border border-slate-800/80 rounded-3xl p-5 backdrop-blur-md" aria-label="Solar setup controls">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 lg:gap-8 items-start">
+                
+                <!-- Solar Array Limits -->
+                <div class="space-y-4 col-span-1 lg:col-span-2">
+                    <h3 class="text-xs font-bold text-white flex items-center gap-1.5 uppercase tracking-widest font-mono mb-2 border-b border-slate-800 pb-2">
+                        <i class="fa-solid fa-sun text-amber-400"></i> Array Matrix
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Panel Wattage -->
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center font-mono text-[10px] text-slate-400">
+                                <label for="panelWatts" class="text-slate-200 font-semibold">Panel Watts</label>
+                                <div class="flex items-center gap-1">
+                                    <input id="panelWattsNum" type="number" class="bg-slate-950 border border-slate-800 rounded px-1.5 py-0.5 w-16 text-amber-400 font-bold text-right focus:outline-none focus:ring-1 focus:ring-cyan-500" value="50">
+                                    <span>W</span>
+                                </div>
+                            </div>
+                            <input id="panelWatts" type="range" min="10" max="3000" step="5" value="50" class="w-full">
+                        </div>
+
+                        <!-- Useful Sun Hours -->
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center font-mono text-[10px] text-slate-400">
+                                <label for="sunHours" class="text-slate-200 font-semibold">Sun Hours</label>
+                                <div class="flex items-center gap-1">
+                                    <input id="sunHoursNum" type="number" class="bg-slate-950 border border-slate-800 rounded px-1.5 py-0.5 w-16 text-amber-400 font-bold text-right focus:outline-none focus:ring-1 focus:ring-cyan-500" value="5" step="0.5">
+                                    <span>h</span>
+                                </div>
+                            </div>
+                            <input id="sunHours" type="range" min="1" max="12" step="0.5" value="5" class="w-full">
+                        </div>
+
+                        <!-- Sun Strength -->
+                        <div class="space-y-2 sm:col-span-2">
+                            <div class="flex justify-between items-center font-mono text-[10px] text-slate-400">
+                                <label for="sunStrength" class="text-slate-200 font-semibold">Sun Intensity</label>
+                                <div class="flex items-center gap-1">
+                                    <input id="sunStrengthNum" type="number" class="bg-slate-950 border border-slate-800 rounded px-1.5 py-0.5 w-16 text-amber-400 font-bold text-right focus:outline-none focus:ring-1 focus:ring-cyan-500" value="85">
+                                    <span>%</span>
+                                </div>
+                            </div>
+                            <input id="sunStrength" type="range" min="35" max="100" step="5" value="85" class="w-full">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charge Controller Profile -->
+                <div class="space-y-4 col-span-1 lg:col-span-2">
+                    <h3 class="text-xs font-bold text-white flex items-center gap-1.5 uppercase tracking-widest font-mono mb-2 border-b border-slate-800 pb-2">
+                        <i class="fa-solid fa-wave-square text-sky-400"></i> Charge Controller
+                    </h3>
+                    
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-baseline font-mono text-[10px] text-slate-400">
+                            <label for="controllerType" class="text-slate-200 font-semibold">Controller Type</label>
+                            <span id="controllerLossLabel" class="text-cyan-400 font-bold">78% Efficiency</span>
+                        </div>
+                        <select id="controllerType" class="w-full min-h-[34px] bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-cyan-500">
+                            <option value="0.78">Cheap PWM controller (78%)</option>
+                            <option value="0.88">Good PWM controller (88%)</option>
+                            <option value="0.94">Small MPPT controller (94%)</option>
+                        </select>
+                        
+                        <div class="grid grid-cols-2 gap-3 text-xs">
+                            <div class="space-y-1.5">
+                                <label class="text-slate-500 font-mono uppercase text-[9px] tracking-wider block" for="controllerAmps">Rating Limit</label>
+                                <input id="controllerAmps" type="number" min="3" max="40" step="1" value="10" class="w-full min-h-[34px] bg-slate-950 border border-slate-800 rounded-lg px-2 text-slate-100 focus:ring-1 focus:ring-cyan-500 text-center font-mono">
+                            </div>
+                            <div class="space-y-1.5">
+                                <label class="text-slate-500 font-mono uppercase text-[9px] tracking-wider block" for="systemVoltage">Nominal Voltage</label>
+                                <input id="systemVoltage" type="number" min="11" max="14" step="0.1" value="12.8" class="w-full min-h-[34px] bg-slate-950 border border-slate-800 rounded-lg px-2 text-slate-100 focus:ring-1 focus:ring-cyan-500 text-center font-mono">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Battery Capacity Profile -->
+                <div class="space-y-4 col-span-1">
+                    <h3 class="text-xs font-bold text-white flex items-center gap-1.5 uppercase tracking-widest font-mono mb-2 border-b border-slate-800 pb-2">
+                        <i class="fa-solid fa-car-battery text-cyan-400"></i> Storage Unit
+                    </h3>
+                    
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center font-mono text-[10px] text-slate-400">
+                            <label for="batteryAh" class="text-slate-200 font-semibold">LiFePO4 Ah</label>
+                            <div class="flex items-center gap-1">
+                                <input id="batteryAhNum" type="number" class="bg-slate-950 border border-slate-800 rounded px-1.5 py-0.5 w-16 text-cyan-400 font-bold text-right focus:outline-none focus:ring-1 focus:ring-cyan-500" value="18">
+                                <span>Ah</span>
+                            </div>
+                        </div>
+                        <input id="batteryAh" type="range" min="4" max="500" step="1" value="18" class="w-full">
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Split Workspace -->
+        <section class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+            
+            <!-- Left Pillar: System Telemetry & Simulation Controls (Span 5) -->
+            <div class="lg:col-span-5 space-y-6 flex flex-col">
+                
+                <!-- System Cards Meta Map -->
+                <div class="grid grid-cols-2 gap-4 flex-shrink-0">
+                    <div class="bg-slate-900/40 border border-slate-800/60 rounded-2xl p-4 flex flex-col justify-between relative overflow-hidden group hover:border-slate-700/80 transition-all duration-300">
+                        <div class="absolute -right-2 -top-2 w-12 h-12 bg-amber-500/10 rounded-full blur-xl"></div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] text-slate-500 font-mono tracking-widest">PANEL</span>
+                            <span class="w-6 h-6 rounded-full bg-amber-950 text-amber-400 text-[10px] flex items-center justify-center font-bold border border-amber-900/30"><i class="fa-solid fa-solar-panel"></i></span>
+                        </div>
+                        <div class="mt-2">
+                            <div class="text-xl font-black text-white font-mono" id="cardPanel">50W</div>
+                            <small id="cardSun" class="text-[9px] text-slate-400 mt-1 block truncate">5.0 useful sun hours</small>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900/40 border border-slate-800/60 rounded-2xl p-4 flex flex-col justify-between relative overflow-hidden group hover:border-slate-700/80 transition-all duration-300">
+                        <div class="absolute -right-2 -top-2 w-12 h-12 bg-sky-500/10 rounded-full blur-xl"></div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] text-slate-500 font-mono tracking-widest">CONTROLLER</span>
+                            <span class="w-6 h-6 rounded-full bg-sky-950 text-sky-400 text-[10px] flex items-center justify-center font-bold border border-sky-900/30"><i class="fa-solid fa-wave-square"></i></span>
+                        </div>
+                        <div class="mt-2">
+                            <div class="text-xl font-black text-white font-mono" id="cardController">10A</div>
+                            <small id="cardControllerNote" class="text-[9px] text-slate-400 mt-1 block truncate">Cheap PWM</small>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900/40 border border-slate-800/60 rounded-2xl p-4 flex flex-col justify-between relative overflow-hidden group hover:border-slate-700/80 transition-all duration-300">
+                        <div class="absolute -right-2 -top-2 w-12 h-12 bg-cyan-500/10 rounded-full blur-xl"></div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] text-slate-500 font-mono tracking-widest">BATTERY</span>
+                            <span class="w-6 h-6 rounded-full bg-cyan-950 text-cyan-400 text-[10px] flex items-center justify-center font-bold border border-cyan-900/30"><i class="fa-solid fa-car-battery"></i></span>
+                        </div>
+                        <div class="mt-2">
+                            <div class="text-xl font-black text-white font-mono" id="cardBattery">18Ah</div>
+                            <small id="cardBatteryNote" class="text-[9px] text-slate-400 mt-1 block truncate">~230Wh storage</small>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900/40 border border-slate-800/60 rounded-2xl p-4 flex flex-col justify-between relative overflow-hidden group hover:border-slate-700/80 transition-all duration-300">
+                        <div class="absolute -right-2 -top-2 w-12 h-12 bg-rose-500/10 rounded-full blur-xl"></div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] text-slate-500 font-mono tracking-widest">DC LOAD</span>
+                            <span class="w-6 h-6 rounded-full bg-rose-950 text-rose-400 text-[10px] flex items-center justify-center font-bold border border-rose-900/30"><i class="fa-solid fa-bolt"></i></span>
+                        </div>
+                        <div class="mt-2">
+                            <div class="text-xl font-black text-white font-mono" id="cardLoad">0W</div>
+                            <small id="cardLoadNote" class="text-[9px] text-slate-400 mt-1 block truncate">current draw</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Simulation Holographic Battery Panel -->
+                <div class="bg-slate-900/25 border border-slate-800/60 rounded-3xl p-6 backdrop-blur-md flex flex-col justify-between flex-grow">
+                    <div class="flex items-center justify-between gap-4 border-b border-slate-800 pb-3">
+                        <div class="flex items-baseline gap-2">
+                            <span id="simTime" class="text-2xl font-black font-mono text-white tracking-tight">06:00</span>
+                            <span id="dayState" class="text-[10px] font-mono text-slate-500 uppercase tracking-widest font-bold">morning</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <button id="playPause" class="text-xs font-mono font-bold bg-cyan-950 text-cyan-400 hover:bg-cyan-900/60 border border-cyan-800/60 rounded-lg px-3 py-1.5 transition-all">Start</button>
+                            <button id="resetSim" class="text-xs font-mono font-bold bg-slate-950 text-slate-400 hover:text-white border border-slate-800 rounded-lg px-3 py-1.5 transition-all">Reset</button>
+                        </div>
+                    </div>
+
+                    <!-- Holographic glass battery cell -->
+                    <div class="relative py-6 flex items-center justify-center">
+                        <div class="relative w-full max-w-[280px] h-32 border-4 border-slate-700/80 rounded-2xl p-1.5 bg-slate-950 flex items-center shadow-2xl relative">
+                            <div class="absolute -right-3 top-1/2 -translate-y-1/2 w-3.5 h-12 bg-slate-700 rounded-r-md"></div>
+                            <div id="batteryFill" class="h-full rounded-lg flex items-center justify-center text-slate-950 text-4xl font-black font-mono transition-all duration-300 shadow-inner select-none" style="width: 82%; background: linear-gradient(90deg, #06b6d4, #22d3ee);">
+                                82%
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-2 text-center text-xs mt-2">
+                        <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-900">
+                            <span class="text-[9px] font-mono text-slate-500 uppercase">Solar</span>
+                            <strong id="solarNow" class="text-sm font-black font-mono text-amber-400 block mt-0.5">0W</strong>
+                        </div>
+                        <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-900">
+                            <span class="text-[9px] font-mono text-slate-500 uppercase">Load</span>
+                            <strong id="loadNow" class="text-sm font-black font-mono text-rose-500 block mt-0.5">0W</strong>
+                        </div>
+                        <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-900">
+                            <span class="text-[9px] font-mono text-slate-500 uppercase">Net Flow</span>
+                            <strong id="netNow" class="text-sm font-black font-mono text-white block mt-0.5">0W</strong>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2 pt-4 border-t border-slate-800/60 mt-4">
+                        <div class="relative h-2.5 rounded-full bg-slate-950 border border-slate-800/80 overflow-hidden">
+                            <div id="progressMarker" class="absolute top-0 bottom-0 w-1.5 bg-cyan-400 shadow-[0_0_8px_#22d3ee] rounded" style="left: 25%"></div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-[9px] font-mono text-slate-500 uppercase">SPEED MULTIPLIER</span>
+                            <div class="flex gap-1">
+                                <button class="btn speed active px-2 py-0.5 text-[10px] font-mono bg-cyan-950 text-cyan-400 border border-cyan-800/60 rounded" type="button" data-speed="1">1x</button>
+                                <button class="btn speed px-2 py-0.5 text-[10px] font-mono bg-slate-950 text-slate-400 hover:text-white border border-slate-800 rounded" type="button" data-speed="2">2x</button>
+                                <button class="btn speed px-2 py-0.5 text-[10px] font-mono bg-slate-950 text-slate-400 hover:text-white border border-slate-800 rounded" type="button" data-speed="4">4x</button>
+                                <button class="btn speed px-2 py-0.5 text-[10px] font-mono bg-slate-950 text-slate-400 hover:text-white border border-slate-800 rounded" type="button" data-speed="8">8x</button>
+                                <button class="btn speed px-2 py-0.5 text-[10px] font-mono bg-slate-950 text-slate-400 hover:text-white border border-slate-800 rounded" type="button" data-speed="16">16x</button>
+                                <button class="btn speed px-2 py-0.5 text-[10px] font-mono bg-slate-950 text-slate-400 hover:text-white border border-slate-800 rounded" type="button" data-speed="32">32x</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Pillar: Insights & Load Customization (Span 7) -->
+            <div class="lg:col-span-7 space-y-6 flex flex-col">
+                
+                <!-- Dynamic Design Notes Panel -->
+                <div class="bg-slate-900/20 border border-slate-800/60 rounded-3xl p-6 backdrop-blur-md flex-shrink-0">
+                    <h2 class="text-sm font-bold text-slate-300 uppercase tracking-widest font-mono flex items-center gap-1.5 mb-4 border-b border-slate-800 pb-3">
+                        <i class="fa-solid fa-receipt text-amber-400"></i> Architectural Verification
+                    </h2>
+                    <div id="insight" class="border-l-4 border-amber-400 bg-amber-950/20 rounded-r-xl p-5 space-y-2 text-sm leading-relaxed text-amber-200/95">
+                        <strong>Ready to simulate.</strong>
+                        <p>Change a slider or press Start to see the energy balance. Make sure PWM chargers contain custom LiFePO4 configs.</p>
+                    </div>
+                </div>
+
+                <!-- Run Potentials Grid -->
+                <div class="bg-slate-900/20 border border-slate-800/60 rounded-3xl p-6 backdrop-blur-md flex-shrink-0">
+                    <h2 class="text-sm font-bold text-slate-300 uppercase tracking-widest font-mono flex items-center gap-1.5 mb-4 border-b border-slate-800 pb-3">
+                        <i class="fa-solid fa-plug text-cyan-400"></i> Total Storage Capacity (From Full)
+                    </h2>
+                    <div id="runtimeList" class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        <!-- Populated Dynamically -->
+                    </div>
+                </div>
+
+                <!-- Custom DC Loads Matrix Manager -->
+                <div class="bg-slate-900/20 border border-slate-800/60 rounded-3xl p-6 backdrop-blur-md flex-grow flex flex-col">
+                    <div class="flex justify-between items-center font-mono text-xs mb-4 border-b border-slate-800 pb-3">
+                        <label class="text-slate-200 font-bold flex items-center gap-1.5 uppercase tracking-widest">
+                            <i class="fa-solid fa-lightbulb text-rose-400"></i> Active Device Matrix
+                        </label>
+                        <span id="loadCount" class="text-rose-400 font-bold bg-rose-950/40 px-2 py-0.5 rounded border border-rose-900/50 text-[10px]">2 Loads</span>
+                    </div>
+                    
+                    <div class="flex-grow">
+                        <div id="loadList" class="space-y-2 max-h-60 overflow-y-auto pr-2">
+                            <!-- Populated Dynamically -->
+                        </div>
+                    </div>
+                    
+                    <div class="pt-4 border-t border-slate-800 mt-4 flex-shrink-0">
+                        <button id="addLoad" class="w-full text-xs font-mono font-bold bg-slate-950 border border-slate-800 hover:border-slate-700 hover:bg-slate-900/60 transition-all rounded-xl py-3 text-slate-300 flex items-center justify-center gap-1.5" type="button">
+                            <i class="fa-solid fa-plus text-[10px]"></i> Mount New DC Device
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Energy Chart Row (Moved below the split workspace) -->
+        <section class="bg-slate-900/25 border border-slate-800/60 rounded-3xl p-6 backdrop-blur-md flex flex-col w-full h-[450px]" aria-label="24 hour chart">
+            <div class="border-b border-slate-800 pb-3 flex justify-between items-center flex-shrink-0">
+                <h2 class="text-sm font-bold text-white flex items-center gap-1.5">
+                    <i class="fa-solid fa-chart-area text-amber-400"></i> Full Spectrum Energy Flow Grid
+                </h2>
+                <div class="flex items-center gap-4 text-[10px] font-mono text-slate-400">
+                    <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-[0_0_6px_#fbbf24]"></span> Solar W</span>
+                    <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-[0_0_6px_#f43f5e]"></span> Load W</span>
+                    <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-cyan-400 shadow-[0_0_6px_#22d3ee]"></span> Battery %</span>
+                </div>
+            </div>
+            
+            <!-- Canvas container injected here -->
+            <div class="relative w-full flex-grow mt-4">
+                <canvas id="energyChart"></canvas>
+            </div>
+        </section>
+        
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-900 bg-slate-950 py-8 text-center text-slate-600 text-xs mt-8 w-full">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-3">
+            <p>Designed and formatted for premium off-grid power tracking research.</p>
+            <p class="font-mono text-[10px] text-slate-700">LiFePO4 Chemistry Model Integration // Solar Labs Simulation System</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript Engine -->
+    <script>
+        const state = {
+            panelWatts: 50,
+            sunHours: 5,
+            sunStrength: 85,
+            controllerEfficiency: 0.78,
+            controllerAmps: 10,
+            systemVoltage: 12.8,
+            batteryAh: 18,
+            time: 6,
+            speed: 1,
+            playing: false,
+            loads: [
+                { name: "LED bulb", watts: 10, start: 18, end: 23 },
+                { name: "Small DC fan", watts: 12, start: 21, end: 6 }
+            ]
+        };
+
+        const $ = (id) => document.getElementById(id);
+        const fmt = (value, unit = "W", digits = 0) => `${Number(value).toFixed(digits)}${unit}`;
+        const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+
+        const loadPresets = [
+            ["LED bulb", 5],
+            ["Phone charging", 12],
+            ["Small DC fan", 12],
+            ["Wi-Fi router", 9],
+            ["CCTV camera", 6],
+            ["Raspberry Pi", 5],
+            ["DC pump", 25],
+            ["USB light", 3]
+        ];
+
+        function isLoadActive(load, hour) {
+            if (Number(load.start) === Number(load.end)) return true;
+            if (load.start < load.end) return hour >= load.start && hour < load.end;
+            return hour >= load.start || hour < load.end;
+        }
+
+        function solarWattsAt(hour) {
+            const daylightCenter = 12;
+            const halfWindow = Math.max(1, state.sunHours * Math.PI / 4);
+            const distance = Math.abs(hour - daylightCenter);
+            if (distance >= halfWindow) return 0;
+            const shape = Math.sin((1 - distance / halfWindow) * Math.PI / 2);
+            const possibleInput = state.panelWatts * (state.sunStrength / 100) * shape;
+            const controllerLimit = state.controllerAmps * state.systemVoltage;
+            return Math.min(possibleInput * state.controllerEfficiency, controllerLimit);
+        }
+
+        function loadWattsAt(hour) {
+            return state.loads.reduce((total, load) => total + (isLoadActive(load, hour) ? Number(load.watts) || 0 : 0), 0);
+        }
+
+        // UPGRADED TWO-PASS EQUILIBRIUM SIMULATION
+        // Solves the 12:00AM reset bug by calculating an accurate continuous wrap-around start state.
+        function simulateDay() {
+            const capacityWh = state.batteryAh * state.systemVoltage;
+            const stepMinutes = 5;
+
+            // Pass 1: Find the continuous starting state (simulating "yesterday")
+            let energyWh = capacityWh; // Assume starting full initially
+            for (let minute = 0; minute <= 1440; minute += stepMinutes) {
+                const hour = minute / 60;
+                const net = solarWattsAt(hour) - loadWattsAt(hour);
+                if (minute > 0) {
+                    energyWh = clamp(energyWh + net * (stepMinutes / 60), 0, capacityWh);
+                }
+            }
+
+            // Pass 2: Calculate today's continuous energy curve using the established stable starting point
+            const points = [];
+            let emptyMinutes = 0;
+            let fullMinutes = 0;
+
+            for (let minute = 0; minute <= 1440; minute += stepMinutes) {
+                const hour = minute / 60;
+                const solar = solarWattsAt(hour);
+                const load = loadWattsAt(hour);
+                const net = solar - load;
+                if (minute > 0) {
+                    energyWh = clamp(energyWh + net * (stepMinutes / 60), 0, capacityWh);
+                }
+                if (energyWh <= capacityWh * 0.02) emptyMinutes += stepMinutes;
+                if (energyWh >= capacityWh * 0.98) fullMinutes += stepMinutes;
+                points.push({ hour, solar, load, net, soc: capacityWh ? energyWh / capacityWh : 0 });
+            }
+
+            return { points, capacityWh, emptyMinutes, fullMinutes };
+        }
+
+        function dailyEnergy() {
+            const step = 0.05;
+            let solar = 0;
+            let load = 0;
+            for (let hour = 0; hour < 24; hour += step) {
+                solar += solarWattsAt(hour) * step;
+                load += loadWattsAt(hour) * step;
+            }
+            return { solar, load };
+        }
+
+        function renderLoads() {
+            $("loadList").innerHTML = "";
+            state.loads.forEach((load, index) => {
+                const row = document.createElement("div");
+                row.className = "grid grid-cols-12 gap-1.5 items-center bg-slate-950/80 border border-slate-800/80 rounded-xl p-3 text-xs relative";
+                row.innerHTML = `
+                    <div class="col-span-12 sm:col-span-4 min-w-0">
+                        <select aria-label="Load ${index + 1} name" data-load="${index}" data-field="name" class="w-full bg-slate-900 border border-slate-800 text-slate-100 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-cyan-500 font-medium text-[11px] truncate">
+                            ${loadPresets.map(([name]) => `<option value="${name}" ${load.name === name ? "selected" : ""}>${name}</option>`).join("")}
+                        </select>
+                    </div>
+                    <div class="col-span-3 sm:col-span-2 relative">
+                        <span class="absolute text-[8px] font-mono text-slate-500 -top-1.5 left-2 bg-slate-950 px-1">Watts</span>
+                        <input aria-label="Load ${index + 1} watts" type="number" min="0" max="150" step="1" value="${load.watts}" data-load="${index}" data-field="watts" class="w-full bg-slate-900 border border-slate-800 text-slate-100 rounded-lg px-1 py-1.5 text-center font-mono text-[11px] focus:outline-none focus:ring-1 focus:ring-cyan-500" title="Watts">
+                    </div>
+                    <div class="col-span-3 sm:col-span-2 relative">
+                        <span class="absolute text-[8px] font-mono text-slate-500 -top-1.5 left-2 bg-slate-950 px-1">Start H</span>
+                        <input aria-label="Load ${index + 1} start hour" type="number" min="0" max="24" step="1" value="${load.start}" data-load="${index}" data-field="start" class="w-full bg-slate-900 border border-slate-800 text-slate-100 rounded-lg px-1 py-1.5 text-center font-mono text-[11px] focus:outline-none focus:ring-1 focus:ring-cyan-500" title="Start Hour">
+                    </div>
+                    <div class="col-span-3 sm:col-span-2 relative">
+                        <span class="absolute text-[8px] font-mono text-slate-500 -top-1.5 left-2 bg-slate-950 px-1">End H</span>
+                        <input aria-label="Load ${index + 1} end hour" type="number" min="0" max="24" step="1" value="${load.end}" data-load="${index}" data-field="end" class="w-full bg-slate-900 border border-slate-800 text-slate-100 rounded-lg px-1 py-1.5 text-center font-mono text-[11px] focus:outline-none focus:ring-1 focus:ring-cyan-500" title="End Hour">
+                    </div>
+                    <div class="col-span-3 sm:col-span-2 flex justify-end">
+                        <button class="w-full h-8 bg-rose-950/40 text-rose-400 border border-rose-900/50 hover:bg-rose-900 hover:text-white rounded-lg transition-all flex items-center justify-center font-mono font-bold" type="button" title="Remove load" aria-label="Remove load ${index + 1}" data-remove="${index}">
+                            <i class="fa-solid fa-trash-can text-xs"></i>
+                        </button>
+                    </div>
+                `;
+                $("loadList").appendChild(row);
+            });
+
+            $("loadCount").textContent = `${state.loads.length} device${state.loads.length === 1 ? "" : "s"}`;
+        }
+
+        let energyChartInstance = null;
+
+        function renderChart(sim) {
+            const ctx = $("energyChart").getContext('2d');
+            
+            const labels = sim.points.map(p => {
+                let h = Math.floor(p.hour);
+                let m = Math.round((p.hour % 1) * 60);
+                return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+            });
+            const dataSolar = sim.points.map(p => p.solar);
+            const dataLoad = sim.points.map(p => p.load);
+            const dataSoc = sim.points.map(p => p.soc * 100);
+
+            if (energyChartInstance) {
+                energyChartInstance.data.labels = labels;
+                energyChartInstance.data.datasets[0].data = dataSolar;
+                energyChartInstance.data.datasets[1].data = dataLoad;
+                energyChartInstance.data.datasets[2].data = dataSoc;
+                energyChartInstance.options.plugins.timeLine = { currentTime: state.time, points: sim.points };
+                energyChartInstance.update('none');
+            } else {
+                energyChartInstance = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            { 
+                                label: 'Solar Generation (W)', 
+                                data: dataSolar, 
+                                borderColor: '#fbbf24', 
+                                backgroundColor: 'rgba(251, 191, 36, 0.15)', 
+                                fill: true, 
+                                tension: 0.4, 
+                                yAxisID: 'y',
+                                pointRadius: 0,
+                                pointHoverRadius: 4
+                            },
+                            { 
+                                label: 'Load Draw (W)', 
+                                data: dataLoad, 
+                                borderColor: '#f43f5e', 
+                                backgroundColor: 'transparent', 
+                                fill: false, 
+                                tension: 0.4, 
+                                yAxisID: 'y',
+                                pointRadius: 0,
+                                pointHoverRadius: 4
+                            },
+                            { 
+                                label: 'Battery Charge (%)', 
+                                data: dataSoc, 
+                                borderColor: '#22d3ee', 
+                                borderDash: [5, 5], 
+                                fill: false, 
+                                tension: 0.4, 
+                                yAxisID: 'y1',
+                                pointRadius: 0,
+                                pointHoverRadius: 4
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true, 
+                        maintainAspectRatio: false,
+                        interaction: { mode: 'index', intersect: false },
+                        scales: {
+                            x: { 
+                                ticks: { maxTicksLimit: 24, color: '#64748b', font: { family: 'JetBrains Mono', size: 10 } }, 
+                                grid: { color: 'rgba(255,255,255,0.03)' } 
+                            },
+                            y: { 
+                                type: 'linear', 
+                                display: true, 
+                                position: 'left', 
+                                title: { display: true, text: 'Watts', color: '#64748b', font: { size: 10 } }, 
+                                ticks: { color: '#64748b', font: { family: 'JetBrains Mono', size: 10 } }, 
+                                grid: { color: 'rgba(255,255,255,0.05)' } 
+                            },
+                            y1: { 
+                                type: 'linear', 
+                                display: true, 
+                                position: 'right', 
+                                min: 0, max: 100, 
+                                title: { display: true, text: 'SOC %', color: '#64748b', font: { size: 10 } }, 
+                                ticks: { color: '#64748b', font: { family: 'JetBrains Mono', size: 10 } }, 
+                                grid: { drawOnChartArea: false } 
+                            }
+                        },
+                        plugins: { 
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: '#0f172a',
+                                borderColor: '#1e293b',
+                                borderWidth: 1,
+                                titleColor: '#f1f5f9',
+                                bodyColor: '#cbd5e1',
+                                titleFont: { family: 'JetBrains Mono' },
+                                bodyFont: { family: 'JetBrains Mono' }
+                            },
+                            timeLine: { currentTime: state.time, points: sim.points }
+                        }
+                    },
+                    plugins: [{
+                        id: 'timeLine',
+                        afterDraw: (chart, args, options) => {
+                            if (!options.points) return;
+                            const timeIndex = options.points.findIndex(p => p.hour >= options.currentTime);
+                            if (timeIndex >= 0 && chart.getDatasetMeta(0).data[timeIndex]) {
+                                const x = chart.getDatasetMeta(0).data[timeIndex].x;
+                                const ctx = chart.ctx;
+                                ctx.save();
+                                ctx.beginPath();
+                                ctx.moveTo(x, chart.chartArea.top);
+                                ctx.lineTo(x, chart.chartArea.bottom);
+                                ctx.lineWidth = 2;
+                                ctx.strokeStyle = 'rgba(34, 211, 238, 0.8)';
+                                ctx.setLineDash([5, 5]);
+                                ctx.stroke();
+                                ctx.restore();
+                            }
+                        }
+                    }]
+                });
+            }
+        }
+
+        function renderRuntimeList(capacityWh) {
+            const examples = [
+                ["5W LED bulb", 5],
+                ["12W DC fan", 12],
+                ["9W router", 9],
+                ["6W Camera", 6],
+                ["45W Laptop", 45],
+                ["25W Pump", 25]
+            ];
+
+            $("runtimeList").innerHTML = examples.map(([name, watts]) => {
+                const hours = capacityWh * 0.88 / watts;
+                return `
+                    <div class="bg-slate-950/40 border border-slate-900 rounded-xl p-3 flex flex-col justify-between">
+                        <span class="text-[9px] text-slate-500 font-mono truncate uppercase">${name}</span>
+                        <strong class="text-sm font-black text-slate-100 font-mono mt-1">${hours.toFixed(hours > 10 ? 0 : 1)}H</strong>
+                    </div>`;
+            }).join("");
+        }
+
+        function renderInsight(energy, sim) {
+            const margin = energy.solar - energy.load;
+            let title = "Balanced Daily Energy Profile";
+            let text = `Your panels generate approximately ${fmt(energy.solar, "Wh")} and consumption is approximately ${fmt(energy.load, "Wh")} per cycle.`;
+            let border = "#10b981"; // Emerald
+            let bg = "rgba(16, 185, 129, 0.08)";
+            let textClass = "text-emerald-300";
+
+            if (margin < -10) {
+                title = "Critical Deficit Alert";
+                text = `Daily consumption exceeds solar generation by about ${fmt(Math.abs(margin), "Wh")}. Reduce device wattage, shorten operating windows, increase panel capacity, or optimize sunlight hours.`;
+                border = "#ef4444"; // Rose
+                bg = "rgba(239, 68, 68, 0.08)";
+                textClass = "text-rose-300";
+            } else if (margin > 80) {
+                title = "Excellent Generation Reserves";
+                text = `There is about ${fmt(margin, "Wh")} of clean surplus headroom today. The system's LiFePO4 battery should recharge comfortably even under light cloud cover.`;
+                border = "#06b6d4"; // Cyan
+                bg = "rgba(6, 182, 212, 0.08)";
+                textClass = "text-cyan-300";
+            }
+
+            if (sim.emptyMinutes > 0) {
+                title = "Battery Depletion Risk Detected";
+                text = `Your battery goes completely flat for approximately ${(sim.emptyMinutes / 60).toFixed(1)} hours during the simulated 24-hour cycle. Add storage or manage high night loads.`;
+                border = "#ef4444"; // Rose
+                bg = "rgba(239, 68, 68, 0.08)";
+                textClass = "text-rose-300";
+            }
+
+            const insightBox = $("insight");
+            insightBox.style.borderColor = border;
+            insightBox.style.background = bg;
+            insightBox.className = `border-l-4 rounded-r-xl p-5 space-y-2 text-sm leading-relaxed ${textClass}`;
+            insightBox.innerHTML = `<strong>${title}</strong><p class="text-slate-300">${text}</p><span class="text-[10px] text-slate-500 font-mono block mt-2 pt-2 border-t border-slate-800/50">Note: Make sure charger has LiFePO4 support with high voltage cutoffs set to 14.4V.</span>`;
+        }
+
+        function render() {
+            state.panelWatts = Number($("panelWatts").value);
+            state.sunHours = Number($("sunHours").value);
+            state.sunStrength = Number($("sunStrength").value);
+            state.controllerEfficiency = Number($("controllerType").value);
+            state.controllerAmps = Number($("controllerAmps").value);
+            state.systemVoltage = Number($("systemVoltage").value);
+            state.batteryAh = Number($("batteryAh").value);
+
+            const sim = simulateDay();
+            const energy = dailyEnergy();
+            const capacityWh = state.batteryAh * state.systemVoltage;
+            const currentSolar = solarWattsAt(state.time);
+            const currentLoad = loadWattsAt(state.time);
+            const nowPoint = sim.points.reduce((best, p) => Math.abs(p.hour - state.time) < Math.abs(best.hour - state.time) ? p : best, sim.points[0]);
+            const socPercent = Math.round(nowPoint.soc * 100);
+
+            // Sync inputs with state if user is using sliders
+            if (document.activeElement !== $("panelWattsNum")) $("panelWattsNum").value = state.panelWatts;
+            if (document.activeElement !== $("sunHoursNum")) $("sunHoursNum").value = state.sunHours;
+            if (document.activeElement !== $("sunStrengthNum")) $("sunStrengthNum").value = state.sunStrength;
+            if (document.activeElement !== $("batteryAhNum")) $("batteryAhNum").value = state.batteryAh;
+            
+            $("controllerLossLabel").textContent = `${Math.round(state.controllerEfficiency * 100)}% Eff`;
+
+            $("dailySolar").textContent = fmt(energy.solar, "Wh");
+            $("dailyLoad").textContent = fmt(energy.load, "Wh");
+            $("batteryWh").textContent = fmt(capacityWh, "Wh");
+            
+            // Verdict card details
+            const verdictBox = $("verdict");
+            const verdictNote = $("verdictNote");
+            if (energy.solar >= energy.load) {
+                verdictBox.textContent = "OK";
+                verdictBox.className = "text-xl md:text-2xl font-black uppercase text-emerald-400 mt-1";
+                verdictNote.textContent = "solar covers daily needs";
+            } else {
+                verdictBox.textContent = "DEFICIT";
+                verdictBox.className = "text-xl md:text-2xl font-black uppercase text-rose-500 mt-1";
+                verdictNote.textContent = "load exceeds daily solar";
+            }
+
+            $("cardPanel").textContent = fmt(state.panelWatts);
+            $("cardSun").textContent = `${fmt(state.sunHours, "h", 1)} useful sun @ ${state.sunStrength}%`;
+            $("cardController").textContent = `${state.controllerAmps}A`;
+            $("cardControllerNote").textContent = `${$("controllerType").selectedOptions[0].text.split('(')[0]}`;
+            $("cardBattery").textContent = fmt(state.batteryAh, "Ah");
+            $("cardBatteryNote").textContent = `about ${fmt(capacityWh, "Wh")} storage`;
+            $("cardLoad").textContent = fmt(currentLoad);
+            $("cardLoadNote").textContent = currentLoad ? "loads active right now" : "no load active right now";
+
+            // Clock / DayState updates
+            $("simTime").textContent = `${String(Math.floor(state.time)).padStart(2, "0")}:${String(Math.round((state.time % 1) * 60)).padStart(2, "0")}`;
+            $("dayState").textContent = state.time < 6 || state.time >= 19 ? "night" : state.time < 11 ? "morning" : state.time < 16 ? "solar peak" : "evening";
+            
+            // Battery Hologram fill levels and glow properties
+            const fillBox = $("batteryFill");
+            fillBox.textContent = `${socPercent}%`;
+            fillBox.style.width = `${socPercent}%`;
+            
+            if (socPercent < 20) {
+                fillBox.style.background = "linear-gradient(90deg, #f43f5e, #ef4444)";
+                fillBox.style.boxShadow = "0 0 15px rgba(239, 68, 68, 0.4)";
+            } else if (socPercent < 50) {
+                fillBox.style.background = "linear-gradient(90deg, #fbbf24, #f59e0b)";
+                fillBox.style.boxShadow = "0 0 15px rgba(245, 158, 11, 0.3)";
+            } else {
+                fillBox.style.background = "linear-gradient(90deg, #06b6d4, #22d3ee)";
+                fillBox.style.boxShadow = "0 0 15px rgba(6, 182, 212, 0.3)";
+            }
+
+            $("solarNow").textContent = fmt(currentSolar);
+            $("loadNow").textContent = fmt(currentLoad);
+            
+            const netVal = currentSolar - currentLoad;
+            $("netNow").textContent = `${netVal >= 0 ? "+" : ""}${fmt(netVal)}`;
+            $("netNow").className = netVal >= 0 ? "text-emerald-400 text-sm font-black font-mono block mt-0.5" : "text-rose-500 text-sm font-black font-mono block mt-0.5";
+            $("progressMarker").style.left = `${(state.time / 24) * 100}%`;
+
+            renderChart(sim);
+            renderRuntimeList(capacityWh);
+            renderInsight(energy, sim);
+        }
+
+        function bindControls() {
+            ["panelWatts", "sunHours", "sunStrength", "batteryAh"].forEach(id => {
+                $(id).addEventListener("input", (e) => {
+                    $(`${id}Num`).value = e.target.value;
+                    render();
+                });
+                $(`${id}Num`).addEventListener("input", (e) => {
+                    $(id).value = e.target.value;
+                    render();
+                });
+            });
+
+            ["controllerType", "controllerAmps", "systemVoltage"].forEach(id => {
+                $(id).addEventListener("input", render);
+            });
+
+            $("loadList").addEventListener("input", (event) => {
+                const index = Number(event.target.dataset.load);
+                const field = event.target.dataset.field;
+                if (!Number.isInteger(index) || !field) return;
+                const value = field === "name" ? event.target.value : Number(event.target.value);
+                state.loads[index][field] = field === "name" ? value : clamp(value, field === "watts" ? 0 : 0, field === "watts" ? 150 : 24);
+                if (field === "name") {
+                    const preset = loadPresets.find(([name]) => name === value);
+                    if (preset) state.loads[index].watts = preset[1];
+                    renderLoads();
+                }
+                render();
+            });
+
+            $("loadList").addEventListener("click", (event) => {
+                const targetBtn = event.target.closest("button");
+                if (!targetBtn) return;
+                const index = Number(targetBtn.dataset.remove);
+                if (!Number.isInteger(index)) return;
+                state.loads.splice(index, 1);
+                if (!state.loads.length) state.loads.push({ name: "LED bulb", watts: 5, start: 18, end: 23 });
+                renderLoads();
+                render();
+            });
+
+            $("addLoad").addEventListener("click", () => {
+                state.loads.push({ name: "Phone charging", watts: 12, start: 17, end: 19 });
+                renderLoads();
+                render();
+            });
+
+            $("playPause").addEventListener("click", () => {
+                state.playing = !state.playing;
+                $("playPause").textContent = state.playing ? "Pause" : "Start";
+                $("playPause").className = state.playing 
+                    ? "text-xs font-mono font-bold bg-rose-950 text-rose-400 hover:bg-rose-900/60 border border-rose-800/60 rounded-lg px-3 py-1.5 transition-all"
+                    : "text-xs font-mono font-bold bg-cyan-950 text-cyan-400 hover:bg-cyan-900/60 border border-cyan-800/60 rounded-lg px-3 py-1.5 transition-all";
+            });
+
+            $("resetSim").addEventListener("click", () => {
+                state.time = 6;
+                state.playing = false;
+                $("playPause").textContent = "Start";
+                $("playPause").className = "text-xs font-mono font-bold bg-cyan-950 text-cyan-400 hover:bg-cyan-900/60 border border-cyan-800/60 rounded-lg px-3 py-1.5 transition-all";
+                render();
+            });
+
+            document.querySelectorAll(".speed").forEach(button => {
+                button.addEventListener("click", () => {
+                    state.speed = Number(button.dataset.speed);
+                    document.querySelectorAll(".speed").forEach(item => {
+                        item.className = "btn speed px-2 py-0.5 text-[10px] font-mono bg-slate-950 text-slate-400 hover:text-white border border-slate-800 rounded";
+                    });
+                    button.className = "btn speed active px-2 py-0.5 text-[10px] font-mono bg-cyan-950 text-cyan-400 border border-cyan-800/60 rounded";
+                });
+            });
+        }
+
+        let lastTick = performance.now();
+        function tick(now) {
+            const deltaSeconds = (now - lastTick) / 1000;
+            lastTick = now;
+            if (state.playing) {
+                state.time = (state.time + deltaSeconds * state.speed * 0.06) % 24;
+                render();
+            }
+            requestAnimationFrame(tick);
+        }
+
+        bindControls();
+        renderLoads();
+        render();
+        requestAnimationFrame(tick);
+    </script>
+</body>
+</html>
