@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Iron Protocol | 365 Mastery</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;1,600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#fbf9f1',
+                            100: '#f5f0db',
+                            200: '#ebdcb6',
+                            300: '#dfc287',
+                            400: '#d4a45d',
+                            500: '#cb8b3f',
+                            600: '#be7433',
+                            700: '#9e5a2c',
+                            800: '#804a28',
+                            900: '#673d23',
+                            950: '#381e10',
+                        },
+                        dark: {
+                            900: '#121212',
+                            800: '#1a1a1a',
+                            700: '#2a2a2a',
+                            600: '#404040'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #121212; color: #f3f4f6; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .checkbox-custom {
+            appearance: none;
+            width: 1.5rem;
+            height: 1.5rem;
+            border: 2px solid #52525b;
+            border-radius: 0.375rem;
+            outline: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            background-color: #1a1a1a;
+        }
+        .checkbox-custom:checked {
+            background-color: #cb8b3f;
+            border-color: #cb8b3f;
+        }
+        .checkbox-custom:checked::after {
+            content: '';
+            position: absolute;
+            left: 30%;
+            top: 15%;
+            width: 40%;
+            height: 60%;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+        
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col font-sans selection:bg-brand-500 selection:text-white">
+
+    <nav class="sticky top-0 z-50 bg-dark-900/90 backdrop-blur-md border-b border-dark-700">
+        <div class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-2" onclick="resetToToday()" style="cursor: pointer;">
+                <i class="ph-fill ph-sword text-brand-500 text-2xl"></i>
+                <h1 class="font-serif font-semibold text-xl tracking-wide text-white hidden sm:block">The Iron Protocol</h1>
+            </div>
+            <div class="flex items-center gap-3 text-sm font-medium">
+                <button onclick="resetToToday()" class="text-xs font-medium text-gray-400 hover:text-white transition-colors uppercase tracking-wider bg-dark-800 px-3 py-1.5 rounded-full border border-dark-700">
+                    Today
+                </button>
+                <div class="bg-dark-800 px-3 py-1.5 rounded-full border border-dark-600 flex items-center gap-2">
+                    <i class="ph-fill ph-fire text-orange-500"></i>
+                    <span class="text-gray-300">Day <span id="day-of-journey" class="text-white font-bold">1</span>/365</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow max-w-4xl mx-auto w-full px-4 py-6 pb-24">
+        
+        <header class="mb-8 text-center">
+            <div class="flex items-center justify-center gap-4 mb-3">
+                <button onclick="changeDate(-1)" class="p-2 bg-dark-800 text-gray-400 hover:text-brand-400 hover:bg-dark-700 rounded-lg transition-colors border border-dark-700">
+                    <i class="ph-bold ph-caret-left text-lg"></i>
+                </button>
+                
+                <div class="relative group flex-shrink-0">
+                    <button class="flex items-center gap-2 text-brand-400 font-medium tracking-widest uppercase text-sm py-2 px-3 rounded-lg hover:bg-dark-800 transition-colors">
+                        <i class="ph ph-calendar-blank text-lg"></i>
+                        <span id="current-date">Loading Date...</span>
+                    </button>
+                    <input type="date" id="date-picker" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="jumpToDate(event)">
+                </div>
+                
+                <button onclick="changeDate(1)" class="p-2 bg-dark-800 text-gray-400 hover:text-brand-400 hover:bg-dark-700 rounded-lg transition-colors border border-dark-700">
+                    <i class="ph-bold ph-caret-right text-lg"></i>
+                </button>
+            </div>
+
+            <h3 class="text-3xl font-serif font-semibold text-white mb-3">Forge Yourself.</h3>
+            <p id="daily-quote" class="text-gray-400 italic max-w-lg mx-auto text-sm min-h-[40px] px-4"></p>
+        </header>
+
+        <div class="flex space-x-2 bg-dark-800 p-1 rounded-xl mb-6 overflow-x-auto hide-scrollbar sticky top-[68px] z-40 shadow-lg border border-dark-700">
+            <button onclick="switchTab('daily')" id="tab-daily" class="tab-btn flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all bg-dark-700 text-white shadow whitespace-nowrap">Daily Action</button>
+            <button onclick="switchTab('roadmap')" id="tab-roadmap" class="tab-btn flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all text-gray-400 hover:text-white whitespace-nowrap">1-Year Roadmap</button>
+            <button onclick="switchTab('pillars')" id="tab-pillars" class="tab-btn flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all text-gray-400 hover:text-white whitespace-nowrap">The 12 Pillars</button>
+        </div>
+
+        <!-- TAB 1: DAILY ACTION -->
+        <section id="content-daily" class="tab-content block">
+            
+            <div id="daily-dynamic-content" class="fade-in">
+                <!-- Focus of the Day -->
+                <div class="bg-gradient-to-br from-dark-800 to-dark-900 border border-brand-900/50 rounded-2xl p-6 mb-8 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-4 opacity-10">
+                        <i id="focus-icon" class="ph-fill ph-target text-9xl text-brand-500"></i>
+                    </div>
+                    <div class="relative z-10">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="bg-brand-900/50 text-brand-300 text-xs font-bold px-2 py-1 rounded uppercase tracking-wider">Deep Work Focus</span>
+                        </div>
+                        <h3 class="text-2xl font-serif font-semibold text-white mb-2" id="focus-title">Loading Focus...</h3>
+                        <p class="text-gray-300 mb-4 text-sm leading-relaxed" id="focus-desc">...</p>
+                        <div class="bg-dark-900/50 rounded-lg p-4 border border-dark-700">
+                            <h4 class="text-sm font-semibold text-brand-400 mb-1">Today's Mission:</h4>
+                            <p class="text-gray-200 text-sm" id="focus-task">...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- The Daily Dozen Checklist -->
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xl font-serif font-semibold text-white">The Daily Dozen</h3>
+                        <span class="text-xs font-medium text-gray-400 bg-dark-800 px-2 py-1 rounded border border-dark-700">Micro-Habits</span>
+                    </div>
+                    <p class="text-sm text-gray-400 mb-6">Small, non-negotiable daily actions. These dynamically scramble every day to prevent habit fatigue.</p>
+                    
+                    <div class="grid gap-3" id="checklist-container">
+                        <!-- Populated by JS -->
+                    </div>
+                    
+                    <div class="mt-6 flex justify-between items-center bg-dark-800 p-4 rounded-xl border border-dark-700">
+                        <span class="text-sm font-medium text-gray-300">Daily Completion</span>
+                        <div class="flex items-center gap-3">
+                            <span id="completion-text" class="text-brand-400 font-bold">0/12</span>
+                            <div class="w-24 h-2 bg-dark-900 rounded-full overflow-hidden">
+                                <div id="progress-bar" class="h-full bg-brand-500 w-0 transition-all duration-500"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: YEARLY ROADMAP -->
+        <section id="content-roadmap" class="tab-content hidden">
+            <div class="mb-6">
+                <h3 class="text-2xl font-serif font-semibold text-white mb-2">1-Year Mastery Roadmap</h3>
+                <p class="text-sm text-gray-400">Your macro-level guide. Review these targets at the start of each month to ensure you are on the path to competency.</p>
+            </div>
+            <div class="space-y-8" id="roadmap-container"></div>
+        </section>
+
+        <!-- TAB 3: THE 12 PILLARS -->
+        <section id="content-pillars" class="tab-content hidden">
+            <div class="mb-6">
+                <h3 class="text-2xl font-serif font-semibold text-white mb-2">The Philosophy</h3>
+                <p class="text-sm text-gray-400">The core definitions and reasoning behind the 12 essential skills of masculinity.</p>
+            </div>
+            <div class="grid gap-4" id="pillars-container"></div>
+        </section>
+
+    </main>
+
+    <script>
+        // =====================================================================
+        // --- APP CONFIGURATION ---
+        // =====================================================================
+        
+        const START_DATE = new Date('2026-07-15T00:00:00'); 
+        let activeDate = new Date(); 
+        let localDateKey = "";
+        
+        // =====================================================================
+        
+        const quotes = [
+            "No man has the right to be an amateur in the matter of physical training. - Socrates",
+            "Mastery is not a function of genius or talent. It is a function of time and intense focus. - Robert Greene",
+            "The impediment to action advances action. What stands in the way becomes the way. - Marcus Aurelius",
+            "A man who has nothing for which he is willing to fight, nothing which is more important than his own personal safety, is a miserable creature. - J.S. Mill",
+            "We are what we repeatedly do. Excellence, then, is not an act, but a habit. - Will Durant",
+            "He who sweats more in training bleeds less in war. - Spartan Creed",
+            "Do not pray for an easy life, pray for the strength to endure a difficult one. - Bruce Lee",
+            "Discipline equals freedom. - Jocko Willink",
+            "A fit body, a calm mind, a house full of love. These things cannot be bought—they must be earned. - Naval Ravikant",
+            "Tough times create strong men, strong men create good times. - G. Michael Hopf",
+            "The more you seek the uncomfortable, the more you will become comfortable. - Conor McGregor",
+            "Waste no more time arguing what a good man should be. Be one. - Marcus Aurelius"
+        ];
+
+        // Massively Expanded Dataset (7 Micro Habits & 10 Focus Tasks per skill)
+        const skillsData = [
+            {
+                id: "strength",
+                title: "Physical & Emotional Strength",
+                icon: "ph-barbell",
+                philosophy: "Strength is the primal ability to exert your will and resist the will of others. It translates heavily into emotional strength—the resilience to cope with inner struggles and remain a source of stability for your loved ones.",
+                dailyMicro: [
+                    "Do 50 pushups or 50 bodyweight squats.",
+                    "Hold a plank for 90 seconds.",
+                    "Do 10 pull-ups or 30 bodyweight rows.",
+                    "Stretch your hamstrings and hips for 5 minutes.",
+                    "Meditate or sit in total silence for 5 minutes.",
+                    "Do 100 jumping jacks.",
+                    "Take 20 deep, controlled diaphragm breaths."
+                ],
+                focusTasks: [
+                    "Push your physical limit: Do a workout that strictly tests your endurance (e.g., a long run, heavy deadlifts).",
+                    "Emotional regulation test: When faced with a frustrating situation today, pause for 5 seconds before reacting.",
+                    "Fasting: Skip a meal today to practice self-denial and mental fortitude.",
+                    "Max Effort: Do a set of pushups to absolute failure. Write the number down.",
+                    "Go for a 45-minute brisk walk or light jog without any music or podcasts.",
+                    "Practice 'voluntary discomfort': sleep without a pillow or wear a slightly itchy shirt.",
+                    "Write down 3 emotional triggers that caused you stress recently and outline a stoic response.",
+                    "Research a new workout split (e.g., Push/Pull/Legs) and plan how you would implement it.",
+                    "Carry something heavy. Perform a farmer's carry with weights or heavy bags for max distance.",
+                    "Identify an area where you are weak (e.g., core, cardio) and complete a 20-minute targeted workout for it."
+                ],
+                roadmap: { Q1: "Establish a baseline fitness routine (3-4 days/week) and begin basic stoic reading.", Q2: "Hit specific physical benchmarks (e.g., bodyweight bench press, 5k run under 25 mins).", Q3: "Focus on emotional stability: Practice remaining entirely calm during arguments or high-stress scenarios.", Q4: "Achieve peak annual physical shape. Become the undisputed 'rock' for your family/friends." }
+            },
+            {
+                id: "fighting",
+                title: "Fighting & Combat Simulations",
+                icon: "ph-sword",
+                philosophy: "While violence is a last resort, knowing how to protect yourself builds discipline. If actual fighting isn't for you, find 'combat simulations' (like competitive sports or debates) as a healthy outlet for masculine aggression.",
+                dailyMicro: [
+                    "Shadowbox for 3 minutes, focusing on head movement.",
+                    "Do 2 minutes of jump rope or high knees to build stamina.",
+                    "Play 1 highly competitive rapid game (e.g., chess).",
+                    "Visualize defending yourself in a specific scenario for 2 minutes.",
+                    "Watch 1 instructional video on striking or grappling fundamentals.",
+                    "Do 30 burpees to build explosive combat stamina.",
+                    "Stretch your hips and neck for improved combat mobility."
+                ],
+                focusTasks: [
+                    "Research local martial arts gyms (BJJ, Muay Thai, Boxing) and schedule a trial class.",
+                    "Engage in a competitive physical sport today (basketball, tennis, sprinting against a friend).",
+                    "Watch and analyze a professional combat sports match to understand distancing and strategy.",
+                    "Practice your stance and movement. Spend 15 minutes moving in a fighting stance without crossing your feet.",
+                    "Read an article or watch a video on the legalities of self-defense in your specific state/country.",
+                    "Debate someone or defend a position you hold in a competitive but respectful manner.",
+                    "Do a heavy bag workout (if you have access) or shadowbox intensely for 5 rounds of 3 minutes.",
+                    "Study de-escalation techniques. Learn the verbal skills required to talk someone down from a fight.",
+                    "Play a highly strategic competitive video game, focusing purely on outsmarting the opponent.",
+                    "Audit your situational awareness. When in public today, identify the exits in every room you enter."
+                ],
+                roadmap: { Q1: "Join a gym or local sports league. Commit to showing up.", Q2: "Learn the fundamentals of striking and grappling. Spar lightly.", Q3: "Enter a local competition or tournament, even a low-stakes one.", Q4: "Integrate combat/competition into your lifestyle as a permanent, healthy outlet." }
+            },
+            {
+                id: "thumos",
+                title: "Courage & Spiritedness (Thumos)",
+                icon: "ph-fire",
+                philosophy: "Thumos is the Greek concept for passion, courage, and forward-driving energy. It's the spine that allows you to assert yourself, stand up for what is right, and break out of passive escapism and comfort.",
+                dailyMicro: [
+                    "Take a 60-second cold shower.",
+                    "Make strong eye contact with everyone you speak to today.",
+                    "Do one uncomfortable or tedious chore you have been putting off.",
+                    "Speak slightly louder and clearer than you usually do.",
+                    "Give a genuine compliment to a stranger.",
+                    "Walk with perfect, upright posture for the entire day.",
+                    "Say exactly what you mean in a conversation, cutting out any 'people-pleasing' fluff."
+                ],
+                focusTasks: [
+                    "Voluntarily take the lead on a project or social outing where you usually remain passive.",
+                    "Assert your boundary: Say 'no' to something you don't want to do, without apologizing excessively.",
+                    "Face a micro-fear: Do something today that makes you slightly socially anxious.",
+                    "Have the difficult conversation. Address an issue with a friend, partner, or coworker you've been avoiding.",
+                    "Go somewhere new alone. Sit at a restaurant or coffee shop by yourself without looking at your phone.",
+                    "Do something physically intimidating (e.g., a high dive, a heavy lift, a steep hike).",
+                    "Publicly state an unpopular opinion you genuinely hold, and defend it calmly.",
+                    "Ask for something you want but fear being rejected for (a discount, a date, a raise).",
+                    "Dress significantly better than the occasion requires, and own the attention it brings.",
+                    "Write down your ultimate ambition. What would you do if you had zero fear of failure?"
+                ],
+                roadmap: { Q1: "Identify your main fears and comfort zones. Start taking daily cold showers to build discipline.", Q2: "Speak up in group settings. Practice voicing dissenting opinions.", Q3: "Take a calculated risk in your career or personal life.", Q4: "Live authentically without seeking approval. You dictate your path based on internal values." }
+            },
+            {
+                id: "speech",
+                title: "Speech, Language & Humor",
+                icon: "ph-chat-teardrop-text",
+                philosophy: "Being articulate allows you to navigate social hierarchies, give weight to your ideas, and form meaningful relationships. This extends to writing, learning languages, and cultivating humor to bring life into a room.",
+                dailyMicro: [
+                    "Read 5 pages of a challenging non-fiction book.",
+                    "Write down 3 clear, articulated thoughts in a journal.",
+                    "Practice speaking without filler words (um, like) for one conversation.",
+                    "Learn 3 new vocabulary words and use one in a sentence.",
+                    "Practice 5 minutes of a foreign language on an app.",
+                    "Tell a joke or a short funny anecdote to someone.",
+                    "Read a poem or famous speech out loud, focusing on pacing and tone."
+                ],
+                focusTasks: [
+                    "Record yourself speaking on a topic for 2 minutes. Watch it back to fix filler words and body language.",
+                    "Write a 500-word essay on a topic you care about to organize your thoughts.",
+                    "Learn and practice telling one high-quality, engaging story to a friend.",
+                    "Watch a stand-up comedy special and analyze *why* their timing and delivery works.",
+                    "Engage in a 10-minute conversation with someone where you only ask open-ended questions.",
+                    "Rewrite a poorly worded email or text message to be as concise and powerful as possible.",
+                    "Memorize a meaningful quote or poem so you can recite it flawlessly.",
+                    "Spend 30 minutes intensely studying a new language (grammar, not just vocab apps).",
+                    "Call a friend you haven't spoken to in months just to catch up.",
+                    "Write a physical letter or card to someone you care about and mail it."
+                ],
+                roadmap: { Q1: "Eliminate filler words from your vocabulary. Start a daily journaling habit.", Q2: "Begin learning a new language. Practice storytelling.", Q3: "Join a public speaking group or start creating video/audio content.", Q4: "Master the art of holding a room's attention with charisma, wit, and precise articulation." }
+            },
+            {
+                id: "tools",
+                title: "Tools & Maintenance",
+                icon: "ph-wrench",
+                philosophy: "There is immense value in knowing how things work. Learning basic carpentry, mechanics, and household maintenance makes you reliable, competent, and self-sufficient rather than constantly dependent on others.",
+                dailyMicro: [
+                    "Clean, organize, or tighten/fix one object you own today.",
+                    "Sharpen a kitchen knife or properly polish/clean your boots.",
+                    "Clear out physical clutter from your immediate workspace or car.",
+                    "Organize a digital folder or clear your desktop/inbox.",
+                    "Check the tire pressure and fluid levels on a vehicle.",
+                    "Clean the filter on a household appliance (vacuum, dishwasher, AC).",
+                    "Identify one broken thing in your house and add it to a fix-it list."
+                ],
+                focusTasks: [
+                    "Open the hood of your car. Identify the oil dipstick, coolant, and battery. Check your tire pressure.",
+                    "Take inventory of your tools. Buy one essential tool you are missing (e.g., a good multi-tool, a drill).",
+                    "Watch a tutorial on basic plumbing. Learn how to shut off your house's main water line and unclog a P-trap.",
+                    "Sew a button back onto a shirt or repair a small tear in an article of clothing.",
+                    "Deep clean your primary electronics (keyboard, screen, phone ports, mouse).",
+                    "Research how an engine works or how electricity is routed through a house.",
+                    "Fix something on your 'fix-it' list using only YouTube tutorials and basic tools.",
+                    "Build something small from raw materials (e.g., a wooden box, a simple shelf).",
+                    "Perform standard maintenance on a piece of gear you own (oil a hinge, sharpen a blade, patch a tent).",
+                    "Organize your digital life: back up your photos and important documents to an external drive or cloud."
+                ],
+                roadmap: { Q1: "Build a basic toolkit (hammer, screwdrivers, wrenches, drill). Learn basic home repairs.", Q2: "Learn fundamental car maintenance (changing a tire, checking oil, replacing wipers).", Q3: "Take on a medium DIY project (building a shelf, fixing a broken appliance).", Q4: "Become the 'go-to' guy for fixing things in your household. Stop paying for basic labor." }
+            },
+            {
+                id: "history",
+                title: "History & Politics",
+                icon: "ph-globe-stand",
+                philosophy: "Ignoring politics makes you a passive observer. You need to form logical beliefs. Furthermore, knowing your history and heritage grounds you against future uncertainty.",
+                dailyMicro: [
+                    "Read or listen to 10 minutes of history (No toxic social media scrolling).",
+                    "Read one long-form article about a geopolitical event or philosophy.",
+                    "Review a map of a region you are unfamiliar with for 3 minutes.",
+                    "Learn about one historical figure who exemplifies masculinity.",
+                    "Read the headlines from 3 news sources with vastly different political biases.",
+                    "Read a foundational document of your country (e.g., the Constitution).",
+                    "Learn the capital cities and basic geography of one continent."
+                ],
+                focusTasks: [
+                    "Research the history of your own family lineage or local town.",
+                    "Read an opposing political viewpoint with an open mind to understand their fundamental argument.",
+                    "Study a major historical conflict (e.g., Rome's fall, WW1) and extract one lesson applicable today.",
+                    "Research who your local representatives are (mayor, city council) and what they are currently voting on.",
+                    "Listen to a long-form podcast explaining the history of a complex modern conflict.",
+                    "Read an essay by a classic philosopher (Plato, Aristotle, Locke, Hobbes).",
+                    "Understand how your local tax system works. Where exactly does your income tax go?",
+                    "Study a historical economic collapse (e.g., The Great Depression, Weimar Germany) and its causes.",
+                    "Watch a documentary about a culture completely disconnected from your own.",
+                    "Write down your core political and moral beliefs. Then write down the strongest counter-argument to them."
+                ],
+                roadmap: { Q1: "Understand the fundamental political systems and history of your nation.", Q2: "Study classic philosophy (Stoicism, Enlightenment thinkers) to form a moral baseline.", Q3: "Engage in civil, local political discourse. Understand local laws and taxes.", Q4: "Possess a deep, unshakeable worldview grounded in historical precedent, not modern trends." }
+            },
+            {
+                id: "finance",
+                title: "Investing & Finance",
+                icon: "ph-chart-line-up",
+                philosophy: "Regardless of the economy, managing your household is your responsibility. Budget, minimize pointless spending, and aggressively reinvest money into assets, skills, or business to build wealth.",
+                dailyMicro: [
+                    "Track every single dollar you spent today.",
+                    "Check your bank and investment balances to remain aware of your position.",
+                    "Resist one impulse purchase today.",
+                    "Read one article or watch a short video on financial literacy.",
+                    "Review your upcoming bills for the week.",
+                    "Transfer a small amount of money ($5-$20) into a savings or investment account.",
+                    "Skip buying coffee or eating out today; make it at home."
+                ],
+                focusTasks: [
+                    "Audit your subscriptions. Cancel at least one recurring charge you don't need.",
+                    "Research one specific asset class (Index funds, Real Estate, Bitcoin) for 30 minutes.",
+                    "Brainstorm 3 ways to increase your earning potential (new skill, side hustle, asking for a raise).",
+                    "Build a strict, written budget for the upcoming month, allocating every dollar.",
+                    "Calculate your exact Net Worth (Assets minus Liabilities).",
+                    "Research tax-advantaged accounts available in your country (e.g., Roth IRA, ISA) and ensure you are using them.",
+                    "Sell one item you no longer use online (eBay, Facebook Marketplace).",
+                    "Read a chapter from a foundational finance book (e.g., The Richest Man in Babylon, Rich Dad Poor Dad).",
+                    "Run the math on a compound interest calculator to see what $100/month does over 30 years.",
+                    "Negotiate a bill (call your internet or insurance provider and ask for a better rate)."
+                ],
+                roadmap: { Q1: "Create a strict budget. Eliminate high-interest debt and build a 1-month emergency fund.", Q2: "Expand emergency fund to 3-6 months. Begin consistent monthly investing.", Q3: "Focus on increasing income. Launch a side-hustle or acquire a high-income skill.", Q4: "Establish a fully automated financial system where wealth grows passively." }
+            },
+            {
+                id: "creation",
+                title: "Creative Expression",
+                icon: "ph-paint-brush",
+                philosophy: "Men are not just physical beings; they are builders of culture. Engaging in art, music, or creative projects allows you to explore your consciousness and leave a meaningful mark on the world.",
+                dailyMicro: [
+                    "Spend 10 minutes creating something instead of consuming content.",
+                    "Write down 3 new ideas for a project, story, or business.",
+                    "Sketch, doodle, or write a short paragraph creatively.",
+                    "Listen to a piece of classical or instrumental music intentionally without doing anything else.",
+                    "Take one highly composed, intentional photograph.",
+                    "Brainstorm solutions for a problem you noticed today.",
+                    "Spend 5 minutes visualizing a project you want to build."
+                ],
+                focusTasks: [
+                    "Start a low-barrier creative hobby today (e.g., origami, sketching, writing a poem).",
+                    "Go to a museum, art gallery, or architectural landmark to observe high-level human creation.",
+                    "Build something with your hands (woodworking, model building, sculpting).",
+                    "Learn a new software tool for creation (Photoshop, a coding language, video editing).",
+                    "Write a 1-page outline for a short story or screenplay.",
+                    "Try to recreate a piece of art you admire (draw a frame from a comic, play a song by ear).",
+                    "Curate a playlist of music designed specifically to help you focus and work.",
+                    "Take apart something broken just to see how it was engineered and designed.",
+                    "Share something you created with someone else and ask for honest feedback.",
+                    "Spend 1 hour in 'Flow State'—no phone, no internet, just pure uninterrupted creative work."
+                ],
+                roadmap: { Q1: "Pick one creative medium and dedicate 2 hours a week to it.", Q2: "Complete your first tangible creative project (a short story, a song, a physical object).", Q3: "Share your creation with others. Accept critique and iterate.", Q4: "Integrate creation into your identity. Aim to consume less than you produce." }
+            },
+            {
+                id: "cooking",
+                title: "Cooking",
+                icon: "ph-cooking-pot",
+                philosophy: "Relying on takeout only works for young bachelors. You need the skills to cook proper, presentable meals for a wife, children, or guests to show care and competence.",
+                dailyMicro: [
+                    "Drink 3 liters of water and eat at least one whole, unprocessed food.",
+                    "Consume zero liquid calories today (no soda, juice, or alcohol).",
+                    "Eat a meal prioritizing high protein and zero processed sugar.",
+                    "Mince garlic or chop an onion perfectly.",
+                    "Clean the kitchen immediately after eating; leave zero dishes in the sink.",
+                    "Prep tomorrow's breakfast or lunch tonight.",
+                    "Identify 3 new spices in your pantry and taste a tiny pinch of them to learn their profile."
+                ],
+                focusTasks: [
+                    "Cook a meal entirely from scratch using raw ingredients. No pre-packaged sauces.",
+                    "Learn the precise technique for cooking a perfect steak, chicken breast, or fish fillet.",
+                    "Host a dinner for a friend or partner where you are solely responsible for the meal.",
+                    "Bake bread from scratch using flour, water, yeast, and salt.",
+                    "Master cooking eggs 4 different ways (scrambled, fried, poached, hard-boiled).",
+                    "Make a large batch of a complex stew, chili, or curry for meal prep.",
+                    "Learn how to properly deglaze a pan and make a pan sauce.",
+                    "Watch a culinary masterclass on knife skills and practice julienning a vegetable.",
+                    "Cook a traditional dish from your heritage or family history.",
+                    "Go to a local butcher or farmer's market and buy high-quality, whole ingredients."
+                ],
+                roadmap: { Q1: "Master 3 basic, healthy, utilitarian meals (e.g., eggs, rice/chicken, pasta).", Q2: "Learn knife skills and how to use spices/herbs properly.", Q3: "Master 2 'Impressive' meals (e.g., a good steak dinner, a complex roast).", Q4: "Be able to confidently host a dinner party for 4+ people with a multi-course meal." }
+            },
+            {
+                id: "outdoors",
+                title: "Outdoorsmanship & First Aid",
+                icon: "ph-mountains",
+                philosophy: "While wilderness survival isn't an everyday need, basic navigation, shelter, and fire-making are great skills. Even more vital is basic first aid to genuinely save a life.",
+                dailyMicro: [
+                    "Spend at least 20 minutes outside in direct sunlight/fresh air.",
+                    "Take a 15-minute walk without your phone or headphones.",
+                    "Practice tying a useful utility knot (e.g., bowline, square knot).",
+                    "Identify the cardinal directions (North, South, East, West) from wherever you are right now.",
+                    "Check your local weather radar and forecast, learning to read pressure/storm systems.",
+                    "Review the signs of a stroke (FAST) or heart attack.",
+                    "Drink an extra liter of water to maintain outdoor hydration levels."
+                ],
+                focusTasks: [
+                    "Review or enroll in a basic CPR and Stop-the-Bleed course.",
+                    "Go for a hike without using GPS. Rely on a physical map or trail markers.",
+                    "Practice making a fire (safely) using minimal starting materials.",
+                    "Audit or build a First Aid kit for your car and home.",
+                    "Learn how to apply a tourniquet properly and quickly.",
+                    "Go camping, or spend at least 4 continuous hours deep in nature.",
+                    "Learn to identify 3 common edible plants and 3 poisonous plants in your region.",
+                    "Pitch a tent or build a basic emergency shelter in your yard/local woods.",
+                    "Go rucking (walking with a weighted backpack) for 3 miles to build outdoor endurance.",
+                    "Research what to do in the most common natural disaster for your region (earthquake, tornado, flood)."
+                ],
+                roadmap: { Q1: "Build a proper First Aid kit for your home and car. Learn basic wound care.", Q2: "Get certified in CPR and basic life support.", Q3: "Go camping or undertake a difficult multi-hour hike to test your endurance and gear.", Q4: "Become fully proficient in navigation, fire building, and emergency response protocols." }
+            },
+            {
+                id: "responsibility",
+                title: "Taking Responsibility",
+                icon: "ph-anchor",
+                philosophy: "Making excuses exonerates you from duty and infantilizes you. Being a man means bearing your own burden, staying in the arena, and holding yourself to a consistently high standard.",
+                dailyMicro: [
+                    "Eat the frog: Do your hardest or most dreaded task first thing in the morning.",
+                    "Make your bed perfectly as soon as you wake up.",
+                    "Take extreme ownership: Do not complain or blame anyone else for anything today.",
+                    "Arrive 5 minutes early to every commitment you have today.",
+                    "Write down your 3 most critical tasks for tomorrow before going to sleep.",
+                    "Keep a promise you made to yourself (e.g., 'I will read today').",
+                    "Fix a small problem before anyone else asks you to."
+                ],
+                focusTasks: [
+                    "Identify one area of your life where you are playing the victim. Write down how to take control of it.",
+                    "Clean and organize your immediate environment (room/desk). Order starts locally.",
+                    "Apologize to someone you wronged or take the blame for a mistake without adding a 'but...'",
+                    "Take on a new voluntary responsibility (e.g., mentor someone, adopt a plant/pet, lead a project).",
+                    "Do a 'Life Audit': Write down where you are failing physically, financially, and relationally.",
+                    "Offer to help someone with a heavy burden (moving furniture, reviewing their resume, listening).",
+                    "Pay off a small debt, or take a concrete step toward resolving a major hanging obligation.",
+                    "Say 'I don't know' when asked about something you are ignorant of, rather than faking it.",
+                    "Set a hard boundary with someone who is draining your time or energy.",
+                    "Review your core values. Write down 3 actions you took recently that contradicted them, and fix it."
+                ],
+                roadmap: { Q1: "Take 100% accountability for your current life situation. Stop blaming external factors.", Q2: "Take on a new responsibility voluntarily (e.g., leading a project, adopting a pet, mentoring).", Q3: "Maintain your standards even when exhausted. Prove you can carry a burden consistently.", Q4: "Become a pillar for others. People naturally rely on you because of your extreme ownership." }
+            },
+            {
+                id: "dress",
+                title: "Dress & Grooming",
+                icon: "ph-coat-hanger",
+                philosophy: "Dressing sloppily signals a lack of care. Dressing properly gives you gravitas and demonstrates respect for yourself and those you interact with.",
+                dailyMicro: [
+                    "Wash face, brush teeth, style hair, and wear clean, fitted clothes (no pajamas outside).",
+                    "Trim your nails, moisturize, and apply a good fragrance.",
+                    "Lay out tomorrow's clothes tonight to ensure you look sharp without rushing.",
+                    "Wipe down or brush your shoes before leaving the house.",
+                    "Ensure your belt matches your shoes (leather to leather).",
+                    "Floss your teeth and scrape your tongue.",
+                    "Tuck in your shirt or adjust your layers to look intentionally styled."
+                ],
+                focusTasks: [
+                    "Audit your wardrobe. Throw away or donate clothes that are stained, torn, or fit poorly.",
+                    "Go to a tailor and get one staple piece (suit, trousers, or shirt) altered to fit you perfectly.",
+                    "Upgrade your grooming routine. Invest in a good moisturizer, a signature fragrance, and a proper haircut.",
+                    "Learn how to properly iron a dress shirt and trousers.",
+                    "Investigate 'Capsule Wardrobes'. Plan out 5 versatile outfits from basic pieces.",
+                    "Learn how to tie a tie perfectly (e.g., Half-Windsor knot) without looking at a mirror.",
+                    "Shine/polish a pair of leather shoes or deep-clean your sneakers.",
+                    "Research face shapes and hair types to find the absolute best haircut for your specific head.",
+                    "Buy one high-quality 'gravitas' piece (a wool overcoat, a nice watch, quality boots).",
+                    "Dress up in a suit or your best clothes for no reason other than to feel the psychological shift."
+                ],
+                roadmap: { Q1: "Nail the grooming basics: Skincare, consistent haircuts, trimmed nails, good hygiene.", Q2: "Build a capsule wardrobe of basic, high-quality, well-fitting items (chinos, plain tees, boots).", Q3: "Invest in 'gravitas' pieces: A tailored suit, a classic overcoat, or a quality watch.", Q4: "Develop a personal, signature style that communicates competence and respect everywhere you go." }
+            }
+        ];
+
+        // --- 2. APP LOGIC ---
+
+        document.addEventListener('DOMContentLoaded', () => {
+            START_DATE.setHours(0, 0, 0, 0);
+            renderRoadmaps();
+            renderPillars();
+            updateDashboard();
+        });
+
+        function changeDate(offset) {
+            activeDate.setDate(activeDate.getDate() + offset);
+            updateDashboard();
+        }
+
+        function jumpToDate(event) {
+            if (event.target.value) {
+                const [year, month, day] = event.target.value.split('-');
+                activeDate = new Date(year, month - 1, day);
+                updateDashboard();
+            }
+        }
+        
+        function resetToToday() {
+            activeDate = new Date();
+            updateDashboard();
+        }
+
+        function updateDashboard() {
+            // 1. Calculate Day of Journey
+            const utcActive = Date.UTC(activeDate.getFullYear(), activeDate.getMonth(), activeDate.getDate());
+            const utcStart = Date.UTC(START_DATE.getFullYear(), START_DATE.getMonth(), START_DATE.getDate());
+            const msPerDay = 1000 * 60 * 60 * 24;
+            
+            const diffMs = utcActive - utcStart;
+            let dayOfJourney = Math.floor(diffMs / msPerDay) + 1;
+
+            // 2. Format Dates
+            const dateString = activeDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+            localDateKey = `rm_checklist_${activeDate.getFullYear()}_${activeDate.getMonth()}_${activeDate.getDate()}`;
+            const isoDateString = new Date(activeDate.getTime() - (activeDate.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+            
+            // 3. Update DOM
+            document.getElementById('current-date').innerText = dateString;
+            document.getElementById('day-of-journey').innerText = dayOfJourney;
+            document.getElementById('date-picker').value = isoDateString;
+            
+            const dynamicContent = document.getElementById('daily-dynamic-content');
+            dynamicContent.classList.remove('fade-in');
+            void dynamicContent.offsetWidth; // Trigger reflow
+            dynamicContent.classList.add('fade-in');
+
+            // 4. Mathematical Array Index Logic
+            const arrIndex = (dayOfJourney > 0) ? (dayOfJourney - 1) : Math.abs(dayOfJourney - 1);
+            
+            const quoteIndex = arrIndex % quotes.length;
+            document.getElementById('daily-quote').innerText = `"${quotes[quoteIndex]}"`;
+
+            // Update tasks dynamically
+            setupFocusOfDay(arrIndex);
+            renderChecklistUI(arrIndex); 
+
+            // 5. Load saved state for THIS date
+            loadChecklistState();
+        }
+
+        function setupFocusOfDay(arrIndex) {
+            const skillIndex = arrIndex % 12;
+            const skill = skillsData[skillIndex];
+            
+            const cycleNumber = Math.floor(arrIndex / 12);
+            const taskIndex = cycleNumber % skill.focusTasks.length;
+            const task = skill.focusTasks[taskIndex];
+
+            document.getElementById('focus-icon').className = `ph-fill ${skill.icon} text-9xl text-brand-500`;
+            document.getElementById('focus-title').innerText = skill.title;
+            document.getElementById('focus-desc').innerText = skill.philosophy.substring(0, 120) + "...";
+            document.getElementById('focus-task').innerText = task;
+        }
+
+        function renderChecklistUI(arrIndex) {
+            const container = document.getElementById('checklist-container');
+            container.innerHTML = '';
+
+            skillsData.forEach((skill, index) => {
+                const microIndex = (arrIndex + index) % skill.dailyMicro.length;
+                const dailyMicroTask = skill.dailyMicro[microIndex];
+
+                const item = document.createElement('label');
+                item.className = "flex items-start gap-4 p-4 rounded-xl bg-dark-800 border border-dark-700 cursor-pointer hover:bg-dark-700 transition-colors";
+                item.innerHTML = `
+                    <div class="pt-1">
+                        <input type="checkbox" class="checkbox-custom checklist-item" data-index="${index}" onchange="updateProgress()">
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-1">
+                            <i class="ph-fill ${skill.icon} text-brand-400"></i>
+                            <h4 class="text-white font-medium text-sm tracking-wide uppercase">${skill.title}</h4>
+                        </div>
+                        <p class="text-gray-400 text-sm leading-relaxed">${dailyMicroTask}</p>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function updateProgress() {
+            const checkboxes = document.querySelectorAll('.checklist-item');
+            let checkedCount = 0;
+            const state = {};
+
+            checkboxes.forEach(cb => {
+                if (cb.checked) checkedCount++;
+                state[cb.dataset.index] = cb.checked;
+            });
+
+            document.getElementById('completion-text').innerText = `${checkedCount}/12`;
+            document.getElementById('progress-bar').style.width = `${(checkedCount / 12) * 100}%`;
+
+            if(checkedCount === 12) {
+                document.getElementById('progress-bar').classList.remove('bg-brand-500');
+                document.getElementById('progress-bar').classList.add('bg-green-500');
+                document.getElementById('completion-text').classList.add('text-green-500');
+            } else {
+                document.getElementById('progress-bar').classList.add('bg-brand-500');
+                document.getElementById('progress-bar').classList.remove('bg-green-500');
+                document.getElementById('completion-text').classList.remove('text-green-500');
+            }
+
+            localStorage.setItem(localDateKey, JSON.stringify(state));
+        }
+
+        function loadChecklistState() {
+            const checkboxes = document.querySelectorAll('.checklist-item');
+            checkboxes.forEach(cb => cb.checked = false);
+
+            const saved = localStorage.getItem(localDateKey);
+            if (saved) {
+                const state = JSON.parse(saved);
+                checkboxes.forEach(cb => {
+                    if (state[cb.dataset.index]) {
+                        cb.checked = true;
+                    }
+                });
+            }
+            updateProgress();
+        }
+
+        function renderRoadmaps() {
+            const container = document.getElementById('roadmap-container');
+            container.innerHTML = '';
+            skillsData.forEach(skill => {
+                const block = document.createElement('div');
+                block.className = "bg-dark-800 rounded-xl overflow-hidden border border-dark-700";
+                block.innerHTML = `
+                    <div class="bg-dark-900/50 p-4 border-b border-dark-700 flex items-center gap-3">
+                        <i class="ph-fill ${skill.icon} text-2xl text-brand-500"></i>
+                        <h4 class="text-lg font-serif font-semibold text-white">${skill.title}</h4>
+                    </div>
+                    <div class="p-4 grid gap-4">
+                        <div class="flex gap-4 items-start">
+                            <span class="text-brand-400 font-bold bg-brand-900/30 px-2 py-1 rounded text-xs">Q1</span>
+                            <p class="text-gray-300 text-sm flex-1 pt-1">${skill.roadmap.Q1}</p>
+                        </div>
+                        <div class="flex gap-4 items-start">
+                            <span class="text-brand-400 font-bold bg-brand-900/30 px-2 py-1 rounded text-xs">Q2</span>
+                            <p class="text-gray-300 text-sm flex-1 pt-1">${skill.roadmap.Q2}</p>
+                        </div>
+                        <div class="flex gap-4 items-start">
+                            <span class="text-brand-400 font-bold bg-brand-900/30 px-2 py-1 rounded text-xs">Q3</span>
+                            <p class="text-gray-300 text-sm flex-1 pt-1">${skill.roadmap.Q3}</p>
+                        </div>
+                        <div class="flex gap-4 items-start">
+                            <span class="text-brand-400 font-bold bg-brand-900/30 px-2 py-1 rounded text-xs">Q4</span>
+                            <p class="text-gray-300 text-sm flex-1 pt-1">${skill.roadmap.Q4}</p>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(block);
+            });
+        }
+
+        function renderPillars() {
+            const container = document.getElementById('pillars-container');
+            container.innerHTML = '';
+            skillsData.forEach((skill, i) => {
+                const block = document.createElement('div');
+                block.className = "bg-dark-800 rounded-xl p-5 border border-dark-700 flex gap-4 items-start";
+                block.innerHTML = `
+                    <div class="bg-dark-900 p-3 rounded-lg border border-dark-600 shrink-0">
+                        <i class="ph-fill ${skill.icon} text-2xl text-brand-400"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-dark-600 font-bold text-sm">#${i+1}</span>
+                            <h4 class="text-lg font-serif font-semibold text-white">${skill.title}</h4>
+                        </div>
+                        <p class="text-gray-400 text-sm leading-relaxed">${skill.philosophy}</p>
+                    </div>
+                `;
+                container.appendChild(block);
+            });
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => {
+                el.classList.add('hidden');
+                el.classList.remove('block');
+            });
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.classList.remove('bg-dark-700', 'text-white', 'shadow');
+                el.classList.add('text-gray-400');
+            });
+
+            document.getElementById(`content-${tabId}`).classList.remove('hidden');
+            document.getElementById(`content-${tabId}`).classList.add('block');
+            
+            const btn = document.getElementById(`tab-${tabId}`);
+            btn.classList.add('bg-dark-700', 'text-white', 'shadow');
+            btn.classList.remove('text-gray-400');
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
