@@ -1,58 +1,65 @@
 {
-  "generated_at": "2026-08-17T09:03:18Z",
+  "generated_at": "2026-08-17T09:52:07Z",
   "model": "gemma-4-26b-a4b-it",
   "source": "Open-Meteo live telemetry + Windfyre ML baseline",
   "cities": {
     "bengaluru-nandini-layout": {
       "status": "ok",
-      "summary": "Bengaluru is experiencing overcast conditions with significant wind gusts and lower than average humidity.",
-      "current_conditions": "Temperature is 29.7C with 48% humidity, overcast skies, and wind gusts reaching 42.8 km/h from the west.",
-      "baseline_comparison": "Recent observations show lower humidity levels compared to the ML baseline, while wind speeds and gusts are slightly elevated.",
-      "next_24h_outlook": "Expect overcast skies with light precipitation, wind speeds around 14.8 km/h, and humidity around 72.4%.",
-      "next_7d_outlook": "The week ahead shows variable weather with intermittent precipitation, wind speeds between 13.2 and 17.0 km/h, and humidity levels fluctuating between 70% and 80%.",
+      "summary": "Bengaluru is experiencing overcast conditions with significant wind gusts and lower than expected humidity compared to recent historical averages.",
+      "current_conditions": "Current temperature is 29.8C with 47% humidity and wind speeds of 16.9 km/h, with gusts up to 43.2 km/h.",
+      "baseline_comparison": "Recent observations show lower humidity levels (71-78%) compared to the ML baseline of approximately 80-82%.",
+      "next_24h_outlook": "The next 24 hours will likely see continued overcast conditions with light precipitation and wind gusts up to 45 km/h.",
+      "next_7d_outlook": "The 7-day forecast indicates variable weather with intermittent precipitation, particularly on August 23rd, and sustained high wind speeds.",
       "anomalies": [
         {
           "type": "humidity",
           "severity": "medium",
           "timeframe": "Last 7 days",
-          "description": "Humidity levels have consistently been lower than the ML baseline throughout the week."
+          "description": "Humidity levels have consistently been lower than the ML baseline, ranging from 71% to 78%."
         }
       ],
       "watch_items": [
-        "Wind gusts up to 52.2 km/h observed recently."
+        "High wind gusts up to 52 km/h observed recently.",
+        "Monitor for increased precipitation on August 23rd."
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecasts are subject to uncertainty due to model validation metrics. Check local updates for real-time changes.",
-      "updated_at": "2026-08-17T09:03:18Z"
+      "data_quality_note": "Forecast uncertainty is inherent; model validation shows a temperature MAE of 1.08C and a wind speed MAE of 3.17 km/h.",
+      "updated_at": "2026-08-17T09:52:07Z"
     },
     "nagamangala": {
       "status": "ok",
-      "summary": "Nagamangala is experiencing elevated wind speeds and lower humidity compared to historical baselines.",
-      "current_conditions": "Current temperature is 30.4C with 48% humidity, wind speed 22.1 km/h from 269 degrees, and gusts up to 44.6 km/h.",
-      "baseline_comparison": "Recent observations show wind speeds consistently higher than the ML baseline, while humidity levels are notably lower.",
-      "next_24h_outlook": "The next 24 hours will see continued high wind speeds and gusts up to 50 km/h, with light precipitation.",
-      "next_7d_outlook": "The 7-day forecast indicates variable weather with a significant precipitation spike on August 19th and sustained high wind speeds.",
+      "summary": "Nagamangala is experiencing higher than baseline wind speeds and lower humidity levels compared to recent historical averages.",
+      "current_conditions": "Current temperature is 30.4C with 47% humidity and wind speeds of 23.4 km/h from the west, with gusts up to 45.0 km/h.",
+      "baseline_comparison": "Recent observations show wind speeds consistently higher than the ML baseline, while humidity remains significantly lower than historical norms.",
+      "next_24h_outlook": "The next 24 hours will see continued high wind speeds and gusts up to 50 km/h, with light precipitation expected.",
+      "next_7d_outlook": "The 7-day forecast indicates fluctuating wind speeds and humidity, with a notable spike in precipitation on August 19th.",
       "anomalies": [
         {
           "type": "wind",
           "severity": "high",
-          "timeframe": "Last 7 days",
-          "description": "Average wind speeds have been consistently higher than the ML baseline throughout the week."
+          "timeframe": "Recent observations (Aug 10-16)",
+          "description": "Average wind speeds have been consistently higher than the ML baseline throughout the week. "
         },
         {
           "type": "humidity",
           "severity": "medium",
-          "timeframe": "Last 7 days",
-          "description": "Relative humidity has been consistently lower than the ML baseline, hovering around 70% compared to 80%."
+          "timeframe": "Recent observations (Aug 10-16)",
+          "description": "Relative humidity has been consistently lower than the ML baseline. "
+        },
+        {
+          "type": "precipitation",
+          "severity": "medium",
+          "timeframe": "August 19th forecast",
+          "description": "Forecasted precipitation of 9.1mm is significantly higher than the baseline of 2.7mm. "
         }
       ],
       "watch_items": [
-        "High wind gusts up to 50 km/h expected.",
-        "Significant precipitation on August 19th."
+        "High wind speeds and gusts up to 50 km/h.",
+        "Significant precipitation spike on August 19th."
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecast uncertainty is inherent; model validation data shows moderate accuracy for wind and temperature.",
-      "updated_at": "2026-08-17T09:03:18Z"
+      "data_quality_note": "Forecasts are inherently uncertain; model validation data suggests moderate accuracy for wind and temperature.",
+      "updated_at": "2026-08-17T09:52:07Z"
     }
   }
 }
