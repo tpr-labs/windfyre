@@ -2,7 +2,8 @@ name: Refresh AI weather analysis
 
 on:
   schedule:
-    - cron: '7,22,37,52 * * * *'
+    - cron: '0 7-22 * * *'
+      timezone: 'Asia/Kolkata'
   workflow_dispatch:
   repository_dispatch:
     types: [refresh-ai-weather-analysis]
