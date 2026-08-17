@@ -7,6 +7,7 @@ import json
 import math
 import os
 import tempfile
+import time
 from collections import Counter, defaultdict
 from datetime import UTC, datetime
 from pathlib import Path
@@ -64,13 +65,13 @@ def read_json(path: Path) -> dict:
         return json.load(handle)
 
 
-def request_json(url: str, *, params: dict | None = None, payload: dict | None = None) -> dict:
+def request_json(url: str, *, params: dict | None = None, payload: dict | None = None, timeout: int = 60) -> dict:
     if params:
         url = f"{url}?{urlencode(params)}"
     data = json.dumps(payload).encode("utf-8") if payload is not None else None
     request = Request(url, data=data, headers={"Content-Type": "application/json", "Accept": "application/json"})
     try:
-        with urlopen(request, timeout=60) as response:
+        with urlopen(request, timeout=timeout) as response:
             return json.load(response)
     except HTTPError as error:
         detail = error.read().decode("utf-8", "replace")[:1000]
@@ -194,12 +195,21 @@ def gemini_analysis(context: dict, api_key: str) -> dict:
             "responseJsonSchema": ANALYSIS_SCHEMA,
         },
     }
-    response = request_json(f"{GEMINI_URL}?{urlencode({'key': api_key})}", payload=payload)
-    try:
-        text = response["candidates"][0]["content"]["parts"][0]["text"]
-        return json.loads(text)
-    except (IndexError, KeyError, TypeError, json.JSONDecodeError) as error:
-        raise RuntimeError("Gemini returned no valid JSON analysis") from error
+    last_error: Exception | None = None
+    for attempt in range(3):
+        try:
+            response = request_json(
+                f"{GEMINI_URL}?{urlencode({'key': api_key})}",
+                payload=payload,
+                timeout=180,
+            )
+            text = response["candidates"][0]["content"]["parts"][0]["text"]
+            return json.loads(text)
+        except (TimeoutError, OSError, IndexError, KeyError, TypeError, json.JSONDecodeError, RuntimeError) as error:
+            last_error = error
+            if attempt < 2:
+                time.sleep(5 * (attempt + 1))
+    raise RuntimeError("Gemini did not return a valid analysis after 3 attempts") from last_error
 
 
 def validate_analysis(analysis: dict) -> None:
