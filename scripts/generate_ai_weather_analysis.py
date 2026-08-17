@@ -191,6 +191,8 @@ def gemini_analysis(context: dict, api_key: str) -> dict:
         "contents": [{"role": "user", "parts": [{"text": analysis_prompt(context)}]}],
         "generationConfig": {
             "temperature": 0.2,
+            "maxOutputTokens": 1024,
+            "thinkingConfig": {"thinkingLevel": "minimal"},
             "responseMimeType": "application/json",
             "responseJsonSchema": ANALYSIS_SCHEMA,
         },
