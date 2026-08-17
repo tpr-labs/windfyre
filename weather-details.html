@@ -604,6 +604,23 @@
             </div>
         </div>
 
+        <!-- Scheduled AI Weather Analysis -->
+        <section id="ai-weather-analysis-section" class="bg-slate-900/30 border border-slate-800/60 rounded-3xl p-6 backdrop-blur-md">
+            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-5">
+                <div>
+                    <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-wand-magic-sparkles text-violet-300"></i>
+                        AI Weather Analysis
+                    </h3>
+                    <p class="text-sm text-slate-400 mt-1">Scheduled interpretation of Open-Meteo telemetry against the embedded ML baseline. Informational only.</p>
+                </div>
+                <span id="ai-analysis-status" class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-950/60 text-slate-400 border border-slate-800/70 uppercase font-bold self-start">Loading</span>
+            </div>
+            <div id="ai-analysis-content" class="rounded-2xl border border-slate-800/80 bg-slate-950/40 p-5 text-sm text-slate-400">
+                Loading scheduled analysis…
+            </div>
+        </section>
+
         <!-- Full-Year Predicted Wind and Rain -->
         <div class="bg-slate-900/30 border border-slate-800/60 rounded-3xl p-6 backdrop-blur-md">
             <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-5">
@@ -734,16 +751,6 @@
                     <div id="visit-caution" class="mt-1 font-bold text-white">--</div>
                 </div>
             </div>
-            <div class="mt-5">
-                <div class="flex items-center justify-between gap-3 mb-3">
-                    <h4 class="text-sm font-bold text-white flex items-center gap-2">
-                        <i class="fa-solid fa-location-dot text-cyan-400"></i>
-                        10 Places To Visit
-                    </h4>
-                    <span class="text-[10px] font-mono uppercase tracking-wider text-slate-500">Travel friendly picks</span>
-                </div>
-                <div id="visit-places-grid" class="overflow-hidden rounded-2xl border border-slate-800/80 bg-slate-950/35"></div>
-            </div>
             <div class="mt-4 pt-4 border-t border-slate-800/70 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs">
                 <p id="visit-reason" class="text-slate-400 leading-relaxed">--</p>
                 <a id="visit-source-link" href="#" target="_blank" rel="noopener noreferrer" class="hidden shrink-0 text-cyan-400 hover:text-cyan-300 font-mono">View source</a>
@@ -868,8 +875,13 @@
         const appBaseUrl = new URL('.', window.location.href);
         const indexUrl = new URL('predictions/city-index.json', appBaseUrl).href;
         const travelSeasonsUrl = new URL('predictions/travel-seasons.json', appBaseUrl).href;
+        const aiAnalysisConfigUrl = new URL('predictions/ai-analysis-config.json', appBaseUrl).href;
+        const aiWeatherAnalysisUrl = new URL('predictions/ai-weather-analysis.json', appBaseUrl).href;
         const cityPayloadCache = new Map();
         let travelSeasonsData = null;
+        let aiAnalysisConfigData = { cities: {} };
+        let aiWeatherAnalysisData = null;
+        let aiAnalysisConfigAvailable = false;
         let cityIndex = null;
         let activeCityMeta = null;
         let bengaluruFormatter = buildDateFormatter(BENGALURU_LOCATION.timezone);
@@ -2200,7 +2212,7 @@
             }
 
             weeklyChart = new Chart(ctx, {
-                type: 'bar',
+                type: 'line',
                 data: {
                     labels: labels,
                     datasets: [
@@ -2223,16 +2235,19 @@
                             order: 1 
                         },
                         {
-                            type: 'bar',
                             label: `Observed / Forecast Max (${unitStr})`,
                             data: liveSpeedDataset,
-                            backgroundColor: 'rgba(34, 211, 238, 0.25)', 
-                            borderColor: '#06b6d4',
-                            hoverBackgroundColor: 'rgba(34, 211, 238, 0.55)',
-                            borderWidth: 1.5,
-                            borderRadius: 6,
-                            pointStyle: 'line',
-                            order: 2 
+                            borderColor: '#22d3ee',
+                            backgroundColor: 'rgba(34, 211, 238, 0.08)',
+                            pointBackgroundColor: '#22d3ee',
+                            pointBorderColor: '#0f172a',
+                            pointBorderWidth: 2,
+                            pointRadius: 4,
+                            pointHoverRadius: 7,
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.35,
+                            order: 2
                         },
                         {
                             type: 'line',
@@ -2268,6 +2283,8 @@
                             }
                         },
                         tooltip: {
+                            mode: 'index',
+                            intersect: false,
                             backgroundColor: '#0f172a',
                             borderColor: '#1e293b',
                             borderWidth: 1,
@@ -2966,6 +2983,64 @@
             }[char]));
         }
 
+        function formatAnalysisTimestamp(value) {
+            const timestamp = new Date(value);
+            if (Number.isNaN(timestamp.getTime())) return 'time unavailable';
+            return timestamp.toLocaleString('en-IN', {
+                dateStyle: 'medium', timeStyle: 'short', timeZone: BENGALURU_LOCATION.timezone
+            });
+        }
+
+        function renderAiWeatherAnalysis() {
+            const content = document.getElementById('ai-analysis-content');
+            const badge = document.getElementById('ai-analysis-status');
+            if (!content || !badge) return;
+
+            const slug = activeCityMeta?.slug;
+            if (!aiAnalysisConfigAvailable) {
+                badge.textContent = 'Unavailable';
+                badge.className = 'px-2 py-0.5 rounded text-[10px] font-mono bg-slate-950/60 text-slate-400 border border-slate-800/70 uppercase font-bold self-start';
+                content.innerHTML = '<p>The AI analysis configuration is unavailable. Existing weather dashboards remain unaffected.</p>';
+                return;
+            }
+            const enabled = Boolean(slug && aiAnalysisConfigData?.cities?.[slug]?.enabled);
+            const analysis = slug ? aiWeatherAnalysisData?.cities?.[slug] : null;
+            if (!enabled) {
+                badge.textContent = 'Disabled for this city';
+                badge.className = 'px-2 py-0.5 rounded text-[10px] font-mono bg-slate-950/60 text-slate-400 border border-slate-800/70 uppercase font-bold self-start';
+                content.innerHTML = '<p>This scheduled AI analysis is not enabled for the selected city.</p>';
+                return;
+            }
+            if (!analysis || analysis.status !== 'ok') {
+                badge.textContent = 'Awaiting next run';
+                badge.className = 'px-2 py-0.5 rounded text-[10px] font-mono bg-amber-950/60 text-amber-300 border border-amber-900/40 uppercase font-bold self-start';
+                content.innerHTML = '<p>The city is enabled, but no published AI analysis is available yet. The scheduled workflow will publish it after a successful run.</p>';
+                return;
+            }
+
+            const anomalyRows = Array.isArray(analysis.anomalies) && analysis.anomalies.length
+                ? analysis.anomalies.map(anomaly => `<li class="rounded-xl border border-rose-900/40 bg-rose-950/15 p-3"><span class="text-[10px] font-mono uppercase text-rose-300">${escapeHtml(anomaly.severity)} · ${escapeHtml(anomaly.type)} · ${escapeHtml(anomaly.timeframe)}</span><p class="mt-1 text-xs text-slate-300">${escapeHtml(anomaly.description)}</p></li>`).join('')
+                : '<li class="text-xs text-slate-500">No material anomalies identified in this run.</li>';
+            const watchItems = Array.isArray(analysis.watch_items) && analysis.watch_items.length
+                ? analysis.watch_items.map(item => `<li>${escapeHtml(item)}</li>`).join('')
+                : '<li>No additional watch items.</li>';
+            const confidenceClass = { high: 'text-emerald-300', medium: 'text-amber-300', low: 'text-rose-300' }[analysis.confidence] || 'text-slate-300';
+
+            badge.textContent = `Updated ${formatAnalysisTimestamp(analysis.updated_at)}`;
+            badge.className = 'px-2 py-0.5 rounded text-[10px] font-mono bg-violet-950/50 text-violet-200 border border-violet-800/50 uppercase font-bold self-start';
+            content.innerHTML = `
+                <div class="space-y-5">
+                    <div><p class="text-base font-bold text-white">${escapeHtml(analysis.summary)}</p><p class="mt-2 text-[11px] font-mono text-slate-500">Last AI analysis updated: ${escapeHtml(formatAnalysisTimestamp(analysis.updated_at))}</p></div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div class="rounded-xl border border-slate-800/80 bg-slate-900/45 p-4"><h4 class="text-xs font-bold text-cyan-300 uppercase tracking-wider">Current conditions</h4><p class="mt-2 text-xs text-slate-300 leading-relaxed">${escapeHtml(analysis.current_conditions)}</p></div>
+                        <div class="rounded-xl border border-slate-800/80 bg-slate-900/45 p-4"><h4 class="text-xs font-bold text-amber-300 uppercase tracking-wider">Baseline comparison</h4><p class="mt-2 text-xs text-slate-300 leading-relaxed">${escapeHtml(analysis.baseline_comparison)}</p></div>
+                        <div class="rounded-xl border border-slate-800/80 bg-slate-900/45 p-4"><h4 class="text-xs font-bold text-emerald-300 uppercase tracking-wider">Next 24 hours</h4><p class="mt-2 text-xs text-slate-300 leading-relaxed">${escapeHtml(analysis.next_24h_outlook)}</p></div>
+                        <div class="rounded-xl border border-slate-800/80 bg-slate-900/45 p-4"><h4 class="text-xs font-bold text-violet-200 uppercase tracking-wider">Next 7 days</h4><p class="mt-2 text-xs text-slate-300 leading-relaxed">${escapeHtml(analysis.next_7d_outlook)}</p></div>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4"><div><h4 class="text-xs font-bold text-rose-300 uppercase tracking-wider mb-2">Anomalies</h4><ul class="space-y-2">${anomalyRows}</ul></div><div class="rounded-xl border border-slate-800/80 bg-slate-900/45 p-4"><h4 class="text-xs font-bold text-slate-200 uppercase tracking-wider">Watch items</h4><ul class="mt-2 space-y-2 list-disc list-inside text-xs text-slate-300">${watchItems}</ul><p class="mt-4 text-xs text-slate-400">Confidence: <span class="font-bold ${confidenceClass}">${escapeHtml(analysis.confidence)}</span></p><p class="mt-2 text-[11px] text-slate-500">${escapeHtml(analysis.data_quality_note)}</p></div></div>
+                </div>`;
+        }
+
         function monthMetrics(monthIndex) {
             const bucket = monthRecords(monthIndex);
             const temperatures = bucket.map(record => record.tc).filter(value => typeof value === 'number');
@@ -3141,30 +3216,6 @@
                 `).join('');
             }
 
-            const placesGrid = document.getElementById('visit-places-grid');
-            if (placesGrid) {
-                const places = Array.isArray(recommendation.places_to_visit) ? recommendation.places_to_visit.slice(0, 10) : [];
-                placesGrid.innerHTML = places.length ? places.map((place, index) => `
-                    <div class="grid grid-cols-[44px_1fr] md:grid-cols-[52px_1.15fr_0.85fr] gap-3 md:gap-5 items-start px-4 py-3 border-b border-slate-800/70 last:border-b-0 hover:bg-slate-900/40 transition-colors">
-                        <div class="h-8 w-8 rounded-full border border-cyan-500/30 bg-cyan-950/30 text-cyan-400 grid place-items-center text-xs font-mono font-bold">${String(index + 1).padStart(2, '0')}</div>
-                        <div>
-                            <div class="flex flex-wrap items-center gap-2">
-                                <span class="font-bold text-white">${escapeHtml(place.name || 'Place to visit')}</span>
-                                <span class="md:hidden px-2 py-0.5 rounded-full border border-slate-800/80 bg-slate-900/60 text-[10px] font-mono uppercase tracking-wider text-slate-400">${escapeHtml(place.type || `Pick ${index + 1}`)}</span>
-                            </div>
-                            <p class="text-xs text-slate-400 mt-1 leading-relaxed">${escapeHtml(place.note || 'Check live weather before finalizing the day plan.')}</p>
-                        </div>
-                        <div class="hidden md:flex justify-end">
-                            <span class="px-2 py-1 rounded-full border border-slate-800/80 bg-slate-900/60 text-[10px] font-mono uppercase tracking-wider text-slate-400">${escapeHtml(place.type || `Pick ${index + 1}`)}</span>
-                        </div>
-                    </div>
-                `).join('') : `
-                    <div class="p-4 text-sm text-slate-400">
-                        No sourced place list is stored for this city yet. The visit window above is still derived from the local weather prediction.
-                    </div>
-                `;
-            }
-
             const link = document.getElementById('visit-source-link');
             if (link) {
                 if (recommendation.source_url) {
@@ -3209,6 +3260,7 @@
             updateCityLabels();
             buildMonthlyCards();
             renderTravelSeason();
+            renderAiWeatherAnalysis();
             telemetryData = buildPredictionOnlyData();
             updateUI();
             syncLiveTelemetry();
@@ -3251,9 +3303,11 @@
 
         async function loadCityIndex() {
             setCityLoading('Loading city index');
-            const [response, travelResponse] = await Promise.all([
+            const [response, travelResponse, aiConfigResponse, aiAnalysisResponse] = await Promise.all([
                 fetch(indexUrl, { cache: 'no-cache' }),
-                fetch(travelSeasonsUrl, { cache: 'no-cache' }).catch(() => null)
+                fetch(travelSeasonsUrl, { cache: 'no-cache' }).catch(() => null),
+                fetch(aiAnalysisConfigUrl, { cache: 'no-cache' }).catch(() => null),
+                fetch(aiWeatherAnalysisUrl, { cache: 'no-cache' }).catch(() => null)
             ]);
             if (!response.ok) throw new Error(`City index failed: HTTP ${response.status}`);
             cityIndex = await response.json();
@@ -3261,6 +3315,13 @@
                 travelSeasonsData = await travelResponse.json();
             } else {
                 travelSeasonsData = { generated_at: '2026-05-27', cities: {} };
+            }
+            if (aiConfigResponse?.ok) {
+                aiAnalysisConfigData = await aiConfigResponse.json();
+                aiAnalysisConfigAvailable = true;
+            }
+            if (aiAnalysisResponse?.ok) {
+                aiWeatherAnalysisData = await aiAnalysisResponse.json();
             }
             if (!cityIndex || !Array.isArray(cityIndex.cities) || !cityIndex.cities.length) {
                 throw new Error('City index has no cities');

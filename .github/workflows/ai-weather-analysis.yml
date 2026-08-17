@@ -1,0 +1,45 @@
+name: Refresh AI weather analysis
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ai-weather-analysis-main
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Generate AI weather analysis
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python scripts/generate_ai_weather_analysis.py
+
+      - name: Commit refreshed analysis
+        run: |
+          if [ -z "$(git status --porcelain -- predictions/ai-weather-analysis.json)" ]; then
+            echo "Analysis is unchanged."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add predictions/ai-weather-analysis.json
+          git commit -m "chore: refresh AI weather analysis"
+          git push origin HEAD:main

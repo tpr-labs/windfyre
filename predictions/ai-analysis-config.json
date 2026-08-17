@@ -1,0 +1,19 @@
+{
+  "cities": {
+    "bengaluru-nandini-layout": { "enabled": true },
+    "nagamangala": { "enabled": true },
+    "sakleshpur": { "enabled": false },
+    "mangalore": { "enabled": false },
+    "ooty": { "enabled": false },
+    "wayanad": { "enabled": false },
+    "munnar": { "enabled": false },
+    "shimla": { "enabled": false },
+    "meghalaya": { "enabled": false },
+    "jaipur": { "enabled": false },
+    "mysuru": { "enabled": false },
+    "chennai": { "enabled": false },
+    "alappuzha": { "enabled": false },
+    "sirsi": { "enabled": false },
+    "kodaikanal": { "enabled": false }
+  }
+}
