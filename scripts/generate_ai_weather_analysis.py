@@ -109,7 +109,15 @@ def weather_context(city: dict) -> dict:
         "current": "temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m,precipitation",
         "hourly": "temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m,precipitation",
     }
-    return request_json(OPEN_METEO_URL, params=params)
+    last_error: Exception | None = None
+    for attempt in range(3):
+        try:
+            return request_json(OPEN_METEO_URL, params=params, timeout=45)
+        except RuntimeError as error:
+            last_error = error
+            if attempt < 2:
+                time.sleep(3 * (attempt + 1))
+    raise RuntimeError(f"Open-Meteo telemetry failed for {city['slug']} after 3 attempts") from last_error
 
 
 def daily_context(telemetry: dict, baseline_records: dict[str, dict], timezone: str) -> list[dict]:
