@@ -180,7 +180,7 @@ Identify material deviations in wind speed/direction, gusts, temperature, humidi
 Describe current conditions, the next 24 hours, the next 7 days, and noteworthy anomalies.
 Do not invent observations, claim a causal explanation, provide travel advice, or issue official weather or safety warnings.
 Forecasts are uncertain: reflect this in confidence and data_quality_note.
-Return only a JSON object matching the supplied response schema. Keep the summary at or below 280 characters.
+Return only a JSON object matching the supplied response schema. Be compact: use one sentence of at most 180 characters for each narrative field, at most 3 anomalies, and at most 2 watch items. Keep the summary at or below 180 characters.
 
 CONTEXT:
 """ + json.dumps(context, separators=(",", ":"))
@@ -191,7 +191,7 @@ def gemini_analysis(context: dict, api_key: str) -> dict:
         "contents": [{"role": "user", "parts": [{"text": analysis_prompt(context)}]}],
         "generationConfig": {
             "temperature": 0.2,
-            "maxOutputTokens": 1024,
+            "maxOutputTokens": 1536,
             "thinkingConfig": {"thinkingLevel": "minimal"},
             "responseMimeType": "application/json",
             "responseJsonSchema": ANALYSIS_SCHEMA,
