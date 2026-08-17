@@ -41,13 +41,6 @@
             background: #172033;
             border-radius: 4px;
         }
-        .mini-chart svg {
-            overflow: visible;
-        }
-        .mini-chart path,
-        .wind-strip span {
-            transition: height 250ms ease, opacity 250ms ease;
-        }
         body.light-mode {
             background-color: #f8fafc !important;
             background-image:
@@ -122,9 +115,57 @@
         body.light-mode .windfyre-brand {
             background-image: linear-gradient(90deg, #0f172a, #334155, #64748b) !important;
         }
-        body.light-mode .mini-chart {
-            background-color: rgba(248, 250, 252, 0.9) !important;
+        .city-table-scroll {
+            scrollbar-color: #334155 #0b1120;
+            scrollbar-width: thin;
+            padding-bottom: 0.5rem;
         }
+        .city-table-scroll::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.38);
+            border-radius: 8px;
+            margin: 0 16px;
+        }
+        .city-table-scroll::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 8px;
+        }
+        .city-table {
+            border-collapse: separate;
+            border-spacing: 0;
+            min-width: 1240px;
+        }
+        .city-table th,
+        .city-table td {
+            border-bottom: 1px solid rgba(30, 41, 59, 0.72);
+        }
+        .city-table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            background: rgba(6, 10, 19, 0.98);
+            box-shadow: inset 0 -1px 0 rgba(30, 41, 59, 0.85);
+        }
+        .city-table .sticky-city {
+            position: sticky;
+            left: 0;
+            z-index: 15;
+            background: rgba(11, 17, 30, 0.98);
+            box-shadow: 10px 0 16px -14px rgba(0, 0, 0, 0.9);
+        }
+        .city-table thead .sticky-city { z-index: 30; background: rgba(6, 10, 19, 0.98); }
+        .city-table .sticky-details {
+            position: sticky;
+            right: 0;
+            z-index: 15;
+            background: rgba(11, 17, 30, 0.98);
+            box-shadow: -10px 0 16px -14px rgba(0, 0, 0, 0.9);
+        }
+        .city-table thead .sticky-details { z-index: 30; background: rgba(6, 10, 19, 0.98); }
+        .city-table .data-row:hover td:not(.sticky-city):not(.sticky-details) { background: rgba(30, 41, 59, 0.34); }
+        body.light-mode .city-table thead th { background: rgba(248, 250, 252, 0.98) !important; }
+        body.light-mode .city-table .sticky-city,
+        body.light-mode .city-table .sticky-details { background: rgba(255, 255, 255, 0.98) !important; }
+        body.light-mode .city-table .data-row:hover td:not(.sticky-city):not(.sticky-details) { background: rgba(241, 245, 249, 0.9); }
     </style>
 </head>
 <body class="min-h-screen text-slate-100 selection:bg-cyan-500/30 selection:text-cyan-200">
@@ -200,9 +241,16 @@
             </div>
         </section>
 
-        <section id="city-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-            <div class="rounded-3xl border border-slate-800/70 bg-slate-900/40 p-6 text-slate-400">
-                Loading city prediction cards...
+        <section class="rounded-3xl border border-slate-800/70 bg-slate-900/40 backdrop-blur-md shadow-2xl shadow-black/10 overflow-hidden">
+            <div class="flex items-center justify-between gap-4 border-b border-slate-800/70 bg-slate-950/35 px-4 py-3 sm:px-5">
+                <p class="text-xs text-slate-400">Swipe horizontally to compare every metric.</p>
+                <div class="hidden shrink-0 items-center gap-4 text-[10px] font-mono uppercase tracking-wider text-slate-400 sm:flex">
+                    <span class="flex items-center gap-1.5"><span class="h-2 w-2 rounded-sm bg-amber-400/80"></span>Predicted</span>
+                    <span class="flex items-center gap-1.5"><span class="h-2 w-2 rounded-sm bg-cyan-400/80"></span>Live</span>
+                </div>
+            </div>
+            <div id="city-grid" class="city-table-scroll max-h-[72vh] overflow-auto">
+                <div class="p-6 text-slate-400">Loading city comparison table...</div>
             </div>
         </section>
     </main>
@@ -416,187 +464,67 @@
             return 'text-rose-300';
         }
 
-        function pointsFor(values, maxValue) {
-            const width = 240;
-            const height = 54;
-            const usableHeight = 42;
-            return values.map((value, index) => {
-                if (typeof value !== 'number') return null;
-                const x = (index / 23) * width;
-                const y = height - 6 - ((value / maxValue) * usableHeight);
-                return `${Math.round(x * 10) / 10},${Math.round(y * 10) / 10}`;
-            });
+        function matchBadgeClasses(score) {
+            if (score === null) return 'border-slate-700 bg-slate-800/65';
+            if (score >= 88) return 'border-emerald-900/70 bg-emerald-950/40';
+            if (score >= 72) return 'border-lime-900/70 bg-lime-950/40';
+            if (score >= 55) return 'border-amber-900/70 bg-amber-950/40';
+            return 'border-rose-900/70 bg-rose-950/40';
         }
 
-        function linePath(points) {
-            let path = '';
-            let open = false;
-            points.forEach(point => {
-                if (!point) {
-                    open = false;
-                    return;
-                }
-                path += `${open ? ' L ' : 'M '}${point}`;
-                open = true;
-            });
-            return path;
+        function formatHumidity(value) {
+            return typeof value === 'number' ? `${Math.round(value)}%` : '--';
         }
 
-        function miniChart(records, predictedField, liveValues, config) {
-            const predicted = records.map(record => record[predictedField]).map(value => typeof value === 'number' ? value : null);
-            const allValues = predicted.concat(liveValues || []).filter(value => typeof value === 'number');
-            const maxValue = Math.max(config.minMax || 1, ...allValues);
-            const predictedPoints = pointsFor(predicted, maxValue);
-            const livePoints = pointsFor(liveValues || Array(24).fill(null), maxValue);
-            const nowHour = localParts(new Date(), 'Asia/Kolkata').hour;
-            const nowX = Math.round((nowHour / 23) * 240 * 10) / 10;
-            const livePath = linePath(livePoints);
-            const predictedPath = linePath(predictedPoints);
-            const liveDots = (liveValues || []).map((value, index) => {
-                if (typeof value !== 'number') return '';
-                const point = livePoints[index].split(',');
-                return `<circle cx="${point[0]}" cy="${point[1]}" r="1.8" fill="${config.liveColor}" opacity="0.85"></circle>`;
-            }).join('');
+        function formatRain(value) {
+            return typeof value === 'number' ? `${Math.round(value * 10) / 10} mm` : '--';
+        }
 
+        function formatDirection(value) {
+            return typeof value === 'number' ? `${Math.round(value)}° ${getCardinal(value)}` : '--';
+        }
+
+        function comparisonCell(predicted, live, formatter) {
             return `
-                <div class="mini-chart h-16 rounded-xl border border-slate-800/60 bg-slate-950/55 p-2">
-                    <svg viewBox="0 0 240 60" class="h-full w-full" preserveAspectRatio="none" role="img" aria-label="${config.label}">
-                        <line x1="${nowX}" y1="4" x2="${nowX}" y2="56" stroke="rgba(148, 163, 184, 0.32)" stroke-width="1" stroke-dasharray="3 4"></line>
-                        <path d="${predictedPath}" fill="none" stroke="${config.predictedColor}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path>
-                        ${livePath ? `<path d="${livePath}" fill="none" stroke="${config.liveColor}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path>${liveDots}` : ''}
-                    </svg>
-                </div>
-            `;
+                <div class="space-y-1.5 whitespace-nowrap text-xs leading-tight">
+                    <div class="flex items-center gap-2"><span class="w-5 font-mono text-[9px] uppercase text-amber-300/70">Prd</span><span class="font-bold text-amber-200">${formatter(predicted)}</span></div>
+                    <div class="flex items-center gap-2"><span class="w-5 font-mono text-[9px] uppercase text-cyan-300/70">Liv</span><span class="font-bold text-cyan-100">${formatter(live)}</span></div>
+                </div>`;
         }
 
-        function cityCard(state) {
+        function directionCell(predicted, live) {
+            const directionLine = (label, value, tone, muted) => typeof value === 'number'
+                ? `<div class="flex items-center gap-2 ${tone}"><span class="w-5 font-mono text-[9px] uppercase opacity-70">${label}</span><span class="flex w-4 justify-center"><i class="fa-solid fa-arrow-up text-[10px]" style="transform:rotate(${value}deg)"></i></span><span class="font-bold">${formatDirection(value)}</span></div>`
+                : `<div class="flex items-center gap-2 ${muted}"><span class="w-5 font-mono text-[9px] uppercase">${label}</span><span class="flex w-4 justify-center"><i class="fa-solid fa-minus text-[9px]"></i></span><span class="font-bold">--</span></div>`;
+            return `<div class="space-y-1.5 whitespace-nowrap text-xs leading-tight">${directionLine('Prd', predicted, 'text-amber-200', 'text-slate-500')}${directionLine('Liv', live, 'text-cyan-100', 'text-slate-500')}</div>`;
+        }
+
+        function cityRow(state) {
             const prediction = predictionForCity(state);
-            const records24 = predicted24Hours(state);
             const rainTotal = predictedRainTotal(state);
-            const liveWindSeries = state.liveHourly ? liveHourlySeries(state, 'wind_speed_10m') : Array(24).fill(null);
-            const liveRainSeries = state.liveHourly ? liveHourlySeries(state, 'precipitation') : Array(24).fill(null);
+            const live = state.live || {};
+            const liveRain = state.liveHourly ? liveRainTotal(state) : null;
             const accuracy = predictionAccuracy(state, prediction);
-            const predictedArrowRotation = Number.isFinite(prediction.direction) ? prediction.direction : 0;
-            const liveArrowRotation = state.live && Number.isFinite(state.live.wind_direction_10m) ? state.live.wind_direction_10m : null;
-            const monthly = state.payload.monthly?.[localParts(new Date(), state.payload.timezone).month - 1];
-            const liveRain = state.live ? liveRainTotal(state) : null;
-            const accuracyPanel = state.live ? `
-                <div class="rounded-2xl border border-slate-800/60 bg-slate-950/45 p-3 flex items-center justify-between gap-3">
-                    <span class="text-[10px] font-mono uppercase tracking-widest text-slate-500">Prediction accuracy</span>
-                    <span class="text-lg font-black ${matchClasses(accuracy)}">${accuracy === null ? '--' : `${accuracy}%`}</span>
-                </div>
-            ` : '';
-            const comparisonPanel = state.live ? `
-                <div class="rounded-2xl border border-cyan-900/35 bg-cyan-950/10 p-3 space-y-3">
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <span class="text-[10px] font-mono uppercase tracking-widest text-amber-300">Predicted weather</span>
-                            <div class="mt-1 flex items-center gap-2 text-base font-black text-white">
-                                <i class="${weatherIcon(prediction.weatherCode)} text-sm"></i>
-                                ${formatTemp(prediction.temperature)}
-                            </div>
-                            <div class="text-[11px] text-slate-400">${weatherText(prediction.weatherCode)}</div>
-                        </div>
-                        <div>
-                            <span class="text-[10px] font-mono uppercase tracking-widest text-cyan-300">Live weather</span>
-                            <div class="mt-1 text-base font-black text-cyan-100">${formatTemp(state.live.temperature_2m)}</div>
-                            <div class="text-[11px] text-slate-400">${weatherText(state.live.weather_code)}</div>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-3 border-t border-slate-800/70 pt-3">
-                        <div>
-                            <span class="text-[10px] font-mono uppercase tracking-widest text-amber-300">Predicted rain</span>
-                            <div class="mt-1 text-base font-black text-white">${Math.round(rainTotal * 10) / 10} mm</div>
-                            <div class="text-[11px] text-slate-400">next 24h</div>
-                        </div>
-                        <div>
-                            <span class="text-[10px] font-mono uppercase tracking-widest text-cyan-300">Live rain</span>
-                            <div class="mt-1 text-base font-black text-cyan-100">${liveRain === null ? '-- mm' : `${Math.round(liveRain * 10) / 10} mm`}</div>
-                            <div class="text-[11px] text-slate-400">observed + forecast</div>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-3 border-t border-slate-800/70 pt-3">
-                        <div>
-                            <span class="text-[10px] font-mono uppercase tracking-widest text-amber-300">Predicted wind</span>
-                            <div class="mt-1 text-base font-black text-white">${formatSpeed(prediction.speed)}</div>
-                            <div class="text-[11px] text-slate-400">${Math.round(prediction.direction)}° ${getCardinal(prediction.direction)}</div>
-                        </div>
-                        <div>
-                            <span class="text-[10px] font-mono uppercase tracking-widest text-cyan-300">Live wind</span>
-                            <div class="mt-1 text-base font-black text-cyan-100">${formatSpeed(state.live.wind_speed_10m)}</div>
-                            <div class="text-[11px] text-slate-400">${Math.round(state.live.wind_direction_10m)}° ${getCardinal(state.live.wind_direction_10m)}</div>
-                        </div>
-                    </div>
-                </div>
-            ` : '';
-
+            const weatherCell = `
+                <div class="space-y-1.5 whitespace-nowrap text-xs leading-tight">
+                    <div class="flex items-center gap-2 text-amber-200"><span class="w-5 font-mono text-[9px] uppercase text-amber-300/70">Prd</span><i class="${weatherIcon(prediction.weatherCode)} w-4 text-center text-[11px]"></i><span class="font-bold">${weatherText(prediction.weatherCode)}</span></div>
+                    <div class="flex items-center gap-2 text-cyan-100"><span class="w-5 font-mono text-[9px] uppercase text-cyan-300/70">Liv</span>${typeof live.weather_code === 'number' ? `<i class="${weatherIcon(live.weather_code)} w-4 text-center text-[11px]"></i><span class="font-bold">${weatherText(live.weather_code)}</span>` : '<i class="fa-solid fa-minus w-4 text-center text-[9px] text-slate-500"></i><span class="font-bold text-slate-500">--</span>'}</div>
+                </div>`;
             return `
-                <article class="rounded-3xl border border-slate-800/75 bg-slate-900/45 p-5 backdrop-blur-md shadow-2xl shadow-black/10 flex flex-col gap-4">
-                    <div class="flex items-start justify-between gap-4">
-                        <div class="min-w-0">
-                            <h3 class="text-lg font-extrabold text-white truncate">${escapeHtml(state.meta.displayName || state.payload.displayName || state.meta.slug)}</h3>
-                            <p class="text-xs text-slate-500 truncate">${escapeHtml(state.meta.location || state.payload.location)}</p>
-                        </div>
-                        <div class="flex items-start gap-2 shrink-0">
-                            <div class="space-y-1 text-center">
-                                <div class="h-14 w-14 rounded-full border border-amber-700/45 bg-slate-950/70 flex items-center justify-center relative">
-                                    <i class="fa-solid fa-arrow-up text-amber-300 transition-transform absolute" title="Predicted direction" style="transform: rotate(${predictedArrowRotation}deg)"></i>
-                                </div>
-                                <div class="text-[8px] font-mono uppercase tracking-wider text-amber-300/80">Pred</div>
-                            </div>
-                            ${liveArrowRotation !== null ? `
-                                <div class="space-y-1 text-center">
-                                    <div class="h-14 w-14 rounded-full border border-cyan-600/50 bg-cyan-950/10 flex items-center justify-center relative shadow-[0_0_18px_rgba(34,211,238,0.08)]">
-                                        <i class="fa-solid fa-arrow-up text-cyan-300 transition-transform absolute drop-shadow-[0_0_8px_rgba(34,211,238,0.65)]" title="Live direction" style="transform: rotate(${liveArrowRotation}deg)"></i>
-                                    </div>
-                                    <div class="text-[8px] font-mono uppercase tracking-wider text-cyan-300/80">Live</div>
-                                </div>
-                            ` : ''}
-                        </div>
-                    </div>
-
-                    ${accuracyPanel}
-                    ${comparisonPanel}
-
-                    <div class="rounded-2xl border border-slate-800/60 bg-slate-950/45 p-3 space-y-3">
-                        <div class="flex items-center justify-between gap-3">
-                            <span class="text-[10px] font-mono uppercase tracking-widest text-slate-500">24h tracks</span>
-                            <div class="flex items-center gap-3 text-[10px] font-mono text-slate-500">
-                                <span><span class="inline-block h-1.5 w-5 rounded-full bg-amber-400 mr-1"></span>Predicted</span>
-                                <span><span class="inline-block h-1.5 w-5 rounded-full bg-cyan-400 mr-1"></span>Live</span>
-                            </div>
-                        </div>
-                        <div>
-                            <div class="flex items-center justify-between gap-3 mb-2">
-                                <span class="text-[10px] font-mono uppercase tracking-widest text-slate-500">Wind</span>
-                                <span class="text-[10px] font-mono text-slate-500">${monthly ? `${monthly.sector} month` : 'Monthly profile'}</span>
-                            </div>
-                            ${miniChart(records24, 's', liveWindSeries, {
-                                label: '24-hour wind speed',
-                                predictedColor: '#fbbf24',
-                                liveColor: '#22d3ee',
-                                minMax: 1
-                            })}
-                        </div>
-                        <div>
-                            <div class="flex items-center justify-between gap-3 mb-2">
-                                <span class="text-[10px] font-mono uppercase tracking-widest text-slate-500">Rain</span>
-                                <span class="text-[10px] font-mono text-slate-500">${Math.round(rainTotal * 10) / 10} mm predicted</span>
-                            </div>
-                            ${miniChart(records24, 'pr', liveRainSeries, {
-                                label: '24-hour rainfall',
-                                predictedColor: '#fbbf24',
-                                liveColor: '#22d3ee',
-                                minMax: 0.25
-                            })}
-                        </div>
-                    </div>
-
-                    <a href="${detailUrlForCity(state)}" class="inline-flex items-center justify-center gap-2 rounded-2xl border border-cyan-900/45 bg-cyan-950/20 px-4 py-3 text-sm font-bold text-cyan-200 hover:bg-cyan-950/35 hover:border-cyan-700/70 transition-all">
-                        View details
-                        <i class="fa-solid fa-arrow-right text-xs"></i>
-                    </a>
-                </article>
+                <tr class="data-row transition-colors">
+                    <td class="sticky-city w-40 border-r border-slate-800/50 px-3 py-3.5 align-middle">
+                        <div class="flex items-center gap-2" title="${escapeHtml(state.meta.location || state.payload.location)}"><div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-slate-700 bg-slate-800 text-slate-400"><i class="fa-solid fa-location-dot text-[11px]"></i></div><div class="min-w-0 truncate text-[12px] font-bold leading-tight text-white">${escapeHtml(state.meta.displayName || state.payload.displayName || state.meta.slug)}</div></div>
+                    </td>
+                    <td class="px-4 py-3.5 align-middle">${weatherCell}</td>
+                    <td class="px-4 py-3.5 align-middle">${comparisonCell(prediction.temperature, live.temperature_2m, formatTemp)}</td>
+                    <td class="px-4 py-3.5 align-middle">${comparisonCell(prediction.humidity, live.relative_humidity_2m, formatHumidity)}</td>
+                    <td class="px-4 py-3.5 align-middle">${comparisonCell(prediction.speed, live.wind_speed_10m, formatSpeed)}</td>
+                    <td class="px-4 py-3.5 align-middle">${directionCell(prediction.direction, live.wind_direction_10m)}</td>
+                    <td class="px-4 py-3.5 align-middle">${comparisonCell(null, live.wind_gusts_10m, formatSpeed)}</td>
+                    <td class="px-4 py-3.5 align-middle">${comparisonCell(rainTotal, liveRain, formatRain)}</td>
+                    <td class="px-4 py-3.5 text-center align-middle"><span class="inline-flex min-w-[3.5rem] items-center justify-center rounded-md border px-2 py-1 font-mono text-xs font-bold ${matchClasses(accuracy)} ${matchBadgeClasses(accuracy)}">${accuracy === null ? '--' : `${accuracy}%`}</span><div class="mt-1 text-[9px] font-mono uppercase text-slate-500">match</div></td>
+                    <td class="sticky-details px-4 py-3.5 text-center align-middle"><a href="${detailUrlForCity(state)}" aria-label="Open details for ${escapeHtml(state.meta.displayName || state.payload.displayName || state.meta.slug)}" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-700 bg-slate-800 text-slate-400 transition-colors hover:border-cyan-700 hover:bg-cyan-950 hover:text-cyan-300"><i class="fa-solid fa-chevron-right text-[10px]"></i></a></td>
+                </tr>
             `;
         }
 
@@ -640,8 +568,24 @@
         function render() {
             renderSummary();
             cityGrid.innerHTML = cityStates.length
-                ? cityStates.map(cityCard).join('')
-                : '<div class="rounded-3xl border border-slate-800/70 bg-slate-900/40 p-6 text-slate-400">Loading city prediction cards...</div>';
+                ? `<table class="city-table w-full text-left">
+                    <thead class="text-[10px] font-mono uppercase tracking-wider text-slate-500">
+                        <tr>
+                            <th scope="col" class="sticky-city px-4 py-3">City</th>
+                            <th scope="col" class="px-4 py-3">Weather</th>
+                            <th scope="col" class="px-4 py-3">Temperature</th>
+                            <th scope="col" class="px-4 py-3">Humidity</th>
+                            <th scope="col" class="px-4 py-3">Wind speed</th>
+                            <th scope="col" class="px-4 py-3">Direction</th>
+                            <th scope="col" class="px-4 py-3">Gust</th>
+                            <th scope="col" class="px-4 py-3">Rain · 24h</th>
+                            <th scope="col" class="px-4 py-3">Accuracy</th>
+                            <th scope="col" class="sticky-details px-4 py-3">Open</th>
+                        </tr>
+                    </thead>
+                    <tbody>${cityStates.map(cityRow).join('')}</tbody>
+                </table>`
+                : '<div class="p-6 text-slate-400">Loading city comparison table...</div>';
         }
 
         async function loadCityPayload(city) {
