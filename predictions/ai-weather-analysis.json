@@ -1,63 +1,75 @@
 {
-  "generated_at": "2026-08-18T15:53:03Z",
+  "generated_at": "2026-08-18T16:54:06Z",
   "model": "gemma-4-26b-a4b-it",
   "source": "Open-Meteo live telemetry + Windfyre ML baseline",
   "cities": {
     "bengaluru-nandini-layout": {
       "status": "ok",
-      "summary": "Bengaluru is experiencing overcast conditions with moderate wind gusts and high humidity.",
-      "current_conditions": "Temperature is 22.9C with 85% humidity, overcast skies, and wind speeds of 9.9 km/h with gusts up to 24.8 km/h.",
-      "baseline_comparison": "Recent observations show lower precipitation and humidity than the ML baseline, while wind speeds have been slightly higher.",
-      "next_24h_outlook": "Expect overcast skies with light precipitation and wind gusts reaching approximately 39.2 km/h.",
-      "next_7d_outlook": "The week ahead shows variable weather with intermittent light rain and moderate wind speeds, with a peak in precipitation on August 24th.",
+      "summary": "Bengaluru is experiencing overcast conditions with moderate wind and high humidity.",
+      "current_conditions": "Temperature is 22.7C with 85% humidity and wind speeds of 10 km/h from the west.",
+      "baseline_comparison": "Recent observations show lower humidity and precipitation compared to the ML baseline.",
+      "next_24h_outlook": "Expect overcast skies with light precipitation and wind gusts up to 39 km/h.",
+      "next_7d_outlook": "The week ahead shows variable weather with intermittent precipitation and wind speeds ranging from 12 to 16 km/h.",
       "anomalies": [
-        {
-          "type": "precipitation",
-          "severity": "medium",
-          "timeframe": "last 7 days",
-          "description": "Observed precipitation has been consistently lower than the ML baseline for much of the week."
-        },
         {
           "type": "humidity",
           "severity": "low",
-          "timeframe": "last 7 days",
-          "description": "Observed humidity levels have been lower than the ML baseline for several days."
+          "timeframe": "past 7 days",
+          "description": "Humidity levels have consistently been lower than the ML baseline. "
+        },
+        {
+          "type": "precipitation",
+          "severity": "low",
+          "timeframe": "past 7 days",
+          "description": "Precipitation totals have generally been lower than the ML baseline. "
         },
         {
           "type": "wind",
           "severity": "low",
-          "timeframe": "next 7 days",
-          "description": "Forecasted wind speeds are expected to be slightly higher than the ML baseline."
+          "timeframe": "past 7 days",
+          "description": "Wind speeds have been slightly higher than the ML baseline on some days. "
         }
       ],
       "watch_items": [
-        "Wind gusts up to 50 km/h expected later in the week."
+        "Wind gusts up to 50 km/h forecasted for late week."
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecast uncertainty is present due to model validation metrics and variable weather patterns.",
-      "updated_at": "2026-08-18T15:53:03Z"
+      "data_quality_note": "Forecast uncertainty is inherent in meteorological models; historical validation shows moderate accuracy. ",
+      "updated_at": "2026-08-18T16:54:06Z"
     },
     "nagamangala": {
       "status": "ok",
-      "summary": "Nagamangala is experiencing moderate wind speeds and overcast conditions, with recent trends showing higher wind speeds than the baseline.",
-      "current_conditions": "Temperature is 22.7C with 83% humidity and overcast skies (weather code 3). Wind speed is 17.9 km/h with gusts up to 34.6 km/h from the west.",
-      "baseline_comparison": "Recent observations show wind speeds consistently higher than the ML baseline, while humidity levels have been lower than baseline expectations.",
-      "next_24h_outlook": "Expect overcast skies and moderate wind speeds, with precipitation-related weather codes appearing in the forecast.",
-      "next_7d_outlook": "The 7-day forecast indicates continued moderate to high wind speeds and variable weather, with humidity levels remaining below baseline.",
+      "summary": "Nagamangala is experiencing overcast conditions with moderate wind speeds and higher than baseline humidity levels.",
+      "current_conditions": "Temperature is 22.3C with 84% humidity and wind speeds of 16.0 km/h from 277 degrees.",
+      "baseline_comparison": "Recent observations show wind speeds consistently higher than the ML baseline, while humidity remains lower than baseline levels.",
+      "next_24h_outlook": "Expect overcast conditions with precipitation of 2.9mm and wind speeds around 16.4 km/h.",
+      "next_7d_outlook": "The next 7 days will see variable weather with wind speeds ranging from 16.3 to 22.4 km/h and light to moderate precipitation.",
       "anomalies": [
         {
           "type": "wind",
           "severity": "medium",
           "timeframe": "Last 7 days",
-          "description": "Average wind speeds have been consistently higher than the ML baseline for the past week."
+          "description": "Average wind speeds have been consistently higher than the ML baseline. "
+        },
+        {
+          "type": "humidity",
+          "severity": "low",
+          "timeframe": "Last 7 days",
+          "description": "Relative humidity has been consistently lower than the ML baseline. "
+        },
+        {
+          "type": "precipitation",
+          "severity": "low",
+          "timeframe": "Last 7 days",
+          "description": "Total precipitation has been lower than the ML baseline. "
         }
       ],
       "watch_items": [
-        "High wind gusts predicted for late week."
+        "Wind speed increases in the upcoming week."
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecasts are subject to uncertainty due to model validation metrics provided in the context.",
-      "updated_at": "2026-08-18T15:53:03Z"
+      "data_quality_note": "Forecasts are subject to uncertainty due to model validation metrics. ",
+      "updated_at": "2026-08-18T16:54:06Z"
     }
   }
 }
