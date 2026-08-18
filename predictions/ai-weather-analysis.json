@@ -1,76 +1,64 @@
 {
-  "generated_at": "2026-08-18T07:59:12Z",
+  "generated_at": "2026-08-18T08:59:20Z",
   "model": "gemma-4-26b-a4b-it",
   "source": "Open-Meteo live telemetry + Windfyre ML baseline",
   "cities": {
     "bengaluru-nandini-layout": {
       "status": "ok",
-      "summary": "Bengaluru is experiencing overcast conditions with moderate wind speeds and significant gusts.",
-      "current_conditions": "Temperature is 29.0C with 55% humidity, overcast skies, and wind speeds of 15.7 km/h with gusts up to 42.1 km/h.",
-      "baseline_comparison": "Recent observations show lower precipitation and humidity levels compared to the ML baseline.",
-      "next_24h_outlook": "Expect overcast skies with light to moderate precipitation, wind speeds around 13.8 km/h, and gusts up to 43.9 km/h.",
-      "next_7d_outlook": "The week ahead features variable weather, with increased wind speeds and periodic precipitation, particularly around August 23-24.",
+      "summary": "Bengaluru is experiencing overcast conditions with moderate wind gusts and lower than baseline humidity.",
+      "current_conditions": "Current temperature is 28.9C with 54% humidity, overcast skies, and wind gusts up to 40.7 km/h from the west.",
+      "baseline_comparison": "Recent observations show lower humidity and higher wind speeds compared to the ML baseline.",
+      "next_24h_outlook": "Expect overcast skies with light precipitation and wind gusts around 44 km/h.",
+      "next_7d_outlook": "The week ahead shows variable weather with intermittent rain and wind gusts reaching up to 54 km/h.",
       "anomalies": [
         {
-          "type": "precipitation",
-          "severity": "medium",
-          "timeframe": "Last 7 days",
-          "description": "Observed precipitation levels have been consistently lower than the ML baseline. "
-        },
-        {
           "type": "humidity",
-          "severity": "low",
-          "timeframe": "Last 7 days",
-          "description": "Humidity levels have been consistently lower than the ML baseline. "
-        },
-        {
-          "type": "wind",
-          "severity": "low",
-          "timeframe": "Next 7 days",
-          "description": "Forecasted wind speeds are expected to be higher than the ML baseline. "
+          "severity": "medium",
+          "timeframe": "last 7 days",
+          "description": "Humidity levels have consistently remained below the ML baseline of approximately 80%."
         }
       ],
       "watch_items": [
-        "Wind gusts up to 53.6 km/h expected later in the week."
+        "Wind gusts exceeding 40 km/h",
+        "Intermittent precipitation"
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecasts are subject to uncertainty due to variability in weather patterns.",
-      "updated_at": "2026-08-18T07:59:12Z"
+      "data_quality_note": "Forecast uncertainty is present due to variability in precipitation and wind patterns.",
+      "updated_at": "2026-08-18T08:59:20Z"
     },
     "nagamangala": {
       "status": "ok",
-      "summary": "Nagamangala is experiencing overcast conditions with significant wind gusts and higher than average wind speeds.",
-      "current_conditions": "Temperature is 26.7C with 67% humidity and overcast skies. Wind speed is 17.6 km/h with gusts up to 40.0 km/h from the west.",
-      "baseline_comparison": "Recent observations show wind speeds and gusts consistently higher than the historical baseline, while humidity is lower than baseline.",
-      "next_24h_outlook": "Expect overcast skies with wind speeds around 16.6 km/h and gusts up to 42.1 km/h, with light precipitation.",
-      "next_7d_outlook": "The week ahead shows variable weather with wind speeds between 15.6 and 21.6 km/h and gusts uping to 54.7 km/h. Precipitation is expected to be highest on August 19th.",
+      "summary": "Nagamangala is experiencing overcast conditions with moderate wind speeds and significant gusts.",
+      "current_conditions": "Temperature is 26.1C with 76% humidity, overcast skies, and wind speeds of 18.0 km/h from 273 degrees with gusts up to 38.5 km/h.",
+      "baseline_comparison": "Recent observations show higher wind speeds and lower humidity compared to the ML baseline.",
+      "next_24h_outlook": "Expect overcast skies with moderate wind speeds and precipitation of 2.7mm.",
+      "next_7d_outlook": "The 7-day forecast indicates variable weather with periodic precipitation and sustained high wind speeds.",
       "anomalies": [
         {
           "type": "wind",
-          "severity": "high",
+          "severity": "medium",
           "timeframe": "Past 7 days",
-          "description": "Average wind speeds and maximum gusts have been consistently higher than the baseline. "
+          "description": "Average wind speeds have been consistently higher than the ML baseline."
         },
         {
           "type": "humidity",
-          "severity": "medium",
+          "severity": "low",
           "timeframe": "Past 7 days",
-          "description": "Average humidity levels have been consistently lower than the baseline. "
+          "description": "Average humidity levels have been lower than the ML baseline."
         },
         {
           "type": "precipitation",
           "severity": "low",
-          "timeframe": "Past 7 days Past 7 days",
-          "description": "Total precipitation is generally lower than the baseline. "
+          "timeframe": "Past 7 days",
+          "description": "Total precipitation has been lower than the ML baseline."
         }
       ],
       "watch_items": [
-        "High wind gusts throughout the week ahead.",
-        "Potential for increased precipitation on August 19th."
+        "High wind speeds and gusts throughout the week."
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecasts are subject to uncertainty due to variable weather patterns. ",
-      "updated_at": "2026-08-18T07:59:12Z"
+      "data_quality_note": "Forecasts are subject to uncertainty due to model validation metrics.",
+      "updated_at": "2026-08-18T08:59:20Z"
     }
   }
 }
