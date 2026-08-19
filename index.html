@@ -77,12 +77,6 @@
         body.light-mode [class*="text-cyan-500"] {
             color: #0369a1 !important;
         }
-        body.light-mode [class*="text-amber-200"],
-        body.light-mode [class*="text-amber-300"],
-        body.light-mode [class*="text-amber-400"],
-        body.light-mode [class*="text-amber-500"] {
-            color: #b45309 !important;
-        }
         body.light-mode [class*="text-emerald-300"],
         body.light-mode [class*="text-emerald-400"],
         body.light-mode [class*="text-lime-300"],
@@ -95,13 +89,11 @@
             color: #be123c !important;
         }
         body.light-mode [class*="bg-cyan-950"],
-        body.light-mode [class*="bg-amber-950"],
         body.light-mode [class*="bg-emerald-950"],
         body.light-mode [class*="bg-rose-950"] {
             background-color: rgba(255, 255, 255, 0.72) !important;
         }
         body.light-mode [class*="border-cyan-"],
-        body.light-mode [class*="border-amber-"],
         body.light-mode [class*="border-emerald-"],
         body.light-mode [class*="border-rose-"] {
             border-color: rgba(14, 116, 144, 0.28) !important;
@@ -173,7 +165,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <a href="index.html" class="flex items-center gap-3">
                 <div class="relative">
-                    <div class="absolute -inset-1.5 bg-gradient-to-r from-cyan-500 to-amber-500 rounded-lg blur opacity-45 transition duration-1000"></div>
+                    <div class="absolute -inset-1.5 bg-gradient-to-r from-cyan-500 to-slate-500 rounded-lg blur opacity-45 transition duration-1000"></div>
                     <div class="relative bg-slate-950 px-3 py-1.5 rounded-md border border-slate-800 flex items-center gap-2">
                         <i class="fa-solid fa-wind text-cyan-400 animate-pulse"></i>
                         <span class="windfyre-brand font-extrabold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-slate-400 text-sm md:text-base">WINDFYRE</span>
@@ -182,7 +174,7 @@
                 <span class="hidden sm:inline-block px-2 py-0.5 text-[10px] uppercase font-mono font-bold tracking-widest bg-cyan-950 text-cyan-400 border border-cyan-800/60 rounded">v2.5</span>
             </a>
             <button data-theme-toggle class="rounded-lg border border-slate-800 bg-slate-900/80 px-3 py-2 text-xs font-mono uppercase tracking-wider text-slate-400 hover:text-slate-100 hover:border-slate-700 transition-all" title="Toggle light mode">
-                <i data-theme-icon class="fa-solid fa-sun text-amber-300 mr-1.5"></i>
+                <i data-theme-icon class="fa-solid fa-sun text-slate-400 mr-1.5"></i>
                 <span data-theme-label>Light</span>
             </button>
         </div>
@@ -224,30 +216,13 @@
             </div>
             <div class="rounded-2xl border border-slate-800/80 bg-slate-900/45 p-4">
                 <span class="text-[10px] font-mono uppercase tracking-widest text-slate-500">Live Sync</span>
-                <div id="summary-live" class="mt-1 text-lg font-extrabold text-amber-300 truncate">Off</div>
-            </div>
-        </section>
-
-        <section class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-            <div>
-                <h2 class="text-xl font-bold text-white">City Prediction Overview</h2>
-                <p class="text-xs text-slate-500 mt-1">Current-hour ML prediction with optional live comparison.</p>
-            </div>
-            <div class="flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-950/60 px-3 py-2 text-xs font-mono text-slate-400">
-                <span class="h-2 w-2 rounded-full bg-amber-400"></span>
-                Prediction
-                <span class="h-2 w-2 rounded-full bg-cyan-400 ml-2"></span>
-                Live
+                <div id="summary-live" class="mt-1 text-lg font-extrabold text-slate-300 truncate">Off</div>
             </div>
         </section>
 
         <section class="rounded-3xl border border-slate-800/70 bg-slate-900/40 backdrop-blur-md shadow-2xl shadow-black/10 overflow-hidden">
             <div class="flex items-center justify-between gap-4 border-b border-slate-800/70 bg-slate-950/35 px-4 py-3 sm:px-5">
-                <p class="text-xs text-slate-400">Swipe horizontally to compare every metric.</p>
-                <div class="hidden shrink-0 items-center gap-4 text-[10px] font-mono uppercase tracking-wider text-slate-400 sm:flex">
-                    <span class="flex items-center gap-1.5"><span class="h-2 w-2 rounded-sm bg-amber-400/80"></span>Predicted</span>
-                    <span class="flex items-center gap-1.5"><span class="h-2 w-2 rounded-sm bg-cyan-400/80"></span>Live</span>
-                </div>
+                <h2 class="text-base font-bold text-white sm:text-lg">City Prediction Overview</h2>
             </div>
             <div id="city-grid" class="city-table-scroll max-h-[72vh] overflow-auto">
                 <div class="p-6 text-slate-400">Loading city comparison table...</div>
@@ -270,7 +245,7 @@
             document.body.classList.toggle('light-mode', lightMode);
             localStorage.setItem('windfyre-theme', lightMode ? 'light' : 'dark');
             document.querySelectorAll('[data-theme-icon]').forEach(icon => {
-                icon.className = lightMode ? 'fa-solid fa-moon text-cyan-500 mr-1.5' : 'fa-solid fa-sun text-amber-300 mr-1.5';
+                icon.className = lightMode ? 'fa-solid fa-moon text-cyan-500 mr-1.5' : 'fa-solid fa-sun text-slate-400 mr-1.5';
             });
             document.querySelectorAll('[data-theme-label]').forEach(label => {
                 label.textContent = lightMode ? 'Dark' : 'Light';
@@ -324,12 +299,12 @@
         }
 
         function weatherIcon(code) {
-            if (code === 0) return 'fa-solid fa-sun text-amber-300';
-            if ([1, 2].includes(code)) return 'fa-solid fa-cloud-sun text-amber-200';
+            if (code === 0) return 'fa-solid fa-sun text-slate-300';
+            if ([1, 2].includes(code)) return 'fa-solid fa-cloud-sun text-slate-400';
             if (code === 3) return 'fa-solid fa-cloud text-slate-300';
             if ([45, 48].includes(code)) return 'fa-solid fa-smog text-slate-400';
             if ([51, 53, 55, 61, 63, 65, 80, 81, 82].includes(code)) return 'fa-solid fa-cloud-rain text-emerald-300';
-            if ([95, 96, 99].includes(code)) return 'fa-solid fa-cloud-bolt text-amber-300';
+            if ([95, 96, 99].includes(code)) return 'fa-solid fa-cloud-bolt text-slate-300';
             return 'fa-solid fa-cloud-sun text-slate-300';
         }
 
@@ -460,7 +435,7 @@
             if (score === null) return 'text-slate-500';
             if (score >= 88) return 'text-emerald-300';
             if (score >= 72) return 'text-lime-300';
-            if (score >= 55) return 'text-amber-300';
+            if (score >= 55) return 'text-slate-300';
             return 'text-rose-300';
         }
 
@@ -468,7 +443,7 @@
             if (score === null) return 'border-slate-700 bg-slate-800/65';
             if (score >= 88) return 'border-emerald-900/70 bg-emerald-950/40';
             if (score >= 72) return 'border-lime-900/70 bg-lime-950/40';
-            if (score >= 55) return 'border-amber-900/70 bg-amber-950/40';
+            if (score >= 55) return 'border-slate-700 bg-slate-800/65';
             return 'border-rose-900/70 bg-rose-950/40';
         }
 
@@ -487,8 +462,8 @@
         function comparisonCell(predicted, live, formatter) {
             return `
                 <div class="space-y-1.5 whitespace-nowrap text-xs leading-tight">
-                    <div class="flex items-center gap-2"><span class="w-5 font-mono text-[9px] uppercase text-amber-300/70">Prd</span><span class="font-bold text-amber-200">${formatter(predicted)}</span></div>
-                    <div class="flex items-center gap-2"><span class="w-5 font-mono text-[9px] uppercase text-cyan-300/70">Liv</span><span class="font-bold text-cyan-100">${formatter(live)}</span></div>
+                    <div class="flex items-center gap-2"><span class="w-5 font-mono text-[9px] uppercase text-slate-500">Prd</span><span class="font-bold text-slate-200">${formatter(predicted)}</span></div>
+                    <div class="flex items-center gap-2"><span class="w-5 font-mono text-[9px] uppercase text-emerald-400/80">Liv</span><span class="font-bold text-emerald-200">${formatter(live)}</span></div>
                 </div>`;
         }
 
@@ -496,7 +471,7 @@
             const directionLine = (label, value, tone, muted) => typeof value === 'number'
                 ? `<div class="flex items-center gap-2 ${tone}"><span class="w-5 font-mono text-[9px] uppercase opacity-70">${label}</span><span class="flex w-4 justify-center"><i class="fa-solid fa-arrow-up text-[10px]" style="transform:rotate(${value}deg)"></i></span><span class="font-bold">${formatDirection(value)}</span></div>`
                 : `<div class="flex items-center gap-2 ${muted}"><span class="w-5 font-mono text-[9px] uppercase">${label}</span><span class="flex w-4 justify-center"><i class="fa-solid fa-minus text-[9px]"></i></span><span class="font-bold">--</span></div>`;
-            return `<div class="space-y-1.5 whitespace-nowrap text-xs leading-tight">${directionLine('Prd', predicted, 'text-amber-200', 'text-slate-500')}${directionLine('Liv', live, 'text-cyan-100', 'text-slate-500')}</div>`;
+            return `<div class="space-y-1.5 whitespace-nowrap text-xs leading-tight">${directionLine('Prd', predicted, 'text-slate-200', 'text-slate-500')}${directionLine('Liv', live, 'text-emerald-200', 'text-slate-500')}</div>`;
         }
 
         function cityRow(state) {
@@ -507,8 +482,8 @@
             const accuracy = predictionAccuracy(state, prediction);
             const weatherCell = `
                 <div class="space-y-1.5 whitespace-nowrap text-xs leading-tight">
-                    <div class="flex items-center gap-2 text-amber-200"><span class="w-5 font-mono text-[9px] uppercase text-amber-300/70">Prd</span><i class="${weatherIcon(prediction.weatherCode)} w-4 text-center text-[11px]"></i><span class="font-bold">${weatherText(prediction.weatherCode)}</span></div>
-                    <div class="flex items-center gap-2 text-cyan-100"><span class="w-5 font-mono text-[9px] uppercase text-cyan-300/70">Liv</span>${typeof live.weather_code === 'number' ? `<i class="${weatherIcon(live.weather_code)} w-4 text-center text-[11px]"></i><span class="font-bold">${weatherText(live.weather_code)}</span>` : '<i class="fa-solid fa-minus w-4 text-center text-[9px] text-slate-500"></i><span class="font-bold text-slate-500">--</span>'}</div>
+                    <div class="flex items-center gap-2 text-slate-200"><span class="w-5 font-mono text-[9px] uppercase text-slate-500">Prd</span><i class="${weatherIcon(prediction.weatherCode)} w-4 text-center text-[11px]"></i><span class="font-bold">${weatherText(prediction.weatherCode)}</span></div>
+                    <div class="flex items-center gap-2 text-emerald-200"><span class="w-5 font-mono text-[9px] uppercase text-emerald-400/80">Liv</span>${typeof live.weather_code === 'number' ? `<i class="${weatherIcon(live.weather_code)} w-4 text-center text-[11px]" style="color:#6ee7b7"></i><span class="font-bold">${weatherText(live.weather_code)}</span>` : '<i class="fa-solid fa-minus w-4 text-center text-[9px] text-slate-500"></i><span class="font-bold text-slate-500">--</span>'}</div>
                 </div>`;
             return `
                 <tr class="data-row transition-colors">
