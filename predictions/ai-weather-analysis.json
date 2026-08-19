@@ -1,63 +1,63 @@
 {
-  "generated_at": "2026-08-19T09:55:08Z",
+  "generated_at": "2026-08-19T10:50:55Z",
   "model": "gemma-4-26b-a4b-it",
   "source": "Open-Meteo live telemetry + Windfyre ML baseline",
   "cities": {
     "bengaluru-nandini-layout": {
       "status": "ok",
-      "summary": "Bengaluru is experiencing moderate wind gusts and light rain, with precipitation levels trending higher than the baseline.",
-      "current_conditions": "Current temperature is 26.2C with 69% humidity and wind gusts reaching 45.0 km/h from the west.",
-      "baseline_comparison": "Recent observations show lower humidity and higher precipitation totals compared to the ML baseline.",
-      "next_24h_outlook": "The next 24 hours will see increased precipitation of 6.6mm, significantly exceeding the baseline of 3.5mm.",
-      "next_7d_outlook": "The upcoming week shows sustained high wind speeds and gusts up to 52.2 km/h, with variable precipitation.",
+      "summary": "Bengaluru is experiencing heavy rain and strong wind gusts, with precipitation levels significantly exceeding the baseline.",
+      "current_conditions": "Current temperature is 24.2C with 80% humidity and wind gusts of 42.1 km/h from the west.",
+      "baseline_comparison": "Recent observations show precipitation and wind gusts are consistently higher than the ML baseline.",
+      "next_24h_outlook": "Expect increased precipitation of 6.6mm and continued strong wind gusts up to 45 km/h.",
+      "next_7d_outlook": "The next week will see sustained high wind speeds and frequent precipitation, with gusts reaching up to 52 km/h.",
       "anomalies": [
         {
           "type": "precipitation",
+          "severity": "high",
+          "timeframe": "recent observations",
+          "description": "Precipitation totals have consistently exceeded the ML baseline over the past week."
+        },
+        {
+          "type": "wind",
           "severity": "medium",
-          "timeframe": "next 24h",
-          "description": "Forecasted precipitation of 6.6mm is nearly double the baseline of 3.5mm."
+          "timeframe": "next 7 days",
+          "description": "Forecasted wind speeds and gusts are expected to be higher than the ML baseline."
         }
       ],
       "watch_items": [
-        "High wind gusts up to 52 km/h expected over the next week."
+        "High wind gusts and frequent precipitation."
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecast uncertainty is present due to variable precipitation and wind patterns.",
-      "updated_at": "2026-08-19T09:55:08Z"
+      "data_quality_note": "Forecast uncertainty is inherent in weather modeling; model validation data suggests moderate accuracy.",
+      "updated_at": "2026-08-19T10:50:55Z"
     },
     "nagamangala": {
       "status": "ok",
-      "summary": "Nagamangala is experiencing high wind speeds and significant precipitation forecast for today, with sustained higher-than-baseline wind speeds expected through the week.",
-      "current_conditions": "Current temperature is 24.4C with 86% humidity and wind speeds of 18.6 km/h from the west, with gusts up to 42.1 km/h.",
-      "baseline_comparison": "Recent observations show wind speeds consistently higher than the ML baseline, while humidity has been lower than expected.",
-      "next_24h_outlook": "Forecast for the next 24 hours indicates heavy precipitation of 12.1mm and continued high wind speeds and gusts.",
-      "next_7d_outlook": "The next 7 days will see sustained high wind speeds, often exceeding 20 km/h, and variable precipitation levels between 0.2mm and 3.0mm.",
+      "summary": "Nagamangala is experiencing elevated wind speeds and significant precipitation forecast for today, alongside a trend of higher than baseline wind speeds.",
+      "current_conditions": "Temperature is 24.3C with 89% humidity and wind speeds of 16.1 km/h from the west, with light precipitation.",
+      "baseline_comparison": "Recent observations show wind speeds consistently higher than the ML baseline, while humidity levels have been lower than baseline.",
+      "next_24h_outlook": "Forecast predicts 12.1mm of precipitation and wind speeds averaging 16.8 km/h with gusts up to 44.6 km/h.",
+      "next_7d_outlook": "The next 7 days will see sustained high wind speeds (20-22 km/h) and variable precipitation, with humidity levels remaining below baseline.",
       "anomalies": [
         {
           "type": "wind",
-          "severity": "high",
-          "timeframe": "recent observations",
-          "description": "Average wind speeds have been consistently higher than the ML baseline for the past week."
+          "severity": "medium",
+          "timeframe": "Recent observations",
+          "description": "Average wind speeds have been consistently higher than the ML baseline for the past week. "
         },
         {
           "type": "precipitation",
-          "severity": "medium",
-          "timeframe": "today's forecast",
-          "description": "Forecasted precipitation of 12.1mm is significantly higher than the ML baseline of 2.7mm."
-        },
-        {
-          "type": "humidity",
-          "severity": "low",
-          "timeframe": "past week",
-          "description": "Humidity levels have been consistently lower than the ML baseline."
+          "severity": "high",
+          "timeframe": "2026-08-19",
+          "description": "Forecasted precipitation of 12.1mm is significantly higher than the ML baseline of 2.7mm. "
         }
       ],
       "watch_items": [
-        "High wind speeds and gusts expected through the week."
+        "High wind speeds and gusts, and significant precipitation forecast for today."
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecasts are subject to uncertainty; model validation shows good accuracy for precipitation and temperature.",
-      "updated_at": "2026-08-19T09:55:08Z"
+      "data_quality_note": "Forecasts are subject to uncertainty; model validation data indicates a wet-hour accuracy of 82.5%.",
+      "updated_at": "2026-08-19T10:50:55Z"
     }
   }
 }
