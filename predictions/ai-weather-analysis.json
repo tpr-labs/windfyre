@@ -1,57 +1,63 @@
 {
-  "generated_at": "2026-08-19T05:52:13Z",
+  "generated_at": "2026-08-19T07:11:47Z",
   "model": "gemma-4-26b-a4b-it",
   "source": "Open-Meteo live telemetry + Windfyre ML baseline",
   "cities": {
     "bengaluru-nandini-layout": {
       "status": "ok",
-      "summary": "Bengaluru is experiencing overcast conditions with significant wind gusts and high expected precipitation for August 19.",
-      "current_conditions": "Temperature is 26.4C with 65% humidity, overcast skies, and wind speeds of 17 km/h with gusts up to 43.9 km/h.",
-      "baseline_comparison": "Recent observations show lower humidity and higher wind speeds compared to the ML baseline.",
-      "next_24h_outlook": "Heavy precipitation is forecasted for August 19, with total rainfall expected to reach 11.6 mm.",
-      "next_7d_outlook": "The next 7 days will see variable weather with wind speeds between 13 and 18 km/h and temperatures around 23.5C.",
+      "summary": "Bengaluru is experiencing moderate wind speeds and overcast conditions, with significant precipitation forecasted for today.",
+      "current_conditions": "Current temperature is 28.5C with 58% humidity and wind speeds of 17.7 km/h from the west-northwest, with gusts up to 45 km/h.",
+      "baseline_comparison": "Recent observations show humidity levels consistently lower than the ML baseline, while wind speeds have been slightly elevated compared to the baseline.",
+      "next_24h_outlook": "The next 24 hours will see increased precipitation, with a total of 6.6mm forecasted, and wind speeds around 13.5 km/h.",
+      "next_7d_outlook": "The 7-day forecast indicates a trend of moderate wind speeds (15-17 km/h) and variable precipitation, with daily totals between 0.5mm and 5.4mm.",
       "anomalies": [
         {
           "type": "precipitation",
-          "severity": "high",
+          "severity": "medium",
           "timeframe": "2026-08-19",
-          "description": "Forecasted precipitation of 11.6 mm is significantly higher than the ML baseline of 3.5 mm."
+          "description": "Forecasted precipitation of 6.6mm is significantly higher than the ML baseline of 3.5mm."
         }
       ],
       "watch_items": [
-        "High wind gusts and heavy rainfall expected today."
+        "High wind gusts up to 52 km/h expected over the next week."
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecasts for precipitation and wind speed are subject to moderate uncertainty.",
-      "updated_at": "2026-08-19T05:52:13Z"
+      "data_quality_note": "Forecast accuracy is subject to uncertainty, as indicated by the model validation metrics for Bengaluru.",
+      "updated_at": "2026-08-19T07:11:47Z"
     },
     "nagamangala": {
       "status": "ok",
-      "summary": "Nagamangala is experiencing overcast conditions with elevated wind speeds and gusts compared to historical baselines.",
-      "current_conditions": "Temperature is 26.9C with 65% humidity and wind speeds of 16.4 km/h from the west, with gusts up to 35.3 km/h.",
-      "baseline_comparison": "Recent observations show wind speeds and gusts consistently higher than the ML baseline, while humidity has been lower.",
-      "next_24h_outlook": "Forecasted precipitation of 10.9mm and wind gusts up to 41.8 km/h are expected, with temperatures around 23.8C.",
-      "next_7d_outlook": "The next week shows sustained high wind speeds and gusts exceeding 50 km/h, with light to moderate precipitation and stable temperatures.",
+      "summary": "Nagamangala is experiencing higher than average wind speeds and significant precipitation forecasted for today.",
+      "current_conditions": "Temperature is 29.9C with 55% humidity and wind speeds of 18.8 km/h from the WNW.",
+      "baseline_comparison": "Recent observations show wind speeds consistently higher than the ML baseline, while humidity has been lower than expected.",
+      "next_24h_outlook": "Heavy precipitation is expected today with a total of 12.1mm and wind gusts up to 44.6 km/h.",
+      "next_7d_outlook": "The next week will see sustained high wind speeds and moderate precipitation, with humidity levels remaining below baseline.",
       "anomalies": [
         {
           "type": "wind",
           "severity": "medium",
-          "timeframe": "last 7 days",
-          "description": "Average wind speeds and gusts have been consistently higher than the ML baseline. "
+          "timeframe": "Last 7 days",
+          "description": "Average wind speeds have been consistently higher than the ML baseline. "
         },
         {
           "type": "humidity",
           "severity": "low",
-          "timeframe": "last 7 days",
-          "description": "Relative humidity levels have been consistently lower than the ML baseline. "
+          "timeframe": "Last 7 days",
+          "description": "Relative humidity has been consistently lower than the ML baseline. "
+        },
+        {
+          "type": "precipitation",
+          "severity": "high",
+          "timeframe": "Today",
+          "description": "Forecasted precipitation of 12.1mm is significantly higher than the ML baseline of 2.7mm."
         }
       ],
       "watch_items": [
-        "High wind gusts expected in the coming week."
+        "High wind gusts and heavy precipitation today."
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecast uncertainty is present due to variability in wind and precipitation patterns.",
-      "updated_at": "2026-08-19T05:52:13Z"
+      "data_quality_note": "Forecast accuracy is subject to uncertainty; model validation shows good wet hour accuracy but some deviation in wind direction.",
+      "updated_at": "2026-08-19T07:11:47Z"
     }
   }
 }
