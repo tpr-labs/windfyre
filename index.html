@@ -124,7 +124,7 @@
         .city-table {
             border-collapse: separate;
             border-spacing: 0;
-            min-width: 1240px;
+            min-width: 1100px;
         }
         .city-table th,
         .city-table td {
@@ -223,6 +223,10 @@
         <section class="rounded-3xl border border-slate-800/70 bg-slate-900/40 backdrop-blur-md shadow-2xl shadow-black/10 overflow-hidden">
             <div class="flex items-center justify-between gap-4 border-b border-slate-800/70 bg-slate-950/35 px-4 py-3 sm:px-5">
                 <h2 class="text-base font-bold text-white sm:text-lg">City Prediction Overview</h2>
+                <div class="flex shrink-0 items-center gap-3 text-[10px] font-mono uppercase tracking-wider">
+                    <span class="flex items-center gap-1.5 text-slate-500"><span class="h-2 w-2 rounded-sm bg-slate-500"></span>Prediction</span>
+                    <span class="flex items-center gap-1.5 text-emerald-300"><span class="h-2 w-2 rounded-sm bg-emerald-400"></span>Live</span>
+                </div>
             </div>
             <div id="city-grid" class="city-table-scroll max-h-[72vh] overflow-auto">
                 <div class="p-6 text-slate-400">Loading city comparison table...</div>
@@ -462,7 +466,7 @@
         function comparisonCell(predicted, live, formatter) {
             return `
                 <div class="space-y-1.5 whitespace-nowrap text-xs leading-tight">
-                    <div class="flex items-center gap-2"><span class="w-5 font-mono text-[9px] uppercase text-slate-500">Prd</span><span class="font-bold text-slate-200">${formatter(predicted)}</span></div>
+                    <div class="flex items-center gap-2"><span class="w-5 font-mono text-[9px] uppercase text-slate-600">Prd</span><span class="font-semibold text-slate-400">${formatter(predicted)}</span></div>
                     <div class="flex items-center gap-2"><span class="w-5 font-mono text-[9px] uppercase text-emerald-400/80">Liv</span><span class="font-bold text-emerald-200">${formatter(live)}</span></div>
                 </div>`;
         }
@@ -471,7 +475,7 @@
             const directionLine = (label, value, tone, muted) => typeof value === 'number'
                 ? `<div class="flex items-center gap-2 ${tone}"><span class="w-5 font-mono text-[9px] uppercase opacity-70">${label}</span><span class="flex w-4 justify-center"><i class="fa-solid fa-arrow-up text-[10px]" style="transform:rotate(${value}deg)"></i></span><span class="font-bold">${formatDirection(value)}</span></div>`
                 : `<div class="flex items-center gap-2 ${muted}"><span class="w-5 font-mono text-[9px] uppercase">${label}</span><span class="flex w-4 justify-center"><i class="fa-solid fa-minus text-[9px]"></i></span><span class="font-bold">--</span></div>`;
-            return `<div class="space-y-1.5 whitespace-nowrap text-xs leading-tight">${directionLine('Prd', predicted, 'text-slate-200', 'text-slate-500')}${directionLine('Liv', live, 'text-emerald-200', 'text-slate-500')}</div>`;
+            return `<div class="space-y-1.5 whitespace-nowrap text-xs leading-tight">${directionLine('Prd', predicted, 'text-slate-400', 'text-slate-500')}${directionLine('Liv', live, 'text-emerald-200', 'text-slate-500')}</div>`;
         }
 
         function cityRow(state) {
@@ -482,7 +486,7 @@
             const accuracy = predictionAccuracy(state, prediction);
             const weatherCell = `
                 <div class="space-y-1.5 whitespace-nowrap text-xs leading-tight">
-                    <div class="flex items-center gap-2 text-slate-200"><span class="w-5 font-mono text-[9px] uppercase text-slate-500">Prd</span><i class="${weatherIcon(prediction.weatherCode)} w-4 text-center text-[11px]"></i><span class="font-bold">${weatherText(prediction.weatherCode)}</span></div>
+                    <div class="flex items-center gap-2 text-slate-400"><span class="w-5 font-mono text-[9px] uppercase text-slate-600">Prd</span><i class="${weatherIcon(prediction.weatherCode)} w-4 text-center text-[11px]"></i><span class="font-semibold">${weatherText(prediction.weatherCode)}</span></div>
                     <div class="flex items-center gap-2 text-emerald-200"><span class="w-5 font-mono text-[9px] uppercase text-emerald-400/80">Liv</span>${typeof live.weather_code === 'number' ? `<i class="${weatherIcon(live.weather_code)} w-4 text-center text-[11px]" style="color:#6ee7b7"></i><span class="font-bold">${weatherText(live.weather_code)}</span>` : '<i class="fa-solid fa-minus w-4 text-center text-[9px] text-slate-500"></i><span class="font-bold text-slate-500">--</span>'}</div>
                 </div>`;
             return `
@@ -490,12 +494,11 @@
                     <td class="sticky-city w-40 border-r border-slate-800/50 px-3 py-3.5 align-middle">
                         <div class="flex items-center gap-2" title="${escapeHtml(state.meta.location || state.payload.location)}"><div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-slate-700 bg-slate-800 text-slate-400"><i class="fa-solid fa-location-dot text-[11px]"></i></div><div class="min-w-0 truncate text-[12px] font-bold leading-tight text-white">${escapeHtml(state.meta.displayName || state.payload.displayName || state.meta.slug)}</div></div>
                     </td>
-                    <td class="px-4 py-3.5 align-middle">${weatherCell}</td>
+                    <td class="w-32 max-w-32 px-3 py-3.5 align-middle">${weatherCell}</td>
                     <td class="px-4 py-3.5 align-middle">${comparisonCell(prediction.temperature, live.temperature_2m, formatTemp)}</td>
                     <td class="px-4 py-3.5 align-middle">${comparisonCell(prediction.humidity, live.relative_humidity_2m, formatHumidity)}</td>
                     <td class="px-4 py-3.5 align-middle">${comparisonCell(prediction.speed, live.wind_speed_10m, formatSpeed)}</td>
                     <td class="px-4 py-3.5 align-middle">${directionCell(prediction.direction, live.wind_direction_10m)}</td>
-                    <td class="px-4 py-3.5 align-middle">${comparisonCell(null, live.wind_gusts_10m, formatSpeed)}</td>
                     <td class="px-4 py-3.5 align-middle">${comparisonCell(rainTotal, liveRain, formatRain)}</td>
                     <td class="px-4 py-3.5 text-center align-middle"><span class="inline-flex min-w-[3.5rem] items-center justify-center rounded-md border px-2 py-1 font-mono text-xs font-bold ${matchClasses(accuracy)} ${matchBadgeClasses(accuracy)}">${accuracy === null ? '--' : `${accuracy}%`}</span><div class="mt-1 text-[9px] font-mono uppercase text-slate-500">match</div></td>
                     <td class="sticky-details px-4 py-3.5 text-center align-middle"><a href="${detailUrlForCity(state)}" aria-label="Open details for ${escapeHtml(state.meta.displayName || state.payload.displayName || state.meta.slug)}" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-700 bg-slate-800 text-slate-400 transition-colors hover:border-cyan-700 hover:bg-cyan-950 hover:text-cyan-300"><i class="fa-solid fa-chevron-right text-[10px]"></i></a></td>
@@ -547,12 +550,11 @@
                     <thead class="text-[10px] font-mono uppercase tracking-wider text-slate-500">
                         <tr>
                             <th scope="col" class="sticky-city px-4 py-3">City</th>
-                            <th scope="col" class="px-4 py-3">Weather</th>
+                            <th scope="col" class="w-32 px-3 py-3">Weather</th>
                             <th scope="col" class="px-4 py-3">Temperature</th>
                             <th scope="col" class="px-4 py-3">Humidity</th>
                             <th scope="col" class="px-4 py-3">Wind speed</th>
                             <th scope="col" class="px-4 py-3">Direction</th>
-                            <th scope="col" class="px-4 py-3">Gust</th>
                             <th scope="col" class="px-4 py-3">Rain · 24h</th>
                             <th scope="col" class="px-4 py-3">Accuracy</th>
                             <th scope="col" class="sticky-details px-4 py-3">Open</th>
