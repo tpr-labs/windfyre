@@ -1,78 +1,70 @@
 {
-  "generated_at": "2026-08-20T04:59:57Z",
+  "generated_at": "2026-08-20T05:52:57Z",
   "model": "gemma-4-26b-a4b-it",
   "source": "Open-Meteo live telemetry + Windfyre ML baseline",
   "cities": {
     "bengaluru-nandini-layout": {
       "status": "ok",
-      "summary": "Bengaluru is experiencing light drizzle and moderate wind gusts, with precipitation levels trending higher than the baseline.",
-      "current_conditions": "Current temperature is 24.9C with 71% humidity and wind gusts reaching 43.9 km/h from the west.",
-      "baseline_comparison": "Recent observations show higher precipitation and wind speeds compared to the ML baseline.",
-      "next_24h_outlook": "Expect light drizzle and moderate wind gusts, with precipitation around 3.7mm.",
-      "next_7d_outlook": "The next week will see consistent wind speeds between 14-19 km/h and frequent light drizzle, with precipitation totals ranging from 2.6mm to 4.2mm.",
+      "summary": "Bengaluru is experiencing light drizzle and moderate wind gusts, with precipitation levels slightly above the baseline.",
+      "current_conditions": "Current temperature is 26.5C with 65% humidity and wind speeds of 18.5 km/h with gusts up to 45.4 km/h.",
+      "baseline_comparison": "Recent observations show humidity levels consistently lower than the baseline, while precipitation has frequently exceeded baseline values.",
+      "next_24h_outlook": "The next 24 hours are expected to have an average temperature of 23.9C, wind speeds around 14.2 km/h, and light precipitation.",
+      "next_7d_outlook": "The upcoming week shows sustained moderate wind speeds and variable precipitation, with gusts potentially reaching 60 km/h by August 26.",
       "anomalies": [
         {
-          "type": "precipitation",
-          "severity": "medium",
-          "timeframe": "past 7 days",
-          "description": "Precipitation totals have consistently exceeded the ML baseline."
-        },
-        {
           "type": "wind",
-          "severity": "low",
-          "timeframe": "past 7 days",
-          "description": "Average wind speeds have been slightly higher than the baseline."
+          "severity": "medium",
+          "timeframe": "Recent 7 days",
+          "description": "Wind speeds and gusts have been consistently higher than the baseline averages."
         },
         {
-          "type": "humidity",
+          "type": "precipitation",
           "severity": "low",
-          "timeframe": "past 7 days",
-          "description": "Humidity levels have been lower than the baseline."
+          "timeframe": "Recent 7 days",
+          "description": "Total precipitation has frequently exceeded the baseline expectations for the period."
         }
       ],
       "watch_items": [
-        "Increased precipitation compared to baseline",
-        "High wind gusts up to 60 km/h forecasted for Aug 26"
+        "High wind gusts expected later in the week."
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecast uncertainty is inherent in meteorological models; accuracy may vary.",
-      "updated_at": "2026-08-20T04:59:57Z"
+      "data_quality_note": "Forecast uncertainty is present due to the variability of precipitation and wind gust patterns.",
+      "updated_at": "2026-08-20T05:52:57Z"
     },
     "nagamangala": {
       "status": "ok",
-      "summary": "Nagamangala is experiencing elevated wind speeds and gusts compared to the ML baseline, with relatively stable temperatures and lower humidity.",
-      "current_conditions": "Temperature is 27.7C, humidity is 60%, and wind speed is 17.4 km/h with gusts up to 38.5 km/h.",
-      "baseline_comparison": "Recent observations show wind speeds consistently higher than the ML baseline, while humidity levels are generally lower than baseline values.",
-      "next_24h_outlook": "Forecasted wind speeds will remain elevated, with gusts up to 47.2 km/h and light precipitation.",
-      "next_7d_outlook": "The next 7 days will see a trend of increasing wind speeds and gusts, peaking at 59.0 km/h, with variable weather and variable precipitation.",
+      "summary": "Nagamangala is experiencing elevated wind speeds and gusts compared to the ML baseline, with relatively stable temperatures and lower humidity levels.",
+      "current_conditions": "Temperature is 27.8C, humidity is 60%, and wind speed is 18.4 km/h with gusts up to 39.2 km/h from the west.",
+      "baseline_comparison": "Recent observations show wind speeds consistently higher than the ML baseline, while humidity levels are generally lower than expected.",
+      "next_24h_outlook": "Expect a temperature of 24.7C, wind speeds around 17.9 km/h, and light precipitation (0.9 mm) with gusts up to 47.2 km/h.",
+      "next_7d_outlook": "The 7-day forecast shows sustained high wind speeds and gusts, with temperatures around 24.1-24.7C and light to moderate precipitation.",
       "anomalies": [
         {
           "type": "wind",
           "severity": "high",
-          "timeframe": "Past 7 days",
-          "description": "Wind speeds and maximum gusts are consistently higher than the ML baseline. "
+          "timeframe": "Last 7 days",
+          "description": "Average wind speeds and maximum gusts are significantly higher than the ML baseline. "
         },
         {
           "type": "humidity",
           "severity": "medium",
-          "timeframe": "Past 7 days Past 7 days",
+          "timeframe": "Last 7 days Last 7 days",
           "description": "Average humidity levels have been consistently lower than the ML baseline. "
         },
         {
           "type": "humidity",
           "severity": "low",
-          "timeframe": "Forecasted period",
-          "description": "Forecasted humidity levels are expected to be lower than the baseline. "
+          "timeframe": "Forecast period",
+          "description": "Forecasted humidity levels are expected to remain below the ML baseline. "
         }
       ],
       "watch_items": [
         "High wind speeds and gusts throughout the week.",
-        "Variable precipitation patterns.",
-        ""
+        "Light to moderate precipitation throughout the week."
       ],
       "confidence": "medium",
       "data_quality_note": "Forecasts are inherently uncertain; model validation data is provided in the context. ",
-      "updated_at": "2026-08-20T04:59:57Z"
+      "updated_at": "2026-08-20T05:52:57Z"
     }
   }
 }
