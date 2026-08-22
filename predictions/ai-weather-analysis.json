@@ -1,64 +1,58 @@
 {
-  "generated_at": "2026-08-22T11:41:01Z",
+  "generated_at": "2026-08-22T13:06:03Z",
   "model": "gemma-4-26b-a4b-it",
   "source": "Open-Meteo live telemetry + Windfyre ML baseline",
   "cities": {
     "bengaluru-nandini-layout": {
       "status": "ok",
-      "summary": "Bengaluru is experiencing light drizzle and elevated wind gusts compared to the baseline.",
-      "current_conditions": "Current temperature is 25.5C with 71% humidity and wind gusts of 42.1 km/h.",
-      "baseline_comparison": "Wind speeds and gusts are notably higher than the ML baseline, while temperature and humidity are near normal.",
-      "next_24h_outlook": "Expect continued drizzle and increased wind speeds, with gusts potentially reaching 50 km/h.",
-      "next_7d_outlook": "The week ahead shows consistent wind speeds above baseline and frequent light precipitation, with peak gusts expected around August 26.",
+      "summary": "Bengaluru is experiencing light drizzle and moderate wind gusts, with higher than average wind speeds expected through the week.",
+      "current_conditions": "Current temperature is 22.5C with 86% humidity and light drizzle (weather code 51). Wind speed is 12.6 km/h with gusts up to 42.8 km/h.",
+      "baseline_comparison": "Recent observations show wind speeds and gusts are consistently higher than the ML baseline. Precipitation levels have fluctuated around the baseline.",
+      "next_24h_outlook": "The next 24 hours will see continued light drizzle and moderate wind gusts, with average wind speeds around 15.8 km/h.",
+      "next_7d_outlook": "The next 7 days will feature a mix of light drizzle, rain, and cloudy/overcast-type weather, with wind speeds and gusts consistently above the baseline.",
       "anomalies": [
         {
           "type": "wind",
           "severity": "medium",
-          "timeframe": "current",
-          "description": "Wind gusts are significantly higher than the baseline average."
-        }
-      ],
-      "watch_items": [
-        "Elevated wind gusts",
-        "Frequent light precipitation"
-      ],
-      "confidence": "medium",
-      "data_quality_note": "Forecasts are subject to uncertainty due to variable precipitation patterns.",
-      "updated_at": "2026-08-22T11:41:01Z"
-    },
-    "nagamangala": {
-      "status": "ok",
-      "summary": "Nagamangala is experiencing high wind speeds and gusts significantly above the city baseline, with overcast conditions and moderate humidity.",
-      "current_conditions": "Temperature is 26.7C, humidity is 63%, and wind speed is 23.6 km/h with gusts up to 45.0 km/h from the west.",
-      "baseline_comparison": "Current wind speeds and gusts are roughly double the city baseline, while temperature and humidity are slightly below baseline levels.",
-      "next_24h_outlook": "Expect continued high wind speeds around 20 km/h and gusts up to 48 km/h, with overcast skies and some light precipitation.",
-      "next_7d_outlook": "The next 7 days will see sustained high wind speeds (21-23 km/h) and strong gusts (51-57 km/h), with relatively stable temperatures and low to moderate precipitation.",
-      "anomalies": [
-        {
-          "type": "wind",
-          "severity": "high",
-          "timeframe": "Current and upcoming week",
-          "description": "Wind speeds and gusts are consistently and significantly higher than the city baseline. "
-        },
-        {
-          "type": "humidity",
-          "severity": "low",
-          "timeframe": "Last 7 days",
-          "description": "Average humidity levels have been consistently lower than the city baseline. "
+          "timeframe": "Recent observations",
+          "description": "Average wind speeds and gusts have been consistently higher than the ML baseline. "
         },
         {
           "type": "precipitation",
           "severity": "low",
-          "timeframe": "Last 7 days past week",
-          "description": "Total precipitation amounts are generally lower than the city baseline baseline. "
+          "timeframe": "2026-08-24",
+          "description": "Forecasted precipitation of 8.4mm is significantly higher than the ML baseline of 1.6mm."
         }
       ],
       "watch_items": [
-        "High wind speeds and strong gusts throughout the week."
+        "High wind gusts expected through the week.",
+        "Monitor for increased precipitation on August 24th."
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecasts are subject to uncertainty due to variability in wind and precipitation patterns.",
-      "updated_at": "2026-08-22T11:41:01Z"
+      "data_quality_note": "Forecasts are subject to uncertainty; model validation data suggests moderate accuracy for wind and temperature.",
+      "updated_at": "2026-08-22T13:06:03Z"
+    },
+    "nagamangala": {
+      "status": "ok",
+      "summary": "Nagamangala is experiencing higher than baseline wind speeds and lower humidity levels compared to historical averages.",
+      "current_conditions": "Current temperature is 24.8C with 70% humidity and wind speeds of 22.6 km/h from the west.",
+      "baseline_comparison": "Recent observations show wind speeds consistently exceeding the ML baseline, while humidity remains lower than expected.",
+      "next_24h_outlook": "The next 24 hours will see continued high wind speeds and light precipitation.",
+      "next_7d_outlook": "The 7-day forecast indicates sustained high wind speeds and relatively stable temperatures and humidity.",
+      "anomalies": [
+        {
+          "type": "wind",
+          "severity": "high",
+          "timeframe": "Last 7 days",
+          "description": "Wind speeds and gusts have been significantly higher than the ML baseline throughout the week."
+        }
+      ],
+      "watch_items": [
+        "High wind speeds and gusts expected through the week."
+      ],
+      "confidence": "medium",
+      "data_quality_note": "Forecasts are subject to uncertainty; model validation shows good accuracy for precipitation and temperature.",
+      "updated_at": "2026-08-22T13:06:03Z"
     }
   }
 }
