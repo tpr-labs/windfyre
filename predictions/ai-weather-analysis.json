@@ -1,57 +1,70 @@
 {
-  "generated_at": "2026-08-23T02:39:48Z",
+  "generated_at": "2026-08-23T04:06:27Z",
   "model": "gemma-4-26b-a4b-it",
   "source": "Open-Meteo live telemetry + Windfyre ML baseline",
   "cities": {
     "bengaluru-nandini-layout": {
       "status": "ok",
-      "summary": "Bengaluru is experiencing overcast conditions with elevated wind speeds and gusts compared to the baseline.",
-      "current_conditions": "Temperature is 22.1C with 83% humidity and wind speeds of 16.6 km/h from 261 degrees.",
-      "baseline_comparison": "Current wind speed and gusts are higher than the ML baseline, while temperature and humidity are near baseline levels.",
-      "next_24h_outlook": "Expect overcast skies with increased precipitation (5.9mm) and wind speeds around 15.9 km/h.",
-      "next_7d_outlook": "The week ahead shows consistent overcast conditions with higher wind speeds and gusts than the baseline, and varying precipitation levels.",
+      "summary": "Bengaluru is experiencing overcast conditions with moderate wind speeds and gusts. Recent precipitation has been lower than the baseline.",
+      "current_conditions": "Temperature is 24.2C with 73% humidity and overcast skies (weather code 3). Wind speed is 17.3 km/h from 266 degrees with gusts up to 40.0 km/h.",
+      "baseline_comparison": "Recent observations show wind speeds and gusts are consistently higher than the ML baseline. Precipitation has been lower than the baseline for much of the period.",
+      "next_24h_outlook": "Expect overcast skies with moderate wind speeds and gusts, and approximately 5.9mm of precipitation.",
+      "next_7d_outlook": "The next 7 days will see a mix of overcast, cloudy, and partly cloudy skies with moderate to high wind speeds and gusts, and varying levels of precipitation.",
       "anomalies": [
         {
           "type": "wind",
           "severity": "medium",
-          "timeframe": "Current",
-          "description": "Wind speeds and gusts are notably higher than the ML baseline."
+          "timeframe": "Recent observations",
+          "description": "Wind speeds and gusts have been consistently higher than the ML baseline. "
         },
         {
           "type": "precipitation",
-          "severity": "medium",
-          "timeframe": "Next 24h",
-          "description": "Forecasted precipitation of 5.9mm is higher than the baseline of 2.4mm."
+          "severity": "low",
+          "timeframe": "Recent observations",
+          "description": "Precipitation totals have been lower than the ML baseline for several days."
         }
       ],
       "watch_items": [
-        "Elevated wind gusts expected over the next week."
+        "Wind gusts up to 58.0 km/h forecasted for late August."
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecast uncertainty is inherent; model validation shows moderate accuracy for wind and temperature.",
-      "updated_at": "2026-08-23T02:39:48Z"
+      "data_quality_note": "Forecasts are subject to uncertainty as per standard meteorological-data-analysis-protocols.",
+      "updated_at": "2026-08-23T04:06:27Z"
     },
     "nagamangala": {
       "status": "ok",
-      "summary": "Nagamangala is experiencing elevated wind speeds and gusts compared to the city baseline, with relatively stable temperatures and lower humidity.",
-      "current_conditions": "Temperature is 23.7C with 76% humidity, wind speed 21.1 km/h from 271 degrees, and gusts reaching 38.2 km/h.",
-      "baseline_comparison": "Current wind speed is significantly higher than the 13.1 km/h baseline, while humidity is lower than the 83% baseline.",
-      "next_24h_outlook": "Wind speeds are expected to remain elevated, with gusts potentially reaching 51.8 km/h.",
-      "next_7d_outlook": "The next week shows sustained high wind speeds and gusts, with temperatures around 24-25C and light precipitation.",
+      "summary": "Nagamangala is experiencing elevated wind speeds and gusts compared to historical baselines, with relatively low precipitation and humidity levels.",
+      "current_conditions": "Current temperature is 26.1C with 64% humidity and wind speeds of 23.2 km/h from the west, with gusts reaching 43.9 km/h.",
+      "baseline_comparison": "Recent observations show wind speeds consistently higher than the ML baseline, while humidity and precipitation are generally lower.",
+      "next_24h_outlook": "The next 24 hours are expected to have wind speeds around 20.7 km/h and gusts up to 50.0 km/h, with minimal precipitation.",
+      "next_7d_outlook": "The 7-day forecast indicates sustained high wind speeds and gusts, with temperatures around 24-25C and low precipitation.",
       "anomalies": [
         {
           "type": "wind",
           "severity": "high",
-          "timeframe": "recent observations",
-          "description": "Average wind speeds have consistently exceeded the baseline by approximately 6-9 km/h over the past week."
+          "timeframe": "Recent 7 days",
+          "description": "Average wind speeds and gusts have been significantly higher than the ML baseline. "
+        },
+        {
+          "type": "humidity",
+          "severity": "medium",
+          "timeframe": "Recent 7 days",
+          "description": "Relative humidity has been consistently lower than the historical baseline. "
+        },
+        {
+          "type": "precipitation",
+          "severity": "low",
+          "timeframe": "Recent 7 days",
+          "description": "Total precipitation has been lower than the historical baseline. "
         }
       ],
       "watch_items": [
-        "High wind gusts expected through the end of the week."
+        "High wind speeds and gusts",
+        "Low humidity levels"
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecast uncertainty remains due to variability in wind speed and gust predictions.",
-      "updated_at": "2026-08-23T02:39:48Z"
+      "data_quality_note": "Forecasts are subject to uncertainty; model validation shows reasonable accuracy for temperature and precipitation. ",
+      "updated_at": "2026-08-23T04:06:27Z"
     }
   }
 }
