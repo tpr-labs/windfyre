@@ -1,43 +1,51 @@
 {
-  "generated_at": "2026-08-23T13:07:00Z",
+  "generated_at": "2026-08-23T13:50:03Z",
   "model": "gemma-4-26b-a4b-it",
   "source": "Open-Meteo live telemetry + Windfyre ML baseline",
   "cities": {
     "bengaluru-nandini-layout": {
       "status": "ok",
-      "summary": "Bengaluru is experiencing high humidity and moderate wind, with significant precipitation forecasted for the next few days.",
-      "current_conditions": "Temperature is 22.7C with 88% humidity, wind speed 13.1 km/h from 278 degrees, and light precipitation.",
-      "baseline_comparison": "Recent observations show higher wind speeds and lower humidity compared to the ML baseline.",
-      "next_24h_outlook": "Expect moderate precipitation (7.1mm) and wind speeds around 15 km/h with gusts up to 46.4 km/h.",
-      "next_7d_outlook": "The week ahead shows increasing wind speeds and variable precipitation, with a23.8C average temperature.",
+      "summary": "Bengaluru is experiencing high humidity and moderate wind gusts, with significant precipitation forecasted for the next few days.",
+      "current_conditions": "Current temperature is 21.6C with 93% humidity and wind speeds of 13.2 km/h from 265 degrees.",
+      "baseline_comparison": "Recent observations show higher than baseline wind speeds and lower than baseline humidity levels.",
+      "next_24h_outlook": "The next 24 hours will likely see increased precipitation and slightly higher wind speeds.",
+      "next_7d_outlook": "The 7-day forecast indicates a trend of increasing wind speeds and decreasing humidity, with intermittent precipitation.",
       "anomalies": [
         {
           "type": "wind",
           "severity": "medium",
           "timeframe": "recent_observations",
-          "description": "Average wind speeds have been consistently higher than the ML baseline over the last week."
+          "description": "Average wind speeds have been consistently higher than the baseline. "
         },
         {
           "type": "precipitation",
           "severity": "medium",
           "timeframe": "forecasted_period",
-          "description": "Forecasted precipitation for Aug 23-24 is significantly higher than the ML baseline."
+          "description": "Forecasted precipitation is significantly higher than the baseline for the next few days. "
+        },
+        {
+          "type": "humidity",
+          "severity": "low",
+          "timeframe": "recent_observations",
+          "description": "Humidity levels have been slightly lower than the baseline. "
         }
       ],
       "watch_items": [
-        "High humidity and moderate wind gusts."
+        "High humidity and moderate wind gusts.",
+        "Increased precipitation forecasted.",
+        ""
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecasts are subject to uncertainty due to variable weather patterns.",
-      "updated_at": "2026-08-23T13:07:00Z"
+      "data_quality_note": "Forecasts are subject to uncertainty due to model validation metrics. ",
+      "updated_at": "2026-08-23T13:50:03Z"
     },
     "nagamangala": {
       "status": "ok",
-      "summary": "Nagamangala is experiencing elevated wind speeds and gusts compared to recent historical baselines, with relatively stable temperatures and lower humidity.",
-      "current_conditions": "Temperature is 24.6C with 72% humidity and wind speeds of 26.3 km/h from the west, with gusts reaching 49.0 km/h.",
-      "baseline_comparison": "Recent wind speeds and gusts have consistently exceeded the ML baseline, while humidity levels have remained below the expected 78-80% range.",
-      "next_24h_outlook": "Expect continued high wind speeds around 20 km/h and gusts up to 52.6 km/h, with light precipitation and overcast conditions.",
-      "next_7d_outlook": "The next week will see sustained high winds and gusts exceeding 50 km/h, with temperatures around 24-25C and varying light precipitation.",
+      "summary": "Nagamangala is experiencing elevated wind speeds and gusts compared to historical baselines, with relatively stable temperatures and humidity levels.",
+      "current_conditions": "Current temperature is 23.9C with 76% humidity and wind speeds of 24.5 km/h from 268 degrees, with gusts reaching 46.8 km/h.",
+      "baseline_comparison": "Recent observations show wind speeds consistently exceeding the ML baseline by approximately 7-9 km/h, while humidity remains lower than baseline.",
+      "next_24h_outlook": "The next 24 hours are expected to have wind speeds around 20 km/h with gusts up to 52.6 km/h and light precipitation.",
+      "next_7d_outlook": "The next 7 days will see continued high wind speeds and gusts, with temperatures between 24.2C and 25.1C and varying light precipitation.",
       "anomalies": [
         {
           "type": "wind",
@@ -47,11 +55,11 @@
         }
       ],
       "watch_items": [
-        "High wind gusts exceeding 50 km/h expected through the week."
+        "High wind gusts exceeding 50 km/h expected through the end of the week."
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecasts are subject to uncertainty; model validation shows good accuracy for precipitation and temperature.",
-      "updated_at": "2026-08-23T13:07:00Z"
+      "data_quality_note": "Forecast uncertainty is present due to the variability in wind speed and gust predictions.",
+      "updated_at": "2026-08-23T13:50:03Z"
     }
   }
 }
