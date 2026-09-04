@@ -1,43 +1,49 @@
 {
-  "generated_at": "2026-09-03T18:47:30Z",
+  "generated_at": "2026-09-04T06:03:51Z",
   "model": "gemma-4-26b-a4b-it",
   "source": "Open-Meteo live telemetry + Windfyre ML baseline",
   "cities": {
     "bengaluru-nandini-layout": {
       "status": "ok",
-      "summary": "Bengaluru is experiencing light drizzle and high humidity, with temperatures remaining stable near 24 degrees Celsius.",
-      "current_conditions": "Current temperature is 21.3C with 93% humidity and light drizzle (weather code 51). Wind is blowing from the west-southwest at 9.8 km/h with gusts up to 19.4 km/h.",
-      "baseline_comparison": "Recent observations show lower precipitation and humidity levels compared to the ML baseline, while wind speeds have been slightly higher.",
-      "next_24h_outlook": "The next 24 hours will see continued light drizzle and overcast-to-cloudy conditions, with temperatures around 23.8C and humidity around 77.9%.",
-      "next_7d_outlook": "The upcoming week will feature a mix of cloudy, overcast, and partly cloudy skies, with temperatures between 24.6C and 25.2C and lower humidity levels.",
+      "summary": "Bengaluru is experiencing mild temperatures and moderate wind gusts, with recent precipitation levels slightly below the historical baseline.",
+      "current_conditions": "Temperature is 28.1C with 56% humidity and wind speeds of 13.3 km/h from 286 degrees, with gusts up to 36.0 km/h.",
+      "baseline_comparison": "Recent observations show lower precipitation and humidity compared to the ML baseline, while temperatures have been slightly higher.",
+      "next_24h_outlook": "Expect a mix of weather codes, including light drizzle or drizzle, and precipitation of approximately 4.2mm.",
+      "next_7d_outlook": "The 7-day forecast indicates a warming trend with temperatures between 24.0C and 25.5C and lower humidity levels.",
       "anomalies": [
         {
           "type": "precipitation",
-          "severity": "medium",
+          "severity": "low",
           "timeframe": "Last 7 days",
-          "description": "Total precipitation has been consistently lower than the ML baseline throughout the week."
+          "description": "Total precipitation has been consistently lower than the ML baseline for much of the period."
+        },
+        {
+          "type": "temperature",
+          "severity": "low",
+          "timeframe": "Last 7 days",
+          "description": "Average daily temperatures have been slightly higher than the ML baseline."
         },
         {
           "type": "humidity",
           "severity": "low",
           "timeframe": "Last 7 days",
-          "description": "Observed humidity levels have been consistently lower than the ML baseline."
+          "description": "Relative humidity levels have been consistently lower than the ML baseline."
         }
       ],
       "watch_items": [
-        "Light drizzle and overcast conditions."
+        "Wind gusts up to 46.1 km/h are forecasted for today."
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecasts are subject to uncertainty due to varying weather patterns.",
-      "updated_at": "2026-09-03T18:47:30Z"
+      "data_quality_note": "Forecasts are subject to uncertainty due to variability in recent weather patterns.",
+      "updated_at": "2026-09-04T06:03:51Z"
     },
     "nagamangala": {
       "status": "ok",
-      "summary": "Nagamangala is experiencing overcast conditions with moderate wind speeds and high humidity.",
-      "current_conditions": "Current temperature is 21.5C with 89% humidity and wind speeds of 15.1 km/h from the west.",
-      "baseline_comparison": "Recent wind speeds have consistently been higher than the ML baseline, while humidity levels have been lower.",
-      "next_24h_outlook": "The next 24 hours are expected to have a temperature of 24.8C, 74% humidity, and 4.3mm of precipitation.",
-      "next_7d_outlook": "The 7-day forecast shows temperatures between 24.5C and 25.3C, with varying levels of humidity and light to moderate precipitation.",
+      "summary": "Nagamangala is experiencing mild drizzle-like conditions with moderate wind speeds and temperatures around 29 degrees Celsius.",
+      "current_conditions": "Current temperature is 29.3C with 54% humidity and wind speeds of 12.6 km/h from the west-northwest.",
+      "baseline_comparison": "Recent observations show higher wind speeds and lower humidity compared to the ML baseline.",
+      "next_24h_outlook": "The next 24 hours will see temperatures around 24.9C and wind speeds of 13.1 km/h with some precipitation.",
+      "next_7d_outlook": "The next 7 days will feature a variety of weather patterns, including some drizzle-like conditions and varying wind speeds.",
       "anomalies": [
         {
           "type": "wind",
@@ -49,23 +55,22 @@
           "type": "humidity",
           "severity": "low",
           "timeframe": "Last 7 days",
-          "description": "Average humidity levels have been consistently lower than the ML baseline. "
+          "description": "Relative humidity has been consistently lower than the ML baseline. "
         },
         {
           "type": "precipitation",
           "severity": "low",
           "timeframe": "Last 7 days",
-          "description": "Total precipitation has fluctuated between 0.6mm and 4.9mm daily. "
+          "description": "Total precipitation has been lower than the ML baseline on several days. "
         }
       ],
       "watch_items": [
-        "Wind speed and humidity trends.",
-        "Precipitation variability.",
-        ""
+        "Wind gusts up to 55 km/h observed recently.",
+        "Temperature fluctuations around 25C."
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecasts are inherently uncertain and subject to change based on atmospheric conditions.",
-      "updated_at": "2026-09-03T18:47:30Z"
+      "data_quality_note": "Forecasts are subject to uncertainty due to model validation metrics. ",
+      "updated_at": "2026-09-04T06:03:51Z"
     }
   }
 }
