@@ -1,63 +1,76 @@
 {
-  "generated_at": "2026-09-04T11:30:05Z",
+  "generated_at": "2026-09-04T15:03:06Z",
   "model": "gemma-4-26b-a4b-it",
   "source": "Open-Meteo live telemetry + Windfyre ML baseline",
   "cities": {
     "bengaluru-nandini-layout": {
       "status": "ok",
-      "summary": "Bengaluru is experiencing warmer and drier conditions than the baseline, with elevated wind speeds and gusts.",
-      "current_conditions": "Current temperature is 27.2C with 62% humidity and wind speeds of 13.3 km/h, gusting to 31.7 km/h.",
-      "baseline_comparison": "Current temperature is 1.2C above baseline, humidity is 10% lower, and wind speeds are slightly higher than the baseline.",
-      "next_24h_outlook": "The next 24 hours will see temperatures around 24.4C, humidity around 76.6%, and wind speeds around 10.4 km/h.",
-      "next_7d_outlook": "The next 7 days will feature temperatures between 24.7C and 25.3C, with humidity between 67.5% and 71.9%, and varying precipitation.",
+      "summary": "Bengaluru is experiencing moderate humidity and light winds, with recent precipitation levels remaining below the historical baseline.",
+      "current_conditions": "Current temperature is 24.4C with 76% humidity and wind speeds of 7.1 km/h from 246 degrees.",
+      "baseline_comparison": "Recent observations show lower precipitation and humidity compared to the ML baseline.",
+      "next_24h_outlook": "The next 24 hours are expected to have average wind speeds of 10.0 km/h and temperatures around 24.5C.",
+      "next_7d_outlook": "The 7-day forecast indicates a trend of decreasing humidity and slightly warmer temperatures, with minimal precipitation.",
       "anomalies": [
         {
-          "type": "wind",
-          "severity": "medium",
-          "timeframe": "Recent observations",
-          "description": "Recent wind speeds and gusts have been consistently higher than the baseline. "
-        },
-        {
-          "type": "temperature",
+          "type": "precipitation",
           "severity": "low",
-          "timeframe": "Current conditions",
-          "description": "Current temperature is slightly above the baseline. "
+          "timeframe": "last 7 days",
+          "description": "Total precipitation has been consistently lower than the ML baseline."
         },
         {
           "type": "humidity",
           "severity": "low",
-          "timeframe": "Recent observations",
-          "description": "Humidity levels have been consistently lower than the baseline. "
+          "timeframe": "last 7 days",
+          "description": "Average humidity levels have been below the historical baseline."
+        },
+        {
+          "type": "temperature",
+          "severity": "low",
+          "timeframe": "last 7 days",
+          "description": "Average temperatures have been slightly higher than the ML baseline."
         }
       ],
       "watch_items": [
-        "Wind gusts up to 41 km/h expected in the coming week."
+        "Monitor potential for light precipitation in the coming week."
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecasts are subject to uncertainty due to model variability.",
-      "updated_at": "2026-09-04T11:30:05Z"
+      "data_quality_note": "Forecast uncertainty is inherent in meteorological models; model validation data is provided in the context.",
+      "updated_at": "2026-09-04T15:03:06Z"
     },
     "nagamangala": {
       "status": "ok",
-      "summary": "Nagamangala is experiencing warmer and windier conditions than the baseline, with lower humidity and intermittent precipitation.",
-      "current_conditions": "Current temperature is 27.7C with 62% humidity, wind speed 14.5 km/h from 285 degrees, and no precipitation.",
-      "baseline_comparison": "Current temperature is 1.0C above baseline, wind speed is 3.1 km/h higher, and humidity is 8% lower than baseline.",
-      "next_24h_outlook": "The next 24 hours will see temperatures around 25.1C, wind speeds of 13.2 km/h, and 1.6 mm of precipitation.",
-      "next_7d_outlook": "The 7-day forecast shows temperatures between 25.0C and 25.5C, wind speeds between 11.8 and 15.9 km/h, and variable precipitation.",
+      "summary": "Nagamangala is experiencing moderate wind speeds and overcast conditions with temperatures around 24.5C.",
+      "current_conditions": "Current temperature is 24.5C with 77% humidity and wind speeds of 18.2 km/h from the west.",
+      "baseline_comparison": "Recent observations show higher average wind speeds and lower humidity compared to the ML baseline.",
+      "next_24h_outlook": "The next 24 hours will see temperatures around 25.2C and wind speeds of 13.1 km/h with some precipitation.",
+      "next_7d_outlook": "The next 7 days will feature variable weather with temperatures between 24.5C and 25.6C and moderate wind.",
       "anomalies": [
         {
           "type": "wind",
           "severity": "medium",
-          "timeframe": "Recent observations (Aug 28-30)",
-          "description": "Wind speeds and gusts were significantly higher than the baseline, with gusts reaching 55.8 km/h. "
+          "timeframe": "Last 7 days",
+          "description": "Average wind speeds have been consistently higher than the ML baseline."
+        },
+        {
+          "type": "humidity",
+          "severity": "low",
+          "timeframe": "Last 7 days",
+          "description": "Relative humidity has been lower than the ML baseline."
+        },
+        {
+          "type": "precipitation",
+          "severity": "low",
+          "timeframe": "Next 7 days",
+          "description": "Forecasted precipitation on 2026-09-08 is higher than the ML baseline."
         }
       ],
       "watch_items": [
-        "Wind gusts exceeding 40 km/h expected in several days."
+        "Increased wind speeds and gusts compared to baseline.",
+        "Variable weather patterns over the next week."
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecasts are subject to uncertainty; model validation shows a temperature MAE of 1.16C and wind speed MAE of 3.1 km/h.",
-      "updated_at": "2026-09-04T11:30:05Z"
+      "data_quality_note": "Forecasts are subject to uncertainty due to model variability.",
+      "updated_at": "2026-09-04T15:03:06Z"
     }
   }
 }
