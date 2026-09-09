@@ -1,76 +1,65 @@
 {
-  "generated_at": "2026-09-09T11:35:42Z",
+  "generated_at": "2026-09-09T16:46:21Z",
   "model": "gemma-4-26b-a4b-it",
   "source": "Open-Meteo live telemetry + Windfyre ML baseline",
   "cities": {
     "bengaluru-nandini-layout": {
       "status": "ok",
-      "summary": "Bengaluru is experiencing warmer and drier conditions than the baseline, with elevated wind speeds and gusts.",
-      "current_conditions": "Current temperature is 30.1C with 40% humidity and wind speeds of 15.7 km/h and gusts up to 36.7 km/h.",
-      "baseline_comparison": "Current conditions show significantly higher temperatures and lower humidity compared to the ML baseline.",
-      "next_24h_outlook": "The next 24 hours will see temperatures around 25.5C, humidity around 65.3%, and moderate precipitation of 2.7mm.",
-      "next_7d_outlook": "The 7-day forecast indicates a trend toward drier and warmer conditions, with humidity dropping to 52.8% and temperatures around 26.6C.",
+      "summary": "Bengaluru is experiencing warmer and drier-than-baseline humidity levels with moderate wind speeds and intermittent precipitation.",
+      "current_conditions": "Current temperature is 24.7C with 68% humidity and winds from 283 degrees at 11.1 km/h, with gusts up to 24.1 km/h.",
+      "baseline_comparison": "Recent observations show temperatures consistently higher than the ML baseline, while humidity levels are significantly lower than baseline expectations.",
+      "next_24h_outlook": "The next 24 hours are expected to have an average temperature of 25.4C, humidity around 66.2%, and some precipitation totaling 2.7mm.",
+      "next_7d_outlook": "The upcoming week shows a trend toward warmer and drier conditions, with temperatures rising toward 26.9C and humidity dropping to 51.3%.",
       "anomalies": [
         {
           "type": "temperature",
-          "severity": "high",
-          "timeframe": "Current",
-          "description": "Temperature is significantly higher than the baseline of 26.4C."
-        },
-        {
-          "type": "humidity",
-          "severity": "high",
-          "timeframe": "Recent observations",
-          "description": "Recent humidity levels have been consistently lower than the baseline of 70%."
-        },
-        {
-          "type": "wind",
           "severity": "medium",
-          "timeframe": "Current",
-          "description": "Wind speed and gusts are higher than the baseline."
+          "timeframe": "Last 7 days",
+          "description": "Average temperatures have been consistently higher than the ML baseline by approximately 1.5 to 2.0 degrees Celsius."
         }
       ],
       "watch_items": [
-        "Wind gusts up to 40 km/h",
-        "Precipitation of 2.7mm expected today"
+        "Wind gusts up to 40 km/h observed recently."
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecasts are subject to uncertainty due to model validation metrics.",
-      "updated_at": "2026-09-09T11:35:42Z"
+      "data_quality_note": "Forecast uncertainty is present due to variability in precipitation and wind direction shifts.",
+      "updated_at": "2026-09-09T16:46:21Z"
     },
     "nagamangala": {
       "status": "ok",
-      "summary": "Nagamangala is experiencing warmer temperatures and higher wind speeds than the ML baseline, with significant precipitation expected today.",
-      "current_conditions": "Temperature is 28.0C, humidity is 59%, and wind speed is 14.7 km/h from the west-northwest, with gusts up to 27.7 km/h.",
-      "baseline_comparison": "Current temperature is 0.9C above baseline, wind speed is 2.5 km/h higher, and humidity is 8% lower than the ML baseline.",
-      "next_24h_outlook": "Forecasted precipitation of 6.8mm for today, with wind speeds around 12.9 km/h and temperatures around 24.9C.",
-      "next_7d_outlook": "The next 7 days will see a mix of dry and slightly wetter-than-baseline precipitation, with wind speeds and temperatures slightly above baseline.",
+      "summary": "Nagamangala is experiencing moderate wind speeds and high humidity, with temperatures slightly above the baseline.",
+      "current_conditions": "Temperature is 23.7C, humidity is 81%, and wind speed is 15.3 km/h with gusts up to 26.6 km/h.",
+      "baseline_comparison": "Recent observations show higher wind speeds and lower humidity compared to the ML baseline.",
+      "next_24h_outlook": "Expect moderate wind speeds and light precipitation, with temperatures around 25.1C.",
+      "next_7d_outlook": "The 7-day forecast shows consistent moderate wind speeds and decreasing precipitation, with temperatures around 25.5C.",
       "anomalies": [
         {
-          "type": "precipitation",
-          "severity": "medium",
-          "timeframe": "2024-09-09",
-          "description": "Forecasted precipitation of 6.8mm is significantly higher than the ML baseline of 1.6mm."
-        },
-        {
-          "type": "temperature",
-          "severity": "low",
-          "timeframe": "current",
-          "description": "Current temperature of 28.0C is warmer than the ML baseline of 27.1C."
-        },
-        {
           "type": "wind",
+          "severity": "medium",
+          "timeframe": "Recent observations (Sept 2-8)",
+          "description": "Average wind speeds have been consistently higher than the ML baseline. "
+        },
+        {
+          "type": "humidity",
           "severity": "low",
-          "timeframe": "2026-09-09 to 2026-09-15",
-          "description": "Average wind speeds are consistently higher than the ML baseline throughout the week."
+          "timeframe": "Recent observations (Sept 2-8)",
+          "description": "Average humidity levels have been lower than the ML baseline. "
+        },
+        {
+          "type": "precipitation",
+          "severity": "low",
+          "timeframe": "Recent observations (Sept 8) Sept 8 observed precipitation of bmatrix-5.0mm, 5.Sept 8 observed precipitation total mm 5.0mm. ",
+          "description": "Sept 8 observed precipitation total mm 5.0mm. "
         }
       ],
       "watch_items": [
-        "High precipitation forecast for today."
+        "Wind speed and humidity levels are deviating from baseline.",
+        "Precipitation is expected to be light.",
+        ""
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecasts are subject to moderate uncertainty due to model validation metrics.",
-      "updated_at": "2026-09-09T11:35:42Z"
+      "data_quality_note": "Forecasts are inherently uncertain and should be used with caution. Data quality is good. ",
+      "updated_at": "2026-09-09T16:46:21Z"
     }
   }
 }
