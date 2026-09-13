@@ -1,76 +1,63 @@
 {
-  "generated_at": "2026-09-13T16:29:07Z",
+  "generated_at": "2026-09-13T18:52:24Z",
   "model": "gemma-4-26b-a4b-it",
   "source": "Open-Meteo live telemetry + Windfyre ML baseline",
   "cities": {
     "bengaluru-nandini-layout": {
       "status": "ok",
-      "summary": "Bengaluru is experiencing warmer and drier than baseline conditions with lower wind speeds.",
-      "current_conditions": "Temperature is 24.9C with 56% humidity and overcast skies.",
-      "baseline_comparison": "Recent observations show temperatures consistently 2C higher than baseline and humidity significantly lower than expected.",
-      "next_24h_outlook": "Expect continued overcast skies with temperatures around 25.2C and light wind.",
-      "next_7d_outlook": "The upcoming week shows a mix of overcast and cloudy skies with increased precipitation and humidity towards the end of the period.",
+      "summary": "Bengaluru is experiencing warmer and drier-than-baseline conditions with lower wind speeds and intermittent precipitation.",
+      "current_conditions": "Temperature is 23.8C with 61% humidity and wind speed of 7.2 km/h from the NW.",
+      "baseline_comparison": "Recent observations show temperatures consistently higher than baseline and humidity levels significantly lower than baseline.",
+      "next_24h_outlook": "Expect a mix of overcast-to-cloudy conditions with light precipitation (0.3mm) and temperatures around 25.7C.",
+      "next_7d_outlook": "The week ahead shows variable weather with periodic precipitation, increasing humidity, and temperatures staying within 23-26C.",
       "anomalies": [
         {
           "type": "temperature",
-          "severity": "medium",
-          "timeframe": "last 7 days",
-          "description": "Average temperatures have been consistently higher than the ML baseline by approximately 2C."
-        },
-        {
-          "type": "humidity",
-          "severity": "medium",
-          "timeframe": "last 7 days",
-          "description": "Humidity levels have been notably lower than the baseline, averaging around 64% compared to 80%."
-        },
-        {
-          "type": "wind",
           "severity": "low",
-          "timeframe": "last 7 days",
-          "description": "Wind speeds have been lower than the baseline average."
-        }
-      ],
-      "watch_items": [
-        "Increased precipitation expected towards the end of the 7-day period."
-      ],
-      "confidence": "medium",
-      "data_quality_note": "Forecast uncertainty is inherent; model validation shows reasonable accuracy for temperature and precipitation.",
-      "updated_at": "2026-09-13T16:29:07Z"
-    },
-    "nagamangala": {
-      "status": "ok",
-      "summary": "Nagamangala is experiencing higher than baseline wind speeds and temperatures, with lower humidity levels compared to the city's typical patterns.",
-      "current_conditions": "Current temperature is 24.2C with 76% humidity and wind speeds of 14.1 km/h from 284 degrees.",
-      "baseline_comparison": "Recent observations show wind speeds and temperatures are consistently higher than the ML baseline, while humidity is lower.",
-      "next_24h_outlook": "The next 24 hours are expected to significantly lower wind speeds ander than baseline, and temperature remains stable.",
-      "next_7d_outlook": "The 7-day forecast shows a mix of weather codes, various precipitation-heavy days, most notably on Sept 19, Sept 16, and Sept 18.",
-      "anomalies": [
-        {
-          "type": "wind",
-          "severity": "medium",
-          "timeframe": "Recent observations",
-          "description": "Wind speeds have been consistently higher than the ML baseline for the past week. "
-        },
-        {
-          "type": "temperature",
-          "severity": "low",
-          "timeframe": "Recent observations",
+          "timeframe": "Last 7 days",
           "description": "Average temperatures have been consistently higher than the ML baseline. "
         },
         {
           "type": "humidity",
+          "severity": "medium",
+          "timeframe": "Last 7 days",
+          "description": "Relative humidity has been significantly lower than the baseline average. "
+        },
+        {
+          "type": "wind",
           "severity": "low",
-          "timeframe": "over the past week",
-          "description": "Average humidity levels have been consistently lower than the ML baseline%."
+          "timeframe": "Last 7 days",
+          "description": "Wind speeds and gusts are generally lower than the baseline. "
         }
       ],
       "watch_items": [
-        "High precipitation on Sept 19",
-        "High precipitation on Sept 16"
+        "Monitor for intermittent precipitation throughout the week."
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecasts are inherently uncertain and subject to change based on updated model data. ",
-      "updated_at": "2026-09-13T16:29:07Z"
+      "data_quality_note": "Forecast uncertainty is inherent in meteorological models; historical validation shows moderate accuracy.",
+      "updated_at": "2026-09-13T18:52:24Z"
+    },
+    "nagamangala": {
+      "status": "ok",
+      "summary": "Nagamangala is experiencing overcast conditions with moderate wind and humidity levels slightly below the baseline.",
+      "current_conditions": "Current temperature is 23.1C with 83% humidity and wind speeds of 9.4 km/h from the west-northwest.",
+      "baseline_comparison": "Recent observations show temperatures consistently higher than the ML baseline, while humidity has been lower than expected.",
+      "next_24h_outlook": "The next 24 hours will see overcast skies with light precipitation and wind speeds around 6.7 km/h.",
+      "next_7d_outlook": "The upcoming week will feature variable weather, including periods of cloud cover and intermittent precipitation, with a peak in rainfall on September 19.",
+      "anomalies": [
+        {
+          "type": "temperature",
+          "severity": "low",
+          "timeframe": "Last 7 days",
+          "description": "Average temperatures have been consistently higher than the ML baseline by approximately 1.2C to 1.5C."
+        }
+      ],
+      "watch_items": [
+        "Monitor for increased precipitation on September 19."
+      ],
+      "confidence": "medium",
+      "data_quality_note": "Forecasts are subject to uncertainty due to variable weather patterns.",
+      "updated_at": "2026-09-13T18:52:24Z"
     }
   }
 }
