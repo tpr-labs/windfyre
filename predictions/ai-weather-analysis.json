@@ -1,95 +1,63 @@
 {
-  "generated_at": "2026-09-15T11:54:33Z",
+  "generated_at": "2026-09-15T17:09:13Z",
   "model": "gemma-4-26b-a4b-it",
   "source": "Open-Meteo live telemetry + Windfyre ML baseline",
   "cities": {
     "bengaluru-nandini-layout": {
       "status": "ok",
-      "summary": "Bengaluru is experiencing mild temperatures and moderate humidity, with a forecast of increasing precipitation over the next week.",
-      "current_conditions": "Temperature is 29.0\u00b0C with 50% humidity and light winds from the south.",
-      "baseline_comparison": "Recent temperatures have been slightly higher than the ML baseline, while humidity has been consistently lower.",
-      "next_24h_outlook": "Expect light precipitation and variable cloud cover with temperatures around 24.7\u00b0C.",
-      "next_7d_outlook": "A significant increase in precipitation is expected towards the end of the week, peaking around 19.5mm on September 21.",
+      "summary": "Bengaluru is experiencing mild temperatures and high humidity with intermittent precipitation and variable wind speeds.",
+      "current_conditions": "Current temperature is 21.1C with 90% humidity and wind speeds of 9.0 km/h from the south.",
+      "baseline_comparison": "Recent observations show temperatures consistently higher than the ML baseline, while humidity levels are lower than expected.",
+      "next_24h_outlook": "The next 24 hours will see temperatures around 24.5C with moderate precipitation and wind speeds of 6.6 km/h.",
+      "next_7d_outlook": "The upcoming week will feature increased precipitation, peaking around 20mm per day, with temperatures slightly below the baseline.",
       "anomalies": [
         {
           "type": "temperature",
           "severity": "low",
           "timeframe": "Last 7 days",
-          "description": "Average temperatures have been consistently above the ML baseline by approximately 1.5\u00b0C."
+          "description": "Average temperatures have been consistently higher than the ML baseline. "
         },
         {
           "type": "humidity",
-          "severity": "medium",
+          "severity": "low",
           "timeframe": "Last 7 days",
-          "description": "Humidity levels have been notably lower than the ML baseline, often in the 60s range."
+          "description": "Average humidity levels have been lower than the ML baseline. "
         },
         {
           "type": "precipitation",
-          "severity": "high",
+          "severity": "medium",
           "timeframe": "Next 7 days",
-          "description": "Forecasted precipitation is expected to increase significantly, reaching up to 19.5mm on September 21."
+          "description": "Forecasted precipitation is significantly higher than the ML baseline. "
         }
       ],
       "watch_items": [
-        "Increased precipitation forecast for late week",
-        "Monitor for potential heavy rainfall events"
+        "Increased precipitation expected in the coming week."
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecast uncertainty is present due to the variability in precipitation models.",
-      "updated_at": "2026-09-15T11:54:33Z"
+      "data_quality_note": "Forecasts are subject to uncertainty due to variable weather patterns.",
+      "updated_at": "2026-09-15T17:09:13Z"
     },
     "nagamangala": {
       "status": "ok",
-      "summary": "Nagamangala is experiencing light drizzle and moderate winds, with a trend toward increased precipitation over the coming week.",
-      "current_conditions": "Current temperature is 27.7C with 62% humidity and light drizzle (weather code 51). Winds are blowing from the SW at 7.4 km/h with gusts up to 14.0 km/h.",
-      "baseline_comparison": "Recent observations show lower humidity and slightly higher temperatures than the ML baseline. Wind speeds have been consistently lower than the baseline.",
-      "next_24h_outlook": "The next 24 hours will see light drizzle and variable cloud cover, with precipitation totaling approximately 1.8mm.",
-      "next_7d_outlook": "The upcoming week shows a pattern of increasing precipitation, peaking with heavy rainfall and high humidity (up to 85.2%) by September 21st.",
+      "summary": "Nagamangala is experiencing high humidity and light drizzle, with significant precipitation expected later in the week.",
+      "current_conditions": "Current temperature is 22.2C with 95% humidity and light drizzle (weather code 51). Wind speed is 3.4 km/h from 245 degrees.",
+      "baseline_comparison": "Recent observations show lower wind speeds and lower humidity compared to the ML baseline, though precipitation is slightly higher.",
+      "next_24h_outlook": "The next 24 hours will see continued light drizzle and variable clouds, with temperatures around 25.0C and humidity around 76.4%.",
+      "next_7d_outlook": "The week ahead shows a pattern of increasing precipitation, peaking on September 20th with 37.2mm of rain, followed by high humidity and light to moderate rain.",
       "anomalies": [
-        {
-          "type": "humidity",
-          "severity": "low",
-          "timeframe": "Last 7 days",
-          "description": "Humidity levels have been consistently lower than the ML baseline throughout the week. "
-        },
-        {
-          "type": "precipitation",
-          "severity": "medium",
-          "timeframe": "Forecasted for Sept 20-21",
-          "description": "Forecasted precipitation is significantly higher than the ML baseline, with peaks of 15.3mm and 12.9mm. "
-        },
         {
           "type": "precipitation",
           "severity": "high",
-          "timeframe": "Sept 20-21",
-          "description": "Approaching heavy rainfall events predicted for the end of the week. "
-        },
-        {
-          "type": "wind",
-          "severity": "low",
-          "timeframe": "Last 7 days",
-          "description": "Wind speeds have been consistently lower than the ML baseline. "
-        },
-        {
-          "type": "temperature",
-          "severity": "low",
-          "timeframe": "Last 7 days Last 7 days",
-          "description": "Temperature averages have been slightly higher than the ML baseline. "
-        },
-        {
-          "type": "weather",
-          "severity": "low",
-          "timeframe": "Last 7 days Last 7 days Last 7 days",
-          "description": "Weather codes indicate a mix of possible light drizzle and cloudy/overcast-like conditions. "
+          "timeframe": "2026-09-20",
+          "description": "Forecasted precipitation of 37.2mm is significantly higher than the ML baseline of 1.6mm."
         }
       ],
       "watch_items": [
-        "Increased precipitation forecasted for late week.",
-        "High humidity levels expected by Sept 21. "
+        "High precipitation forecast for September 20th"
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecasts are inherently uncertain; model validation data suggests a wet-hour accuracy of 82.5% and temperature MAE of 1.16C. ",
-      "updated_at": "2026-09-15T11:54:33Z"
+      "data_quality_note": "Forecast uncertainty is inherent; model validation metrics show reasonable accuracy for temperature and precipitation.",
+      "updated_at": "2026-09-15T17:09:13Z"
     }
   }
 }
