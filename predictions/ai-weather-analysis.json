@@ -1,65 +1,64 @@
 {
-  "generated_at": "2026-09-17T11:54:01Z",
+  "generated_at": "2026-09-17T17:09:18Z",
   "model": "gemma-4-26b-a4b-it",
   "source": "Open-Meteo live telemetry + Windfyre ML baseline",
   "cities": {
     "bengaluru-nandini-layout": {
       "status": "ok",
-      "summary": "Bengaluru is experiencing mild drizzle and moderate wind gusts, with significant precipitation forecasted for the coming week.",
-      "current_conditions": "Temperature is 25.9C with 65% humidity and wind speeds of 10.4 km/h from the south-southwest, including gusts up to 35.6 km/h.",
-      "baseline_comparison": "Recent temperatures have been consistently higher than the ML baseline, while humidity and precipitation levels have trended lower until today's forecast.",
-      "next_24h_outlook": "Expect continued drizzle and moderate wind gusts, with total daily precipitation forecasted at 14.3mm.",
-      "next_7d_outlook": "The next week will see frequent rain and high humidity, with precipitation peaks on Sept 19 and 21, and a slight temperature drop.",
+      "summary": "Bengaluru is experiencing higher than baseline precipitation and temperature deviations, with significant rainfall forecasted for the coming week.",
+      "current_conditions": "Temperature is 22.1C with 92% humidity and wind speeds of 11.2 km/h from 260 degrees.",
+      "baseline_comparison": "Recent observations show temperatures consistently above baseline and humidity levels below baseline.",
+      "next_24h_outlook": "Expect a high of 24.8C with significant precipitation (10.4mm) and wind gusts up to 39.2 km/h.",
+      "next_7d_outlook": "The week ahead features frequent rain, with daily precipitation totals between 2.0mm and 14.5mm, and temperatures staying relatively stable.",
       "anomalies": [
         {
           "type": "precipitation",
           "severity": "high",
-          "timeframe": "next 7 days",
-          "description": "Forecasted precipitation is significantly higher than the ML baseline, peaking at 20.6mm on Sept 19."
+          "timeframe": "2026-09-17",
+          "description": "Forecasted precipitation of 10.4mm is significantly higher than the baseline of 2.2mm."
         },
         {
           "type": "temperature",
           "severity": "low",
-          "timeframe": "recent observations",
-          "description": "Observed temperatures have been consistently 1-2 degrees Celsius above the ML baseline over the last week."
+          "timeframe": "2026-09-10 to 2026-09-16",
+          "description": "Average temperatures have been consistently above the ML baseline."
+        },
+        {
+          "type": "wind",
+          "severity": "medium",
+          "timeframe": "2026-09-23",
+          "description": "Forecasted wind gusts of 45.0 km/h are notably higher than typical levels."
         }
       ],
       "watch_items": [
-        "High precipitation forecast for the next week",
-        "Monitor wind gusts up to 45 km/h expected by Sept 23"
+        "High precipitation forecast for the next several days.",
+        "Monitor for increased wind gusts on September 23rd."
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecast uncertainty is present due to high variability in precipitation and wind gust models.",
-      "updated_at": "2026-09-17T11:54:01Z"
+      "data_quality_note": "Forecasts are subject to uncertainty due to variability in precipitation and wind patterns.",
+      "updated_at": "2026-09-17T17:09:18Z"
     },
     "nagamangala": {
       "status": "ok",
-      "summary": "Nagamangala is experiencing high humidity and significant precipitation, with forecasts indicating increasing rainfall through the next week.",
-      "current_conditions": "Current temperature is 24.6C with 85% humidity and wind gusts of 22.0 km/h from the NW.",
-      "baseline_comparison": "Recent observations show higher than baseline precipitation and humidity, with temperatures remaining close to the baseline.",
-      "next_24h_outlook": "The next 24 hours will see continued precipitation and variable weather, with temperatures around 25.2C.",
-      "next_7d_outlook": "The next 7 days will feature heavy rainfall, peaking around September 21st, with humidity levels remaining high.",
+      "summary": "Nagamangala is experiencing high humidity and significant upcoming precipitation, with wind speeds and gusts deviating from the baseline.",
+      "current_conditions": "Temperature is 21.8C with 93% humidity, wind speed 13.0 km/h from 265 degrees, and no precipitation.",
+      "baseline_comparison": "Recent observations show higher temperatures and lower humidity than the ML baseline, while upcoming precipitation is significantly higher.",
+      "next_24h_outlook": "Expect a mix of weather codes, varying wind speeds, and significant precipitation totaling 9.8mm.",
+      "next_7d_outlook": "The next 7 days will see high precipitation, peaking at 23.2mm on Sept 20, with high humidity and variable wind speeds.",
       "anomalies": [
         {
           "type": "precipitation",
           "severity": "high",
           "timeframe": "Next 7 days",
-          "description": "Forecasted precipitation is significantly higher than the ML baseline, especially between Sept 20-21."
-        },
-        {
-          "type": "humidity",
-          "severity": "medium",
-          "timeframe": "Recent observations",
-          "description": "Humidity levels have been consistently lower than the ML baseline in recent days, though current conditions are high."
+          "description": "Forecasted precipitation is significantly higher than the ML baseline, peaking at 23.2mm on Sept 20."
         }
       ],
       "watch_items": [
-        "Heavy rainfall forecasted for late week",
-        "High humidity and potential for thunderstorms"
+        "High precipitation forecast for the next week."
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecasts are subject to uncertainty due to the variability of precipitation and weather codes.",
-      "updated_at": "2026-09-17T11:54:01Z"
+      "data_quality_note": "Forecasts are inherently uncertain; model validation shows good accuracy for precipitation and wet hours.",
+      "updated_at": "2026-09-17T17:09:18Z"
     }
   }
 }
