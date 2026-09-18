@@ -1,64 +1,78 @@
 {
-  "generated_at": "2026-09-17T17:09:18Z",
+  "generated_at": "2026-09-18T06:03:56Z",
   "model": "gemma-4-26b-a4b-it",
   "source": "Open-Meteo live telemetry + Windfyre ML baseline",
   "cities": {
     "bengaluru-nandini-layout": {
       "status": "ok",
-      "summary": "Bengaluru is experiencing higher than baseline precipitation and temperature deviations, with significant rainfall forecasted for the coming week.",
-      "current_conditions": "Temperature is 22.1C with 92% humidity and wind speeds of 11.2 km/h from 260 degrees.",
-      "baseline_comparison": "Recent observations show temperatures consistently above baseline and humidity levels below baseline.",
-      "next_24h_outlook": "Expect a high of 24.8C with significant precipitation (10.4mm) and wind gusts up to 39.2 km/h.",
-      "next_7d_outlook": "The week ahead features frequent rain, with daily precipitation totals between 2.0mm and 14.5mm, and temperatures staying relatively stable.",
+      "summary": "Bengaluru is experiencing warmer-than-baseline-average temperatures and higher-than-baseline precipitation levels.",
+      "current_conditions": "Temperature is 30.2C with 49% humidity and wind speeds of 11.1 km/h from 306 degrees.",
+      "baseline_comparison": "Recent observations show temperatures consistently above baseline and precipitation significantly higher than baseline.",
+      "next_24h_outlook": "Expect a temperature of 25.2C and 7.4mm of precipitation with wind gusts up to 41.4 km/h.",
+      "next_7d_outlook": "The next 7 days will see a mix of weather, with significant precipitation on Sept 20-22, and increased wind speeds and gusts on Sept 23-24.",
+      "anomalies": [
+        {
+          "type": "temperature",
+          "severity": "medium",
+          "timeframe": "Sept 11-17",
+          "description": "Average temperatures have been consistently higher than the ML baseline. "
+        },
+        {
+          "type": "precipitation",
+          "severity": "high",
+          "timeframe": "Sept 16-21",
+          "description": "Forecasted precipitation is significantly higher than the ML baseline. "
+        },
+        {
+          "type": "weather",
+          "severity": "low",
+          "timeframe": "Sept 23-24",
+          "description": "Forecasted wind speeds and gusts are notably higher than the ML baseline ability to predict. "
+        }
+      ],
+      "watch_items": [
+        "High precipitation on Sept 20-22",
+        "High wind speeds and gusts on Sept 23-24"
+      ],
+      "confidence": "medium",
+      "data_quality_note": "Forecasts are inherently uncertain and should be used with caution. Data quality is based on 2025 model validation. ",
+      "updated_at": "2026-09-18T06:03:56Z"
+    },
+    "nagamangala": {
+      "status": "ok",
+      "summary": "Nagamangala is experiencing warm temperatures and variable wind speeds, with significant precipitation forecasted for the coming week.",
+      "current_conditions": "Temperature is 30.2C with 52% humidity and wind speeds of 9.3 km/h from the NW.",
+      "baseline_comparison": "Recent observations show temperatures slightly above baseline and lower humidity than expected.",
+      "next_24h_outlook": "Expect moderate precipitation and wind gusts up to 43.9 km/h over the next 24 hours.",
+      "next_7d_outlook": "The next 7 days will see high precipitation, particularly around Sept 20-21, with wind speeds increasing towards the end of the week.",
       "anomalies": [
         {
           "type": "precipitation",
           "severity": "high",
-          "timeframe": "2026-09-17",
-          "description": "Forecasted precipitation of 10.4mm is significantly higher than the baseline of 2.2mm."
+          "timeframe": "Sept 16-17",
+          "description": "Observed precipitation was significantly higher than the ML baseline."
         },
         {
           "type": "temperature",
           "severity": "low",
-          "timeframe": "2026-09-10 to 2026-09-16",
-          "description": "Average temperatures have been consistently above the ML baseline."
+          "timeframe": "Recent observations",
+          "description": "Average temperatures have been consistently slightly above the ML baseline."
         },
         {
           "type": "wind",
           "severity": "medium",
-          "timeframe": "2026-09-23",
-          "description": "Forecasted wind gusts of 45.0 km/h are notably higher than typical levels."
+          "timeframe": "Forecasted for Sept 23-24",
+          "description": "Forecasted wind speeds are significantly higher than the ML baseline."
         }
       ],
       "watch_items": [
-        "High precipitation forecast for the next several days.",
-        "Monitor for increased wind gusts on September 23rd."
+        "High precipitation forecasted for Sept 20-21.",
+        "Increased wind speeds forecasted for late week.",
+        ""
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecasts are subject to uncertainty due to variability in precipitation and wind patterns.",
-      "updated_at": "2026-09-17T17:09:18Z"
-    },
-    "nagamangala": {
-      "status": "ok",
-      "summary": "Nagamangala is experiencing high humidity and significant upcoming precipitation, with wind speeds and gusts deviating from the baseline.",
-      "current_conditions": "Temperature is 21.8C with 93% humidity, wind speed 13.0 km/h from 265 degrees, and no precipitation.",
-      "baseline_comparison": "Recent observations show higher temperatures and lower humidity than the ML baseline, while upcoming precipitation is significantly higher.",
-      "next_24h_outlook": "Expect a mix of weather codes, varying wind speeds, and significant precipitation totaling 9.8mm.",
-      "next_7d_outlook": "The next 7 days will see high precipitation, peaking at 23.2mm on Sept 20, with high humidity and variable wind speeds.",
-      "anomalies": [
-        {
-          "type": "precipitation",
-          "severity": "high",
-          "timeframe": "Next 7 days",
-          "description": "Forecasted precipitation is significantly higher than the ML baseline, peaking at 23.2mm on Sept 20."
-        }
-      ],
-      "watch_items": [
-        "High precipitation forecast for the next week."
-      ],
-      "confidence": "medium",
-      "data_quality_note": "Forecasts are inherently uncertain; model validation shows good accuracy for precipitation and wet hours.",
-      "updated_at": "2026-09-17T17:09:18Z"
+      "data_quality_note": "Forecasts are subject to uncertainty due to variable weather patterns.",
+      "updated_at": "2026-09-18T06:03:56Z"
     }
   }
 }
