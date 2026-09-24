@@ -1,70 +1,65 @@
 {
-  "generated_at": "2026-09-24T11:59:41Z",
+  "generated_at": "2026-09-24T17:22:15Z",
   "model": "gemma-4-26b-a4b-it",
   "source": "Open-Meteo live telemetry + Windfyre ML baseline",
   "cities": {
     "bengaluru-nandini-layout": {
       "status": "ok",
-      "summary": "Bengaluru is experiencing elevated wind speeds and gusts, significantly exceeding the recent ML baseline.",
-      "current_conditions": "Current temperature is 23.6C with 80% humidity and wind speeds of 16.5 km/h and gusts up to 41.0 km/h.",
-      "baseline_comparison": "Recent observations show wind speeds and gusts are consistently higher than the ML baseline, while temperature and humidity are within normal ranges.",
-      "next_24h_outlook": "The next 24 hours will see continued high wind speeds (avg 17.7 km/h) and strong gusts (up to 60.5 km/h) with light precipitation.",
-      "next_7d_outlook": "Wind speeds will gradually decrease over the next week, with a significant precipitation spike on September 29th.",
+      "summary": "Bengaluru is experiencing high wind speeds and gusts, significantly exceeding recent baseline averages.",
+      "current_conditions": "Temperature is 21.4C with 90% humidity and wind speeds of 18.4 km/h from 256 degrees, with gusts up to 39.2 km/h.",
+      "baseline_comparison": "Recent wind speeds and gusts have been notably higher than the ML baseline, while temperature and humidity remain within expected ranges.",
+      "next_24h_outlook": "Wind speeds are expected to remain elevated, with gusts potentially reaching 55.8 km/h, and light precipitation is expected.",
+      "next_7d_outlook": "Wind speeds will gradually decrease over the week, followed by a significant spike in precipitation on September 28th.",
       "anomalies": [
         {
           "type": "wind",
           "severity": "high",
           "timeframe": "2026-09-23 to 2026-09-25",
-          "description": "Wind speeds and gusts are significantly higher than the ML baseline. "
-        },
-        {
-          "type": "precipitation",
-          "severity": "medium",
-          "timeframe": "2026-09-29",
-          "description": "Forecasted precipitation is significantly higher than the ML baseline. "
-        },
-        {
-          "type": "weather",
-          "severity": "low",
-          "timeframe": "deviation from baseline direction",
-          "description": "Wind direction is deviating from the ML baseline. "
-        }
-      ],
-      "watch_items": [
-        "High wind speeds and strong gusts.",
-        "Significant precipitation on September 29th."
-      ],
-      "confidence": "medium",
-      "data_quality_note": "Forecasts are subject to uncertainty; model validation metrics indicate moderate accuracy for wind and temperature.",
-      "updated_at": "2026-09-24T11:59:41Z"
-    },
-    "nagamangala": {
-      "status": "ok",
-      "summary": "Nagamangala is experiencing elevated wind speeds and gusts compared to recent baseline trends, with intermittent light precipitation.",
-      "current_conditions": "Current temperature is 23.1C with 87% humidity and wind speeds of 19.5 km/h from the west-southwest, with gusts up to 43.6 km/h.",
-      "baseline_comparison": "Recent observations show wind speeds and gusts significantly exceeding the ML baseline, while temperatures and humidity remain relatively stable.",
-      "next_24h_outlook": "The next 24 hours are expected to have continued high wind speeds and gusts, with total precipitation around 8.3 mm.",
-      "next_7d_outlook": "Wind speeds are forecast to decrease gradually over the week, with varying levels of precipitation and humidity.",
-      "anomalies": [
-        {
-          "type": "wind",
-          "severity": "high",
-          "timeframe": "Last 7 days",
-          "description": "Average wind speeds and maximum gusts have consistently exceeded the ML baseline."
-        },
-        {
-          "type": "precipitation",
-          "severity": "medium",
-          "timeframe": "Last 7 days",
-          "description": "Total precipitation has shown significant spikes, notably on September 21st. "
+          "description": "Wind speeds and gusts are significantly higher than the baseline, with gusts reaching up to 55.8 km/h."
         }
       ],
       "watch_items": [
         "High wind gusts expected through September 25th."
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecast uncertainty is present due to variable wind and precipitation patterns.",
-      "updated_at": "2026-09-24T11:59:41Z"
+      "data_quality_note": "Forecasts are subject to uncertainty, particularly regarding the intensity and timing of the precipitation spike on September 28th.",
+      "updated_at": "2026-09-24T17:22:15Z"
+    },
+    "nagamangala": {
+      "status": "ok",
+      "summary": "Nagamangala is experiencing elevated wind speeds and gusts compared to recent historical averages, with intermittent precipitation expected.",
+      "current_conditions": "Temperature is 22.4C with 85% humidity and moderate wind speeds of 20.3 km/h from the west, with gusts up to 34.9 km/h.",
+      "baseline_comparison": "Recent observations show significantly higher wind speeds and gusts than the ML baseline, while temperatures and humidity remain relatively stable.",
+      "next_24h_outlook": "Expect continued high wind speeds around 20.5 km/h and gusts up to 49.3 km/h, with 6.6 mm of precipitation.",
+      "next_7d_outlook": "Wind speeds will gradually decrease over the week, with a shift in direction and direction shift, and varying precipitation levels.",
+      "anomalies": [
+        {
+          "type": "wind",
+          "severity": "high",
+          "timeframe": "Recent observations (Sept 17-24)",
+          "description": "Wind speeds and gusts have been consistently higher than the ML baseline. "
+        },
+        {
+          "type": "precipitation",
+          "severity": "medium",
+          "timeframe": "Sept 21",
+          "description": "A significant spike in precipitation (19.5 mm) was observed on Sept 21. "
+        },
+        {
+          "type": "weather",
+          "severity": "low",
+          "timeframe": "Sept 24",
+          "description": "Weather codes indicate a significant number of of a single weather code 3 (overcast)            "
+        }
+      ],
+      "watch_items": [
+        "High wind speeds and gusts throughout the next 24-48 hours.",
+        "Intermittent precipitation throughout the week.",
+        ""
+      ],
+      "confidence": "medium",
+      "data_quality_note": "Forecasts are subject to uncertainty due to model validation metrics. ",
+      "updated_at": "2026-09-24T17:22:15Z"
     }
   }
 }
