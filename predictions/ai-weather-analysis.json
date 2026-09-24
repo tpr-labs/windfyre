@@ -1,70 +1,64 @@
 {
-  "generated_at": "2026-09-23T17:17:00Z",
+  "generated_at": "2026-09-24T06:16:40Z",
   "model": "gemma-4-26b-a4b-it",
   "source": "Open-Meteo live telemetry + Windfyre ML baseline",
   "cities": {
     "bengaluru-nandini-layout": {
       "status": "ok",
-      "summary": "Bengaluru is experiencing elevated wind speeds and gusts compared to recent historical averages, with overcast conditions persisting.",
-      "current_conditions": "Current temperature is 21.6\u00b0C with 71% humidity and wind speeds of 17.3 km/h gusting to 37.1 km/h from the west-southwest.",
-      "baseline_comparison": "Recent observations show higher temperatures and lower humidity than the ML baseline, while wind speeds have recently trended higher than baseline.",
-      "next_24h_outlook": "Expect continued high wind speeds and gusts up to 56 km/h, with overcast skies and light precipitation.",
-      "next_7d_outlook": "Wind speeds are expected to remain elevated through the next few days before tapering off, with variable precipitation levels.",
+      "summary": "Bengaluru is experiencing high wind speeds and gusts, significantly exceeding recent baseline averages.",
+      "current_conditions": "Temperature is 26.3C with 62% humidity and wind speeds of 24.4 km/h with gusts up to 56.5 km/h.",
+      "baseline_comparison": "Current wind speeds and gusts are substantially higher than the recent 7-day average wind speed of approximately 10 km/h.",
+      "next_24h_outlook": "Expect continued high wind speeds (avg 19.6 km/h) and strong gusts (up to 59.4 km/h) with some light precipitation.",
+      "next_7d_outlook": "Wind speeds are expected to gradually decrease over the next week, with a significant increase in precipitation on September 29th.",
       "anomalies": [
         {
           "type": "wind",
           "severity": "high",
-          "timeframe": "2026-09-23 to 2026-09-25",
-          "description": "Forecasted wind speeds and gusts are significantly higher than the ML baseline."
+          "timeframe": "Current",
+          "description": "Wind speeds and gusts are significantly higher than the recent baseline. "
         },
         {
           "type": "precipitation",
+          "severity": "medium",
+          "timeframe": "Next 7 days",
+          "description": "A spike in precipitation is forecast for September 29th, reaching 17.1 mm. "
+        },
+        {
+          "type": "weather",
           "severity": "low",
-          "timeframe": "2026-09-29",
-          "description": "Forecasted precipitation is significantly higher than the baseline."
+          "timeframe": "Recent observations",
+          "description": "Weather codes indicate frequent occurrence of moderate to light drizzle-like conditions. "
         }
       ],
       "watch_items": [
-        "High wind gusts expected through 2026-09-25"
+        "High wind speeds and strong gusts forecast for the next  48 hours.",
+        "Monitor for increased precipitation on September 29th."
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecast uncertainty is present due to the variability in wind and precipitation models.",
-      "updated_at": "2026-09-23T17:17:00Z"
+      "data_quality_note": "Forecasts are subject to uncertainty; model validation data indicates a MAE for wind speed is 3.17 km/h. ",
+      "updated_at": "2026-09-24T06:16:40Z"
     },
     "nagamangala": {
       "status": "ok",
-      "summary": "Nagamangala is experiencing high wind speeds and gusts, significantly exceeding the city baseline.",
-      "current_conditions": "Temperature is 22.2C with 77% humidity and wind speeds of 20.0 km/h from the west, with gusts up to 34.6 km/h.",
-      "baseline_comparison": "Recent observations show wind speeds and gusts are consistently higher than the ML baseline, while humidity is generally lower.",
-      "next_24h_outlook": "Wind speeds are expected to remain high, with average speeds of 22.7 km/h and gusts up to 53.6 km/h.",
-      "next_7d_outlook": "Wind speeds will gradually decrease over the next 7 days, with a shift in wind direction to the east/northeast, direction change is forecast-driven. Forecast uncertainty is present. Forecast uncertainty is present.",
+      "summary": "Nagamangala is experiencing significantly higher wind speeds and gusts than recent baseline levels, with overcast conditions and moderate humidity.",
+      "current_conditions": "Current temperature is 29.7C with 47% humidity, overcast skies, and strong winds of 26.4 km/h with gusts up to 52.6 km/h.",
+      "baseline_comparison": "Recent observations show wind speeds and gusts are substantially higher than the ML baseline, while humidity and precipitation are lower.",
+      "next_24h_outlook": "The next 24 hours will see continued high wind speeds around 22.9 km/h and gusts up to 56.2 km/h with overcast skies.",
+      "next_7d_outlook": "Wind speeds are expected to gradually decrease over the next week, with precipitation increasing toward the end of the period.",
       "anomalies": [
         {
           "type": "wind",
           "severity": "high",
-          "timeframe": "2026-09-22 to 2026-09-24",
-          "description": "Wind speeds and gusts are significantly higher than the ML baseline. "
-        },
-        {
-          "type": "humidity",
-          "severity": "low",
-          "timeframe": "24h to 7 days",
-          "description": "Relative humidity is forecast to be lower than the ML baseline. "
-        },
-        {
-          "type": "precipitation",
-          "severity": "low",
-          "timeframe": "2026-09-21",
-          "description": "Precipitation was notably higher than the ML baseline on September 21st. "
+          "timeframe": "Recent observations",
+          "description": "Wind speeds and gusts have been significantly higher than the baseline for several days.\u5e73\u8861"
         }
       ],
       "watch_items": [
-        "High wind speeds and gusts.",
-        "Lower than baseline-average humidity levels."
+        "High wind gusts expected through the next 48 hours."
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecasts are inherently uncertain and should be used with caution. Model validation data is available for context. ",
-      "updated_at": "2026-09-23T17:17:00Z"
+      "data_quality_note": "Forecast uncertainty is inherent; model validation shows good accuracy for precipitation and temperature.",
+      "updated_at": "2026-09-24T06:16:40Z"
     }
   }
 }
