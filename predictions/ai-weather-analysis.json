@@ -1,71 +1,69 @@
 {
-  "generated_at": "2026-09-30T06:53:11Z",
+  "generated_at": "2026-09-30T19:30:19Z",
   "model": "gemma-4-26b-a4b-it",
   "source": "Open-Meteo live telemetry + Windfyre ML baseline",
   "cities": {
     "bengaluru-nandini-layout": {
       "status": "ok",
-      "summary": "Bengaluru is experiencing overcast skies with moderate humidity and light winds, following a period of high wind and precipitation.",
-      "current_conditions": "Current temperature is 27.0C with 64% relative humidity, overcast skies, and light winds at 2.1 km/h.",
-      "baseline_comparison": "Recent observations show higher wind speeds and gusts than the baseline, with significant precipitation on Sep 29.",
-      "next_24h_outlook": "The next 24 hours are expected to have overcast skies, higher humidity (86.7%), and significant precipitation (16.8mm).",
-      "next_7d_outlook": "The next 7 days will see variable cloud cover and intermittent precipitation, with humidity levels remaining relatively high.",
+      "summary": "Bengaluru is experiencing high humidity and recent heavy precipitation, with wind speeds currently below the baseline.",
+      "current_conditions": "Temperature is 21.1C with 96% humidity and light winds from 239 degrees.",
+      "baseline_comparison": "Current temperature and humidity are near baseline, but wind speed is lower than the ML average.",
+      "next_24h_outlook": "Expect light precipitation and variable cloud cover with wind speeds around 4.8 km/h.",
+      "next_7d_outlook": "The week ahead shows fluctuating precipitation, with significant rainfall expected around October 5th and 6th.",
       "anomalies": [
-        {
-          "type": "wind",
-          "severity": "high",
-          "timeframe": "Sep 23-25",
-          "description": "Wind speeds and gusts were significantly higher than the baseline, peaking at 55.8 km/h gusts."
-        },
         {
           "type": "precipitation",
           "severity": "high",
-          "timeframe": "2026-09-29",
-          "description": "Precipitation reached 18.2mm, which is substantially higher than the baseline of 2.0mm."
+          "timeframe": "2026-09-29 to 2026-09-30",
+          "description": "Observed precipitation of 18.2mm and 11.2mm significantly exceeded the ML baseline of 2.0mm and 2.6mm."
+        },
+        {
+          "type": "wind",
+          "severity": "medium",
+          "timeframe": "2026-09-24 to 2026-09-26",
+          "description": "Wind speeds and gusts were notably higher than the ML baseline during this period."
         }
       ],
       "watch_items": [
-        "High precipitation forecast for Sep 30",
-        "Potential for increased humidity and overcast skies"
+        "Increased rainfall expected mid-week."
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecasts are subject to uncertainty due to variable weather patterns.",
-      "updated_at": "2026-09-30T06:53:11Z"
+      "data_quality_note": "Forecast uncertainty is present due to recent high precipitation variability.",
+      "updated_at": "2026-09-30T19:30:19Z"
     },
     "nagamangala": {
       "status": "ok",
-      "summary": "Nagamangala is experiencing light drizzle and moderate humidity, with significant precipitation forecasted for the next 24 hours.",
-      "current_conditions": "Temperature is 28.5C with 59% humidity and light drizzle (weather code 53). Wind speed is 1.7 km/h from the NW.",
-      "baseline_comparison": "Recent wind speeds were significantly higher than the baseline, while current temperature and humidity are near baseline levels.",
-      "next_24h_outlook": "Expect significant precipitation totaling 20.2mm, with wind gusts up to 27.7 km/h and variable weather.",
-      "next_7d_outlook": "The next 7 days will see continued precipitation, ranging from 1.0mm to 9.3mm daily, with humidity remaining high.",
+      "summary": "Nagamangala is experiencing high humidity and overcast conditions with recent precipitation trends exceeding the baseline.",
+      "current_conditions": "Current temperature is 21.6C with 96% humidity and overcast skies (weather code 3).",
+      "baseline_comparison": "Recent wind speeds and precipitation have been higher than the ML baseline, while temperatures remain stable.",
+      "next_24h_outlook": "The next 24 hours will see overcast skies, moderate precipitation, and wind gusts up to 37.1 km/h.",
+      "next_7d_outlook": "The 7-day forecast indicates variable cloud cover, intermittent precipitation, and shifting wind directions.",
       "anomalies": [
-        {
-          "type": "wind",
-          "severity": "high",
-          "timeframe": "2026-09-23 to 2026-09-25",
-          "description": "Wind speeds and gusts were substantially higher than the baseline. "
-        },
         {
           "type": "precipitation",
           "severity": "medium",
-          "timeframe": "2026-09-30",
-          "description": "Forecasted precipitation is significantly higher than the baseline. "
+          "timeframe": "recent observations",
+          "description": "Recent daily precipitation totals have consistently exceeded the ML baseline."
         },
         {
-          "type": "temperature",
+          "type": "wind",
           "severity": "low",
-          "timeframe": "2026-10-06",
-          "description": "Forecasted temperature is slightly lower than the baseline. "
+          "timeframe": "recent observations",
+          "description": "Wind speeds in the previous week were significantly higher than the baseline."
+        },
+        {
+          "type": "weather",
+          "severity": "low",
+          "timeframe": "next 7 days",
+          "description": "Wind direction is forecasted to shift from westerly to easterly patterns."
         }
       ],
       "watch_items": [
-        "High forecasted precipitation for 2026-09-30.",
-        "High humidity levels expected throughout the week."
+        "Monitor precipitation levels and wind gusts."
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecasts are subject to uncertainty; model validation shows good accuracy for precipitation and temperature.",
-      "updated_at": "2026-09-30T06:53:11Z"
+      "data_quality_note": "Forecast uncertainty is present due to variability in precipitation and wind direction models.",
+      "updated_at": "2026-09-30T19:30:19Z"
     }
   }
 }
