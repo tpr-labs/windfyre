@@ -1,69 +1,63 @@
 {
-  "generated_at": "2026-09-30T19:30:19Z",
+  "generated_at": "2026-10-01T07:16:56Z",
   "model": "gemma-4-26b-a4b-it",
   "source": "Open-Meteo live telemetry + Windfyre ML baseline",
   "cities": {
     "bengaluru-nandini-layout": {
       "status": "ok",
-      "summary": "Bengaluru is experiencing high humidity and recent heavy precipitation, with wind speeds currently below the baseline.",
-      "current_conditions": "Temperature is 21.1C with 96% humidity and light winds from 239 degrees.",
-      "baseline_comparison": "Current temperature and humidity are near baseline, but wind speed is lower than the ML average.",
-      "next_24h_outlook": "Expect light precipitation and variable cloud cover with wind speeds around 4.8 km/h.",
-      "next_7d_outlook": "The week ahead shows fluctuating precipitation, with significant rainfall expected around October 5th and 6th.",
+      "summary": "Bengaluru is experiencing mild weather with moderate wind gusts and recent precipitation.",
+      "current_conditions": "Temperature is 28.5C with 55% humidity, wind speed 8.0 km/h from 54 degrees, and gusts up to 23.8 km/h.",
+      "baseline_comparison": "Recent observations show higher wind speeds and precipitation than the ML baseline.",
+      "next_24h_outlook": "Expect moderate wind gusts and light precipitation throughout the next 24 hours.",
+      "next_7d_outlook": "The 7-day forecast indicates variable weather with periodic precipitation and humidity fluctuations.",
       "anomalies": [
-        {
-          "type": "precipitation",
-          "severity": "high",
-          "timeframe": "2026-09-29 to 2026-09-30",
-          "description": "Observed precipitation of 18.2mm and 11.2mm significantly exceeded the ML baseline of 2.0mm and 2.6mm."
-        },
         {
           "type": "wind",
           "severity": "medium",
-          "timeframe": "2026-09-24 to 2026-09-26",
-          "description": "Wind speeds and gusts were notably higher than the ML baseline during this period."
+          "timeframe": "2026-09-24 to 2026-09-25",
+          "description": "Wind speeds and gusts were significantly higher than the ML baseline."
+        },
+        {
+          "type": "precipitation",
+          "severity": "medium",
+          "timeframe": "2026-09-29 to 2026-09-30",
+          "description": "Observed precipitation was notably higher than the ML baseline."
+        },
+        {
+          "type": "temperature",
+          "severity": "low",
+          "timeframe": "2026-10-01",
+          "description": "Current temperature is slightly higher than the ML baseline."
         }
       ],
       "watch_items": [
-        "Increased rainfall expected mid-week."
+        "Light precipitation expected over the next week."
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecast uncertainty is present due to recent high precipitation variability.",
-      "updated_at": "2026-09-30T19:30:19Z"
+      "data_quality_note": "Forecasts are inherently uncertain; model validation metrics are provided in the context.",
+      "updated_at": "2026-10-01T07:16:56Z"
     },
     "nagamangala": {
       "status": "ok",
-      "summary": "Nagamangala is experiencing high humidity and overcast conditions with recent precipitation trends exceeding the baseline.",
-      "current_conditions": "Current temperature is 21.6C with 96% humidity and overcast skies (weather code 3).",
-      "baseline_comparison": "Recent wind speeds and precipitation have been higher than the ML baseline, while temperatures remain stable.",
-      "next_24h_outlook": "The next 24 hours will see overcast skies, moderate precipitation, and wind gusts up to 37.1 km/h.",
-      "next_7d_outlook": "The 7-day forecast indicates variable cloud cover, intermittent precipitation, and shifting wind directions.",
+      "summary": "Nagamangala is experiencing light drizzle and moderate wind gusts, following a period of high wind speeds and precipitation earlier in the month.",
+      "current_conditions": "Temperature is 28.6C with 56% humidity and light drizzle (weather code 51). Wind is blowing from the NE at 8.0 km/h with gusts up to 20.2 km/h.",
+      "baseline_comparison": "Recent observations show wind speeds were significantly higher than baseline in late September, while current humidity is lower than typical.",
+      "next_24h_outlook": "Expect continued light drizzle and variable wind speeds, with precipitation totaling approximately 2.2mm for the day.",
+      "next_7d_outlook": "The week ahead shows variable weather, with increased precipitation and higher humidity expected around October 5-6, including potential thunderstorms.",
       "anomalies": [
         {
-          "type": "precipitation",
-          "severity": "medium",
-          "timeframe": "recent observations",
-          "description": "Recent daily precipitation totals have consistently exceeded the ML baseline."
-        },
-        {
           "type": "wind",
-          "severity": "low",
-          "timeframe": "recent observations",
-          "description": "Wind speeds in the previous week were significantly higher than the baseline."
-        },
-        {
-          "type": "weather",
-          "severity": "low",
-          "timeframe": "next 7 days",
-          "description": "Wind direction is forecasted to shift from westerly to easterly patterns."
+          "severity": "high",
+          "timeframe": "2026-09-24 to 2026-09-25",
+          "description": "Wind speeds and gusts were significantly higher than the ML baseline during this period."
         }
       ],
       "watch_items": [
-        "Monitor precipitation levels and wind gusts."
+        "Increased precipitation and humidity expected mid-week."
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecast uncertainty is present due to variability in precipitation and wind direction models.",
-      "updated_at": "2026-09-30T19:30:19Z"
+      "data_quality_note": "Forecasts are subject to uncertainty due to variable weather patterns and model validation metrics.",
+      "updated_at": "2026-10-01T07:16:56Z"
     }
   }
 }
