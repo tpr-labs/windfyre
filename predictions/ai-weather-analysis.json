@@ -1,63 +1,76 @@
 {
-  "generated_at": "2026-10-01T07:16:56Z",
+  "generated_at": "2026-10-01T14:36:22Z",
   "model": "gemma-4-26b-a4b-it",
   "source": "Open-Meteo live telemetry + Windfyre ML baseline",
   "cities": {
     "bengaluru-nandini-layout": {
       "status": "ok",
-      "summary": "Bengaluru is experiencing mild weather with moderate wind gusts and recent precipitation.",
-      "current_conditions": "Temperature is 28.5C with 55% humidity, wind speed 8.0 km/h from 54 degrees, and gusts up to 23.8 km/h.",
-      "baseline_comparison": "Recent observations show higher wind speeds and precipitation than the ML baseline.",
-      "next_24h_outlook": "Expect moderate wind gusts and light precipitation throughout the next 24 hours.",
-      "next_7d_outlook": "The 7-day forecast indicates variable weather with periodic precipitation and humidity fluctuations.",
+      "summary": "Bengaluru is experiencing overcast conditions with moderate humidity and light winds, deviating from the baseline in wind direction and precipitation patterns.",
+      "current_conditions": "Temperature is 24.3C with 73% humidity and wind speed of 5.2 km/h from the NE.",
+      "baseline_comparison": "Current temperature and humidity are slightly above and below baseline, while wind direction is significantly different from the 249 degree baseline.",
+      "next_24h_outlook": "Expect overcast skies with light precipitation and wind gusts up to 27.7 km/h.",
+      "next_7d_outlook": "The week ahead shows variable weather with increased precipitation and humidity, particularly around October 5th and 6th.",
       "anomalies": [
         {
           "type": "wind",
           "severity": "medium",
-          "timeframe": "2026-09-24 to 2026-09-25",
-          "description": "Wind speeds and gusts were significantly higher than the ML baseline."
+          "timeframe": "Recent observations",
+          "description": "Recent wind speeds and directions have shown significant deviations from the ML baseline. "
         },
         {
           "type": "precipitation",
           "severity": "medium",
-          "timeframe": "2026-09-29 to 2026-09-30",
-          "description": "Observed precipitation was notably higher than the ML baseline."
+          "timeframe": "Recent observations",
+          "description": "Heavy precipitation was observed on September 29th and 30th, exceeding baseline expectations. "
         },
         {
           "type": "temperature",
           "severity": "low",
-          "timeframe": "2026-10-01",
-          "description": "Current temperature is slightly higher than the ML baseline."
-        }
-      ],
-      "watch_items": [
-        "Light precipitation expected over the next week."
-      ],
-      "confidence": "medium",
-      "data_quality_note": "Forecasts are inherently uncertain; model validation metrics are provided in the context.",
-      "updated_at": "2026-10-01T07:16:56Z"
-    },
-    "nagamangala": {
-      "status": "ok",
-      "summary": "Nagamangala is experiencing light drizzle and moderate wind gusts, following a period of high wind speeds and precipitation earlier in the month.",
-      "current_conditions": "Temperature is 28.6C with 56% humidity and light drizzle (weather code 51). Wind is blowing from the NE at 8.0 km/h with gusts up to 20.2 km/h.",
-      "baseline_comparison": "Recent observations show wind speeds were significantly higher than baseline in late September, while current humidity is lower than typical.",
-      "next_24h_outlook": "Expect continued light drizzle and variable wind speeds, with precipitation totaling approximately 2.2mm for the day.",
-      "next_7d_outlook": "The week ahead shows variable weather, with increased precipitation and higher humidity expected around October 5-6, including potential thunderstorms.",
-      "anomalies": [
-        {
-          "type": "wind",
-          "severity": "high",
-          "timeframe": "2026-09-24 to 2026-09-25",
-          "description": "Wind speeds and gusts were significantly higher than the ML baseline during this period."
+          "timeframe": "Forecasted period",
+          "description": "Forecasted temperatures are slightly lower than the ML baseline. "
         }
       ],
       "watch_items": [
         "Increased precipitation and humidity expected mid-week."
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecasts are subject to uncertainty due to variable weather patterns and model validation metrics.",
-      "updated_at": "2026-10-01T07:16:56Z"
+      "data_quality_note": "Forecasts are subject to uncertainty due to variability in recent weather patterns.",
+      "updated_at": "2026-10-01T14:36:22Z"
+    },
+    "nagamangala": {
+      "status": "ok",
+      "summary": "Nagamangala is experiencing higher than baseline wind speeds and humidity, with significant precipitation forecasted for early October.",
+      "current_conditions": "Temperature is 21.3C with 88% humidity, wind speed 12.2 km/h from 244 degrees, and gusts up to 32.4 km/h.",
+      "baseline_comparison": "Current wind speed and humidity are above the ML baseline, while temperature is slightly lower.",
+      "next_24h_outlook": "Expect continued moderate wind and light precipitation, with temperatures around 24.5C.",
+      "next_7d_outlook": "The week ahead shows variable weather, with a significant spike in precipitation on October 5th reaching 19.2mm.",
+      "anomalies": [
+        {
+          "type": "wind",
+          "severity": "high",
+          "timeframe": "2026-09-24 to 2026-09-25",
+          "description": "Wind speeds and gusts were significantly higher than the ML baseline during this period."
+        },
+        {
+          "type": "precipitation",
+          "severity": "high",
+          "timeframe": "2026-10-05",
+          "description": "Forecasted precipitation of 19.2mm is substantially higher than the baseline of 4.3mm."
+        },
+        {
+          "type": "temperature",
+          "severity": "low",
+          "timeframe": "2026-10-07",
+          "description": "Temperature is forecasted to be slightly lower than the baseline."
+        }
+      ],
+      "watch_items": [
+        "High precipitation forecasted for October 5th.",
+        "Monitor wind gusts during the next few days."
+      ],
+      "confidence": "medium",
+      "data_quality_note": "Forecasts are subject to uncertainty, particularly regarding precipitation amounts.",
+      "updated_at": "2026-10-01T14:36:22Z"
     }
   }
 }
