@@ -1,65 +1,76 @@
 {
-  "generated_at": "2026-10-02T19:24:45Z",
+  "generated_at": "2026-10-03T06:39:21Z",
   "model": "gemma-4-26b-a4b-it",
   "source": "Open-Meteo live telemetry + Windfyre ML baseline",
   "cities": {
     "bengaluru-nandini-layout": {
       "status": "ok",
-      "summary": "Bengaluru is experiencing mild temperatures and moderate humidity, with recent precipitation deviations from the baseline.",
-      "current_conditions": "Current temperature is 21.2C with 82% humidity and wind speeds of 8.4 km/h from 100 degrees.",
-      "baseline_comparison": "Recent observations show higher precipitation on Sept 29 and 30 compared to the ML baseline.",
-      "next_24h_outlook": "The next 24 hours are expected to have a temperature of 24.1C and 71.8% humidity with no precipitation.",
-      "next_7d_outlook": "The next 7 days will see temperatures between 21.9C and 24.1C, with significant precipitation expected on Oct 4, 5, and 6.",
+      "summary": "Bengaluru is experiencing clear skies with moderate wind gusts and temperatures near the baseline.",
+      "current_conditions": "Temperature is 27.5C, humidity is 56%, and wind speed is 7.9 km/h with gusts up to 23.8 km/h.",
+      "baseline_comparison": "Current temperature is slightly above baseline, while humidity is lower than typical for this time.",
+      "next_24h_outlook": "Expect a mix of clear and partly cloudy skies with light to moderate wind gusts.",
+      "next_7d_outlook": "The upcoming week will see increased precipitation and higher humidity, with a significant peak in rainfall-heavy days.",
       "anomalies": [
         {
           "type": "precipitation",
-          "severity": "medium",
+          "severity": "high",
           "timeframe": "2026-09-29 to 2026-09-30",
-          "description": "Precipitation totals were significantly higher than the ML baseline during this period."
-        }
-      ],
-      "watch_items": [
-        "Increased precipitation expected between Oct 4 and Oct 6."
-      ],
-      "confidence": "medium",
-      "data_quality_note": "Forecasts are subject to uncertainty due to model validation metrics. ",
-      "updated_at": "2026-10-02T19:24:45Z"
-    },
-    "nagamangala": {
-      "status": "ok",
-      "summary": "Nagamangala is experiencing mild temperatures and low wind speeds, with significant precipitation forecasted for early October.",
-      "current_conditions": "Temperature is 22.4C with 74% humidity and light winds from the east.",
-      "baseline_comparison": "Recent observations show lower humidity and higher wind speeds compared to the ML baseline.",
-      "next_24h_outlook": "Expect mild temperatures around 25.3C and light precipitation of 0.2mm.",
-      "next_7d_outlook": "The next 7 days will see increased precipitation, peaking around 9.6mm on Oct 4th, with temperatures between 23.3C and 25.3C.",
-      "anomalies": [
+          "description": "Observed precipitation was significantly higher than the ML baseline for these two days."
+        },
         {
           "type": "wind",
           "severity": "medium",
-          "timeframe": "2026-09-26",
-          "description": "Wind speeds were significantly higher than the ML baseline, with gusts up to 44.3 km/h."
+          "timeframe": "2026-10-01 to 2026-10-02",
+          "description": "Wind direction has deviated significantly from the baseline direction. Wind speed is also lower than baseline. "
         },
         {
-          "type": "precipitation",
-          "severity": "medium",
-          "timeframe": "2026-09-30",
-          "description": "Precipitation reached 5.9mm, exceeding the ML baseline of 3.0mm."
-        },
-        {
-          "type": "humidity",
+          "type": "temperature",
           "severity": "low",
-          "timeframe": "2026-10-02",
-          "description": "Humidity was lower than the ML baseline, at 67.2% compared to 78.2%."
+          "timeframe": "2026-10-03",
+          "description": "Current temperature is slightly above the ML baseline. "
         }
       ],
       "watch_items": [
-        "Increased precipitation forecasted for Oct 4th and 5th.",
-        "Monitor wind direction shifts.",
-        ""
+        "High precipitation forecast for the period between Oct 5 and Oct 6.",
+        "Wind direction deviation from baseline. "
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecast uncertainty is present due to variability in precipitation and wind direction models.",
-      "updated_at": "2026-10-02T19:24:45Z"
+      "data_quality_note": "Forecasts are subject to uncertainty due to variability in recent observations and model validation metrics. ",
+      "updated_at": "2026-10-03T06:39:21Z"
+    },
+    "nagamangala": {
+      "status": "ok",
+      "summary": "Nagamangala is experiencing warmer temperatures and higher wind speeds than the baseline, with significant precipitation expected later this week.",
+      "current_conditions": "Current temperature is 29.3C with 51% humidity and wind speeds of 12.0 km/h from the east.",
+      "baseline_comparison": "Current conditions show higher temperatures and lower humidity compared to the baseline, with a notable shift in wind direction.",
+      "next_24h_outlook": "The next 24 hours will see temperatures around 25.4C and light precipitation, with wind speeds remaining relatively stable.",
+      "next_7d_outlook": "The upcoming week will see a significant increase in precipitation, peaking on October 5th, followed by a period of relatively stable weather.",
+      "anomalies": [
+        {
+          "type": "temperature",
+          "severity": "medium",
+          "timeframe": "current",
+          "description": "Current temperature of 29.3C is notably higher than the baseline of 28.0C."
+        },
+        {
+          "type": "wind",
+          "severity": "medium",
+          "timeframe": "recent_observation",
+          "description": "Recent observations show wind speeds and direction are deviating from the baseline."
+        },
+        {
+          "type": "precipitation",
+          "severity": "high",
+          "timeframe": "forecast",
+          "description": "Forecasted precipitation of 19.7mm on October 5th is significantly higher than the baseline of 4.3mm."
+        }
+      ],
+      "watch_items": [
+        "High precipitation forecasted for October 5th."
+      ],
+      "confidence": "medium",
+      "data_quality_note": "Forecasts are subject to uncertainty due to variability in recent observations and model validation metrics.",
+      "updated_at": "2026-10-03T06:39:21Z"
     }
   }
 }
