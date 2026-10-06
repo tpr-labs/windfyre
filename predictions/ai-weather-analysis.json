@@ -1,70 +1,72 @@
 {
-  "generated_at": "2026-10-06T15:18:47Z",
+  "generated_at": "2026-10-06T20:24:49Z",
   "model": "gemma-4-26b-a4b-it",
   "source": "Open-Meteo live telemetry + Windfyre ML baseline",
   "cities": {
     "bengaluru-nandini-layout": {
       "status": "ok",
-      "summary": "Bengaluru is experiencing mild temperatures and high humidity, with recent precipitation and shifting wind patterns compared to the baseline.",
-      "current_conditions": "Temperature is 21.9C with 84% humidity and 9.0 km/h wind from the east.",
-      "baseline_comparison": "Recent observations show lower wind speeds and higher precipitation than the ML baseline.",
-      "next_24h_outlook": "Expect mild temperatures around 23.6C and moderate precipitation of 4.0 mm.",
-      "next_7d_outlook": "The 7-day forecast indicates variable weather with periodic precipitation and a peak in wind gusts up to 40.0 km/h.",
+      "summary": "Bengaluru is experiencing mild temperatures and high humidity with variable wind speeds and light precipitation.",
+      "current_conditions": "Current temperature is 21.4C with 84% humidity and wind speed of 9.0 km/h from 106 degrees.",
+      "baseline_comparison": "Recent observations show lower average wind speeds and higher precipitation than the ML baseline.",
+      "next_24h_outlook": "The next 24 hours will see temperatures around 24.1C and light precipitation of 0.4mm.",
+      "next_7d_outlook": "The 7-day forecast indicates a mix of cloudy and partly cloudy skies with a peak in wind speed and gusts around Oct 12.",
       "anomalies": [
         {
           "type": "precipitation",
-          "severity": "high",
-          "timeframe": "2026-09-29 to 2026-10-05",
-          "description": "Total precipitation significantly higher than the ML baseline during this period. "
+          "severity": "medium",
+          "timeframe": "recent_observations",
+          "description": "Total precipitation on Sep 30 was 11.2mm, significantly higher than the baseline of 2.6mm."
         },
         {
           "type": "wind",
-          "severity": "medium",
-          "timeframe": "2026-10-11 to 2026-10-12",
-          "description": "Forecasted wind speeds and gusts are expected to be higher than the ML baseline. "
-        },
-        {
-          "type": "weather",
           "severity": "low",
-          "timeframe": "type_error",
-          "description": "No significant weather code deviations from baseline. "
+          "timeframe": "forecast_period",
+          "description": "Wind speeds and gusts are expected to increase significantly by Oct 11 and Oct 12."
         }
       ],
       "watch_items": [
-        "Forecasted wind gusts up to 40.0 km/h expected in the next week."
+        "Increased wind speed and gusts expected mid-week."
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecasts are inherently uncertain; model validation data suggests moderate accuracy for wind and temperature.",
-      "updated_at": "2026-10-06T15:18:47Z"
+      "data_quality_note": "Forecasts are subject to uncertainty due to variable weather patterns.",
+      "updated_at": "2026-10-06T20:24:49Z"
     },
     "nagamangala": {
       "status": "ok",
-      "summary": "Nagamangala is experiencing mild temperatures and moderate humidity, with recent wind direction shifts and varying precipitation levels.",
-      "current_conditions": "Temperature is 24.7C with 69% humidity and light winds of 4.3 km/h from the NE.",
-      "baseline_comparison": "Recent observations show wind direction has deviated significantly from the ML baseline of approximately 250-270 degrees.",
-      "next_24h_outlook": "Expect light precipitation and moderate humidity, with temperatures around 24.8C.",
-      "next_7d_outlook": "The 7-day forecast indicates fluctuating humidity and precipitation, with a notable increase in wind gusts up to 37.4 km/h on October 11.",
+      "summary": "Nagamangala is experiencing light drizzle and moderate wind speeds, with recent observations showing lower wind speeds than the ML baseline.",
+      "current_conditions": "Current temperature is 22.2C with 85% humidity and wind speeds of 9.0 km/h from 113 degrees.",
+      "baseline_comparison": "Recent observations show lower average wind speeds and varying humidity levels compared to the ML baseline.",
+      "next_24h_outlook": "The next 24 hours are expected to have light drizzle and moderate wind speeds, with temperatures around 24.9C. average humidity of 72.8%.",
+      "next_7d_outlook": "The next 7 days will see a mix of moderate to high humidity and mix of weather codes, mix of wind speeds and mix of precipitation.",
       "anomalies": [
         {
           "type": "wind",
-          "severity": "medium",
-          "timeframe": "Last 7 days",
-          "description": "Wind direction has consistently shifted from the baseline westerly/northwesterly direction to more easterly/northeasterly/northeasterly components."
+          "severity": "low",
+          "timeframe": "Recent observations",
+          "description": "Average wind speeds have been consistently lower than the ML baseline. "
+        },
+        {
+          "type": "humidity",
+          "severity": "low",
+          "timeframe": "Recent observations",
+          "description": "Humidity levels have fluctuated significantly, with some days showing lower than baseline-expected humidity. "
         },
         {
           "type": "precipitation",
           "severity": "low",
-          "timeframe": "October 8",
-          "description": "Forecasted precipitation of 7.7mm is higher than the ML baseline of 2.9mm."
+          "timeframe": "Recent observations",
+          "description": "precipitation_total_mm_observed_is_lower_than_ml_baseline_on_several_timeframes. "
         }
       ],
       "watch_items": [
-        "Wind gusts up to 37.4 km/h expected on Oct 11",
-        "High humidity levels expected around Oct 9"
+        "High humidity and light drizzle.",
+        "Moderate wind gusts.",
+        "Wind direction shifts.",
+        "Precipitation variability. "
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecasts are subject to uncertainty; model validation shows a temperature MAE of 1.16C and a wind speed MAE of 3.1 km/h.",
-      "updated_at": "2026-10-06T15:18:47Z"
+      "data_quality_note": "Forecasts are inherently uncertain and should be used with caution. Data quality is good. ",
+      "updated_at": "2026-10-06T20:24:49Z"
     }
   }
 }
