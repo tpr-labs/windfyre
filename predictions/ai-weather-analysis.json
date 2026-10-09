@@ -1,63 +1,77 @@
 {
-  "generated_at": "2026-10-08T21:23:52Z",
+  "generated_at": "2026-10-09T07:31:09Z",
   "model": "gemma-4-26b-a4b-it",
   "source": "Open-Meteo live telemetry + Windfyre ML baseline",
   "cities": {
     "bengaluru-nandini-layout": {
       "status": "ok",
-      "summary": "Bengaluru weather shows a trend of increasing wind speeds and decreasing humidity over the next week, with temperatures slightly above baseline.",
-      "current_conditions": "Current temperature is 21.3C with 95% humidity and light wind at 4.8 km/h from the east-southeast.",
-      "baseline_comparison": "Recent observations show lower humidity and lower precipitation compared to the ML baseline, while wind direction is consistently more easterly.",
-      "next_24h_outlook": "The next 24 hours will see light precipitation (1.8mm) and wind gusts up to 14.7 km/h with temperatures around 24.7C.",
-      "next_7d_outlook": "The next 7 days will be characterized by increasing wind speeds (up to 12 km/h) and a significant drop in humidity (down to 53.2%) with warmer-than-baseline temperatures.",
+      "summary": "Bengaluru is experiencing warmer and drier conditions than the baseline, with increasing wind speeds and gusts expected over the coming week.",
+      "current_conditions": "Temperature is 29.2C with 47% humidity and wind speeds of 9.1 km/h from the NE.",
+      "baseline_comparison": "Current temperature is 1.5C above baseline and humidity is 18% lower than typical.",
+      "next_24h_outlook": "Expect a mix of clouds and light precipitation, with temperatures around 25.3C and gusts up to 30.2 km/h.",
+      "next_7d_outlook": "The week ahead shows increasing wind speeds and gusts, with temperatures staying above baseline and humidity dropping significantly.",
       "anomalies": [
         {
           "type": "wind",
           "severity": "medium",
-          "timeframe": "Next 7 days",
-          "description": "Forecasted wind speeds and gusts are significantly higher than the ML baseline, particularly from the east/northeast. directionally. directionally."
-        }
-      ],
-      "watch_items": [
-        "High wind gusts forecasted for mid-week, particularly around Oct 11-13."
-      ],
-      "confidence": "medium",
-      "data_quality_note": "Forecasts are subject to uncertainty due to variability in recent observations and model validation metrics.",
-      "updated_at": "2026-10-08T21:23:52Z"
-    },
-    "nagamangala": {
-      "status": "ok",
-      "summary": "Nagamangala is experiencing mild temperatures and variable wind, with recent precipitation and shifting wind directions compared to the baseline.",
-      "current_conditions": "Temperature is 22.3C with 87% humidity and light winds of 4.9 km/h from 123 degrees.",
-      "baseline_comparison": "Recent observations show lower precipitation and humidity levels than the ML baseline, with wind directions consistently deviating from the baseline.",
-      "next_24h_outlook": "Forecasted average wind speed of 7.5 km/h with gusts up to 33.8 km/h and 3.0 mm of precipitation.",
-      "next_7d_outlook": "The 7-day forecast indicates a trend toward warmer-than-baseline temperatures and lower humidity levels, with minimal precipitation.",
-      "anomalies": [
-        {
-          "type": "wind",
-          "severity": "medium",
-          "timeframe": "Last 7 days",
-          "description": "Wind direction has consistently been in the east/northeast/southeast quadrant, deviating from the baseline'g's western/northwestern direction."
+          "timeframe": "next 7 days",
+          "description": "Wind speeds and gusts are forecast to be significantly higher than the baseline average."
         },
         {
           "type": "temperature",
           "severity": "low",
-          "timeframe": "Last 7 days",
-          "description": "Average temperatures have been slightly above the ML baseline for the majority of the period."
+          "timeframe": "current",
+          "description": "Temperature is slightly above the baseline average."
         },
         {
-          "type": "precipitation",
-          "severity": "low",
-          "timeframe": "Last 7 days",
-          "description": "Observed precipitation totals are generally lower than the ML baseline predictions."
+          "type": "humidity",
+          "severity": "high",
+          "timeframe": "next 7 days",
+          "description": "humidity levels are forecast to drop well below the baseline average."
         }
       ],
       "watch_items": [
-        "Wind gusts up to 34.6 km/h expected in the coming week."
+        "High wind gusts expected mid-week.",
+        "Low humidity levels.",
+        ""
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecast uncertainty is inherent in meteorological-model-based predictions; model validation metrics are provided in context.",
-      "updated_at": "2026-10-08T21:23:52Z"
+      "data_quality_note": "Forecast uncertainty is present due to variability in wind and precipitation patterns.",
+      "updated_at": "2026-10-09T07:31:09Z"
+    },
+    "nagamangala": {
+      "status": "ok",
+      "summary": "Nagamangala is experiencing warmer and windier conditions than the baseline, with lower humidity and higher wind speeds.",
+      "current_conditions": "Current temperature is 30.3C with 50% humidity, wind speed 11.2 km/h from 50 degrees, and gusts up to 26.6 km/h.",
+      "baseline_comparison": "Current temperature is 1.7C above baseline, humidity is 13% lower, and wind speed is 3.9 km/h higher than baseline.",
+      "next_24h_outlook": "The next 24 hours will see temperatures around 25.5C, wind speeds around 8.1 km/h, and light precipitation of 1.3 mm.",
+      "next_7d_outlook": "The next 7 days will feature consistent wind speeds between 7.3 and 9.2 km/h, temperatures between 24.8 and 26.4C, and low precipitation.",
+      "anomalies": [
+        {
+          "type": "temperature",
+          "severity": "medium",
+          "timeframe": "Current",
+          "description": "Temperature is significantly higher than the ML baseline of 28.6C."
+        },
+        {
+          "type": "wind",
+          "severity": "medium",
+          "timeframe": "Next 7 days",
+          "description": "Wind speeds and gusts are consistently higher than the ML baseline."
+        },
+        {
+          "type": "humidity",
+          "severity": "low",
+          "timeframe": "Next 7 days",
+          "description": "Humidity is forecasted to remain below the baseline of 63%."
+        }
+      ],
+      "watch_items": [
+        "Wind gusts up to 35.6 km/h forecasted for Oct 11."
+      ],
+      "confidence": "medium",
+      "data_quality_note": "Forecasts are subject to uncertainty; model validation shows a temperature MAE of 1.16C and wind speed MAE of 3.1 km/h.",
+      "updated_at": "2026-10-09T07:31:09Z"
     }
   }
 }
