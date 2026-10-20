@@ -1,75 +1,77 @@
 {
-  "generated_at": "2026-10-20T11:52:44Z",
+  "generated_at": "2026-10-20T17:21:54Z",
   "model": "gemma-4-26b-a4b-it",
   "source": "Open-Meteo live telemetry + Windfyre ML baseline",
   "cities": {
     "bengaluru-nandini-layout": {
       "status": "ok",
-      "summary": "Bengaluru is experiencing moderate wind speeds and partly cloudy skies with temperatures around 26.7C.",
-      "current_conditions": "Current temperature is 26.7C with 61% humidity, wind speed 10.7 km/h from 35 degrees, and gusts up to 30.2 km/h.",
+      "summary": "Bengaluru is experiencing overcast conditions with moderate wind and high humidity.",
+      "current_conditions": "Temperature is 21.7C with 85% humidity and wind speeds of 12.6 km/h from the east-northeast.",
       "baseline_comparison": "Recent observations show higher wind speeds and lower humidity compared to the ML baseline.",
-      "next_24h_outlook": "The next 24 hours will see temperatures around 24.2C, wind speeds around 9.8 km/h, and minimal precipitation (0.2mm).",
-      "next_7d_outlook": "The next 7 days will feature variable weather with significant precipitation expected on Oct 21-23, and temperatures around 22.5-23.0C.",
+      "next_24h_outlook": "Expect overcast-to-cloudy conditions with minimal precipitation (0.2mm) and moderate wind gusts up to 34.6 km/h.",
+      "next_7d_outlook": "The upcoming week shows a trend of increased precipitation, peaking around Oct 24 with 17.4mm, alongside high humidity and overcast-to-cloudy weather.",
       "anomalies": [
-        {
-          "type": "wind",
-          "severity": "medium",
-          "timeframe": "Oct 13-15",
-          "description": "Wind speeds and gusts were consistently higher than the ML baseline during this period."
-        },
         {
           "type": "precipitation",
           "severity": "high",
           "timeframe": "Oct 16-17",
-          "description": "Precipitation totals were significantly higher than the ML baseline, reaching 20.2mm and 16.4mm."
+          "description": "Significant precipitation observed, reaching 20.2mm and 16.4mm respectively, exceeding baseline expectations."
+        },
+        {
+          "type": "wind",
+          "severity": "medium",
+          "timeframe": "Oct 21",
+          "description": "Forecast-predicted wind speeds and gusts (41.4 km/h) are higher than the ML baseline."
         },
         {
           "type": "humidity",
           "severity": "low",
-          "timeframe": "Oct 13-15",
-          "description": "Humidity levels were lower than the ML baseline during this period."
+          "timeframe": "Oct 22-24",
+          "description": "Forecast-predicted humidity levels (87-88%) are notably higher than the ML baseline."
         }
       ],
       "watch_items": [
-        "High precipitation expected between Oct 21 and Oct 23."
+        "Increased precipitation forecast for late week (Oct 24).",
+        "High humidity and overcast conditions persisting through the week."
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecasts are subject to uncertainty due to variable weather patterns.",
-      "updated_at": "2026-10-20T11:52:44Z"
+      "data_quality_note": "Forecasts are subject to uncertainty; model validation data suggests moderate accuracy for precipitation and wind.",
+      "updated_at": "2026-10-20T17:21:54Z"
     },
     "nagamangala": {
       "status": "ok",
-      "summary": "Nagamangala is experiencing mild temperatures and moderate wind speeds, with a trend toward increased precipitation in the coming week.",
-      "current_conditions": "Current temperature is 27.9C with 58% humidity and wind speeds of 9.5 km/h from the NE.",
-      "baseline_comparison": "Recent observations show higher temperatures and lower humidity compared to the ML baseline.",
-      "next_24h_outlook": "The next 24 hours will see temperatures around 25.4C and light precipitation.",
-      "next_7d_outlook": "The next week will feature increased precipitation, peaking around October 23rd and 24th, with humidity levels remaining relatively high.",
+      "summary": "Nagamangala weather analysis shows recent temperature and wind deviations from baseline, with significant precipitation forecasted for the coming week.",
+      "current_conditions": "Current temperature is 23.6C with 72% humidity and wind speeds of 9.6 km/h from the NE.",
+      "baseline_comparison": "Recent observations show higher average temperatures and wind speeds compared to the ML baseline, with lower humidity levels.",
+      "next_24h_outlook": "The next 24 hours will see temperatures around 25.4C and wind speeds of 8.4 km/h, with minimal precipitation.",
+      "next_7d_outlook": "The upcoming week features increased precipitation, peaking on Oct 21 with 17.7mm, and higher humidity levels than baseline.",
       "anomalies": [
         {
           "type": "precipitation",
           "severity": "high",
-          "timeframe": "2026-10-16",
-          "description": "Precipitation reached 22.1mm, significantly higher than the baseline of 3.5mm."
+          "timeframe": "2026-10-21",
+          "description": "Forecasted precipitation of 17.7mm is significantly higher than the ML baseline of 3.8mm."
         },
         {
           "type": "temperature",
           "severity": "low",
-          "timeframe": "2026-10-13 to 2026-10-15",
-          "description": "Average temperatures were consistently higher than the ML baseline."
+          "timeframe": "2026-10-24",
+          "description": "Forecasted temperature of 22.6C is slightly lower than the ML baseline of 23.6C."
         },
         {
-          "type": "humidity",
+          "type": "wind",
           "severity": "medium",
-          "timeframe": "2026-10-16",
-          "description": "Humidity levels were notably higher than the baseline at 86.4%."
+          "timeframe": "2026-10-21",
+          "description": "Forecasted wind gusts of 40.3 km/h are notably higher than typical levels."
         }
       ],
       "watch_items": [
-        "Increased precipitation expected between October 21st and 24th."
+        "High precipitation forecasted for Oct 21",
+        "Increased humidity and wind gusts expected mid-week"
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecasts are subject to uncertainty due to model variability.",
-      "updated_at": "2026-10-20T11:52:44Z"
+      "data_quality_note": "Forecast uncertainty is present due to variability in precipitation and wind gust models.",
+      "updated_at": "2026-10-20T17:21:54Z"
     }
   }
 }
