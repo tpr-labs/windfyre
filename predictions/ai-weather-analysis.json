@@ -1,77 +1,63 @@
 {
-  "generated_at": "2026-10-25T16:37:05Z",
+  "generated_at": "2026-10-26T06:28:49Z",
   "model": "gemma-4-26b-a4b-it",
   "source": "Open-Meteo live telemetry + Windfyre ML baseline",
   "cities": {
     "bengaluru-nandini-layout": {
       "status": "ok",
-      "summary": "Bengaluru is experiencing elevated humidity and wind speeds compared to the baseline, with precipitation expected today.",
-      "current_conditions": "Temperature is 20.8C with 95% humidity and wind speeds of 10.8 km/h from the NE.",
-      "baseline_comparison": "Current humidity (95%) and wind speed (10.8 km/h) are significantly higher than the baseline (80% and 6.9 km/h).",
-      "next_24h_outlook": "Expect elevated wind speeds and moderate precipitation (5.3mm) with high humidity (87.1%).",
-      "next_7d_outlook": "The week ahead shows variable wind directions and variable precipitation, with humidity levels will likely be decrease over the next 7 days.",
+      "summary": "Bengaluru is experiencing moderate wind gusts and variable cloud cover with temperatures around 26\u00b0C.",
+      "current_conditions": "Temperature is 26.4\u00b0C with 57% humidity and wind gusts reaching 37.4 km/h from the east.",
+      "baseline_comparison": "Recent observations show higher wind speeds and humidity levels compared to the ML baseline.",
+      "next_24h_outlook": "Expect moderate wind gusts and varying degrees of cloud cover over the next 24 hours.",
+      "next_7d_outlook": "The next 7 days will see fluctuating temperatures and wind, with potential light precipitation on November 1st.",
       "anomalies": [
-        {
-          "type": "humidity",
-          "severity": "high",
-          "timeframe": "current",
-          "description": "Humidity is at 95%, significantly higher than the baseline of 80%."
-        },
         {
           "type": "wind",
           "severity": "medium",
-          "timeframe": "forecasted for 2026-10-25",
-          "description": "Wind speed is forecasted to be 12.8 km/h, higher than the baseline average."
+          "timeframe": "2026-10-21",
+          "description": "Wind speeds and gusts were significantly higher than the ML baseline."
         },
         {
           "type": "precipitation",
           "severity": "medium",
-          "timeframe": "forecasted for 2026-10-25",
-          "description": "precipitation is forecasted to be 5.3mm, higher than the baseline average of 0.06mm."
+          "timeframe": "2026-10-22",
+          "description": "Precipitation was notably higher than the ML baseline."
+        },
+        {
+          "type": "humidity",
+          "severity": "medium",
+          "timeframe": "2026-10-25",
+          "description": "Humidity levels were consistently higher than the ML baseline."
         }
       ],
       "watch_items": [
-        "Wind gusts up to 41.4 km/h forecasted for today.",
-        "Precipitation of samples 5.3mm expected today."
+        "Wind gusts up to 40 km/h expected in late October."
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecasts are inherently uncertain and subject to change based on atmospheric conditions.",
-      "updated_at": "2026-10-25T16:37:05Z"
+      "data_quality_note": "Forecasts are subject to uncertainty due to variable weather patterns.",
+      "updated_at": "2026-10-26T06:28:49Z"
     },
     "nagamangala": {
       "status": "ok",
-      "summary": "Nagamangala is experiencing high humidity and significant precipitation, deviating from the baseline.",
-      "current_conditions": "Temperature is 21.8C with 87% humidity, wind speed 4.4 km/h from 38 degrees, and no current precipitation.",
-      "baseline_comparison": "Current humidity (87%) is significantly higher than the baseline (80%), while temperature and wind speed are near baseline levels.",
-      "next_24h_outlook": "Forecasted precipitation of 17.5mm and higher than baseline wind speeds (9.7 km/h) and humidity (81.3%).",
-      "next_7d_outlook": "The next 7 days will see a shift in wind direction to the west, shift in humidity-lowering-wet-weather-passing-after-26th, and generally stable temperature.",
+      "summary": "Nagamangala is experiencing mild temperatures and moderate wind gusts, with recent heavy precipitation deviating from the baseline.",
+      "current_conditions": "Temperature is 27.1C with 55% humidity and wind speed of 15.1 km/h from 23 degrees.",
+      "baseline_comparison": "Recent observations show higher precipitation and humidity levels compared to the ML baseline.",
+      "next_24h_outlook": "Expect mild temperatures around 22.9C and moderate wind gusts up to 32.4 km/h.",
+      "next_7d_outlook": "The next 7 days will feature stable temperatures and low precipitation, with wind speeds varying between 2.4 and 13.1 km/h.",
       "anomalies": [
         {
           "type": "precipitation",
           "severity": "high",
           "timeframe": "2026-10-22 to 2026-10-25",
-          "description": "Observed precipitation totals (18.3mm, 9.6mm, 18.0mm, 17.5mm) are significantly higher than the baseline (2.0-3.3mm)."
-        },
-        {
-          "type": "humidity",
-          "severity": "medium",
-          "timeframe": "2thoughtful_thought_process_placeholder_1",
-          "description": "Humidity levels have been consistently high (87-89%) during recent precipitation events."
-        },
-        {
-          "type": "wind",
-          "severity": "medium",
-          "timeframe": "2026-10-28 to 2026-10-29",
-          "description": "Forecasted wind speeds (13.7 km/h and 12.4 km/h) are notably higher than the baseline (8.1-8.4 km/h)."
+          "description": "Observed precipitation was significantly higher than the ML baseline during this period."
         }
       ],
       "watch_items": [
-        "High precipitation and humidity levels.",
-        "Potential for increased wind speeds late in the week."
+        "Wind gusts up to 32 km/h."
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecasts are inherently uncertain; model validation shows moderate accuracy for temperature and humidity.",
-      "updated_at": "2026-10-25T16:37:05Z"
+      "data_quality_note": "Forecasts are subject to uncertainty due to model variability.",
+      "updated_at": "2026-10-26T06:28:49Z"
     }
   }
 }
