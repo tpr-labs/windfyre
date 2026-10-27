@@ -1,64 +1,70 @@
 {
-  "generated_at": "2026-10-26T19:26:12Z",
+  "generated_at": "2026-10-27T06:27:12Z",
   "model": "gemma-4-26b-a4b-it",
   "source": "Open-Meteo live telemetry + Windfyre ML baseline",
   "cities": {
     "bengaluru-nandini-layout": {
       "status": "ok",
-      "summary": "Bengaluru is experiencing overcast conditions with moderate humidity and light winds, following a period of higher precipitation and wind gusts.",
-      "current_conditions": "Current temperature is 19.0C with 72% relative humidity and light winds from the north-northwest at 4.4 km/h.",
-      "baseline_comparison": "Recent observations show higher wind speeds and precipitation than the ML baseline, particularly on Oct 22.",
-      "next_24h_outlook": "The next 24 hours will see temperatures around 21.3C, lower humidity (62.4%), and light winds with gusts up to 28.8 km/h.",
-      "next_7d_outlook": "The upcoming week features variable cloud cover, low precipitation, mostly dry, mostly dry, mostly dry, light rain expected around Nov 1-2.",
+      "summary": "Bengaluru is experiencing mild temperatures and moderate wind gusts, with a shift toward drier conditions over the coming week.",
+      "current_conditions": "Current temperature is 25.5C with 48% humidity and wind speeds of 12.3 km/h from the NNW.",
+      "baseline_comparison": "Recent observations show higher humidity and precipitation levels compared to the ML baseline.",
+      "next_24h_outlook": "The next 24 hours will see temperatures around 21.2C with light winds and no precipitation.",
+      "next_7d_outlook": "The upcoming week features variable weather, with a return of light precipitation and higher humidity by early November.",
       "anomalies": [
         {
-          "type": "wind",
+          "type": "humidity",
           "severity": "medium",
-          "timeframe": "Oct 20-25",
-          "description": "Wind speeds and gusts were consistently higher than the ML baseline during this period."
+          "timeframe": "Past 7 days",
+          "description": "Recent humidity levels have consistently exceeded the ML baseline."
+        },
+        {
+          "type": "precipitation",
+          "severity": "low",
+          "timeframe": "Past 7 days",
+          "description": "Precipitation totals were notably higher than baseline expectations during the mid-week period."
         }
       ],
       "watch_items": [
-        "Monitor for potential light rain and increased humidity starting Nov 1."
+        "Monitor wind gusts up to 40 km/h forecast for Oct 28."
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecasts are subject to uncertainty; model validation shows reasonable accuracy for temperature and precipitation.",
-      "updated_at": "2026-10-26T19:26:12Z"
+      "data_quality_note": "Forecast uncertainty is present due to the variability in upcoming precipitation and wind patterns.",
+      "updated_at": "2026-10-27T06:27:12Z"
     },
     "nagamangala": {
       "status": "ok",
-      "summary": "Nagamangala is experiencing a period of variable weather with recent high precipitation and wind deviations from the baseline.",
-      "current_conditions": "Temperature is 19.3C with 68% humidity, wind speed 7.7 km/h from 319 degrees, and overcast-type weather (code 3).",
-      "baseline_comparison": "Recent observations show higher than baseline precipitation and wind speeds, with humidity levels fluctuating around the baseline.",
-      "next_24h_outlook": "Expect a temperature of 22.4C, wind speeds around 9.7 km/h, and mostly overcast/cloudy conditions with no precipitation.",
-      "next_7d_outlook": "The week ahead features a shift in wind direction to the west, increased wind speeds, and a significant increase in precipitation on November 2nd.",
+      "summary": "Nagamangala is experiencing moderate wind and dry conditions, with recent precipitation levels significantly exceeding the baseline.",
+      "current_conditions": "Temperature is 26.5C with 47% humidity and wind speeds of 13.5 km/h from the north.",
+      "baseline_comparison": "Recent precipitation has been notably higher than the baseline, while humidity and temperature are fluctuating around baseline levels.",
+      "next_24h_outlook": "Expect moderate wind speeds and dry conditions with temperatures around 22.4C.",
+      "next_7d_outlook": "The next 7 days will see a mix of weather, with a significant increase in precipitation on November 2nd.",
       "anomalies": [
         {
           "type": "precipitation",
           "severity": "high",
-          "timeframe": "Oct 20-25",
-          "description": "Observed precipitation was significantly higher than the ML baseline, with daily totals of up to 18.3mm. "
+          "timeframe": "Oct 22 to Oct 25",
+          "description": "Daily precipitation totals were significantly higher than the baseline, reaching up to 18.3mm.0"
         },
         {
           "type": "wind",
           "severity": "medium",
           "timeframe": "Oct 21",
-          "description": "Wind speeds and gusts were notably higher than the baseline, with gusts reaching 40.7 km/h. "
+          "description": "Wind gusts reached 40.7 km/h, exceeding the baseline average.0"
         },
         {
-          "type": "temperature",
+          "type": "humidity",
           "severity": "low",
-          "timeframe": "recent",
-          "description": "Temperature averages are slightly lower than the ML baseline. "
+          "timeframe": "Oct 22 to Oct 24",
+          "description": "Humidity levels were consistently higher than the baseline.0"
         }
       ],
       "watch_items": [
-        "High precipitation on Nov 2nd",
-        "Wind speed increases on Oct 28-29"
+        "High precipitation forecast for Nov 2",
+        "Wind speed fluctuations in late October"
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecasts are subject to uncertainty due to variable weather patterns and model validation metrics.",
-      "updated_at": "2026-10-26T19:26:12Z"
+      "data_quality_note": "Forecasts are subject to uncertainty due to model validation metrics.0",
+      "updated_at": "2026-10-27T06:27:12Z"
     }
   }
 }
