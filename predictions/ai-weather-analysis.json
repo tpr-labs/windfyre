@@ -1,71 +1,76 @@
 {
-  "generated_at": "2026-10-29T14:29:55Z",
+  "generated_at": "2026-10-29T19:45:42Z",
   "model": "gemma-4-26b-a4b-it",
   "source": "Open-Meteo live telemetry + Windfyre ML baseline",
   "cities": {
     "bengaluru-nandini-layout": {
       "status": "ok",
-      "summary": "Bengaluru is experiencing clear skies and moderate temperatures, with a recent trend of decreasing humidity and shifting wind directions.",
-      "current_conditions": "Current temperature is 23.4C with 58% humidity and light winds from the south-southeast at 4.5 km/h.",
-      "baseline_comparison": "Recent observations show higher humidity and precipitation levels compared to the ML baseline, though temperatures remain consistent.",
-      "next_24h_outlook": "The next 24 hours will likely see a mix of clouds and fog, with temperatures around 23.2C and light winds.",
-      "next_7d_outlook": "The upcoming week will see a transition from clear to cloudy and eventually significant precipitation, with temperatures ranging from 21.5C to 24.7C.",
+      "summary": "Bengaluru is experiencing mild weather with recent deviations in humidity and wind direction compared to the baseline.",
+      "current_conditions": "Current temperature is 19.3C with 80% humidity, wind speed 8.2 km/h from 230 degrees, and no precipitation.",
+      "baseline_comparison": "Recent observations show humidity levels consistently higher than the baseline, while wind direction has shifted towards the west.",
+      "next_24h_outlook": "The next 24 hours will see temperatures around 23.6C and lower wind speeds, with no expected precipitation.",
+      "next_7d_outlook": "The upcoming week will see increased precipitation, peaking around November 2nd, with temperatures remaining relatively stable.",
       "anomalies": [
         {
+          "type": "humidity",
+          "severity": "medium",
+          "timeframe": "Last 7 days",
+          "description": "Humidity levels have been consistently higher than the baseline throughout the past week."
+        },
+        {
+          "type": "wind",
+          "severity": "low",
+          "timeframe": "Last 7 days",
+          "description": "Wind direction has shown a notable shift towards the west compared to the baseline."
+        },
+        {
           "type": "precipitation",
-          "severity": "high",
-          "timeframe": "2026-11-02 to 2026-11-04",
-          "description": "Forecasted precipitation is significantly higher than the ML baseline, reaching up to 13.9mm daily."
+          "severity": "low",
+          "timeframe": "Last 7 days",
+          "description": "Total precipitation in the recent observations is lower than the baseline expectation."
         }
       ],
       "watch_items": [
-        "Significant precipitation expected in early November."
+        "Increased precipitation expected in early November.",
+        "Monitor for potential wind gusts up to 34 km/h."
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecasts are subject to uncertainty due to the variability of precipitation and humidity models.",
-      "updated_at": "2026-10-29T14:29:55Z"
+      "data_quality_note": "Forecasts are subject to uncertainty due to varying model validation metrics.",
+      "updated_at": "2026-10-29T19:45:42Z"
     },
     "nagamangala": {
       "status": "ok",
-      "summary": "Nagamangala is experiencing higher than baseline wind speeds and lower humidity, with precipitation expected to increase significantly in early November.",
-      "current_conditions": "Temperature is 22.4C, humidity is 60%, and wind speed is 9.9 km/h from the west-southwest.",
-      "baseline_comparison": "Current wind speed is higher than the 7.6 km/h baseline, and humidity is lower than the 74% baseline.",
-      "next_24h_outlook": "Expect a mix of clear and cloudy-sky conditions with average wind speeds around 11.3 km/h.",
-      "next_7d_outlook": "A shift toward wetter and more humid conditions is forecast, with significant precipitation totaling approximately 29 mm over the next week.",
+      "summary": "Nagamangala is experiencing a period of higher than baseline-expected wind speeds and recent precipitation, with a shift toward wetter conditions in the coming week.",
+      "current_conditions": "Current temperature is 20.3C with 90% humidity and light winds from the southwest at 2.5 km/h.",
+      "baseline_comparison": "Recent observations show wind speeds and precipitation levels significantly exceeding the ML baseline, particularly between Oct 23-25.",
+      "next_24h_outlook": "The next 24 hours will see temperatures around 23.7C with light winds and no significant precipitation.",
+      "next_7d_outlook": "The upcoming week features increasing precipitation, peaking around Nov 3 with nearly 20mm, alongside higher humidity levels.",
       "anomalies": [
         {
           "type": "wind",
           "severity": "medium",
-          "timeframe": "Recent observations",
-          "description": "Average wind speeds have been consistently higher than the ML baseline for several days. "
-        },
-        {
-          "type": "humidity",
-          "severity": "low",
-          "timeframe": "Current conditions",
-          "description": "Relative humidity is currently 60%, which is lower than the 74% baseline. "
+          "timeframe": "Oct 23-29",
+          "description": "Average wind speeds have consistently remained above the ML baseline for the past week."
         },
         {
           "type": "precipitation",
           "severity": "high",
-          "timeframe": "Early November forecast",
-          "description": "Daily precipitation totals are forecast to be significantly higher than theHL baseline. "
+          "timeframe": "Oct 23-25",
+          "description": "Daily precipitation totals were significantly higher than the ML baseline, reaching up to 18mm."
         },
         {
-          "type": "weather",
+          "type": "humidity",
           "severity": "low",
-          "timeframe": "Recent observations",
-          "description": "Weather codes indicate a mix of and cloudy-sky conditions. "
+          "timeframe": "Oct 23-27",
+          "description": "Humidity levels fluctuated but generally remained higher than the ML baseline."
         }
       ],
       "watch_items": [
-        "Significant precipitation forecast for early November.",
-        "Wind speeds are currently above baseline.",
-        ""
+        "Increased precipitation expected in early November, specifically around Nov 2-3."
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecasts are subject to uncertainty due to seasonal transitions. ",
-      "updated_at": "2026-10-29T14:29:55Z"
+      "data_quality_note": "Forecast uncertainty is present due to the variability in precipitation and wind direction models.",
+      "updated_at": "2026-10-29T19:45:42Z"
     }
   }
 }
