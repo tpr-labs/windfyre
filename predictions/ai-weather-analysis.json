@@ -1,75 +1,77 @@
 {
-  "generated_at": "2026-10-31T07:07:26Z",
+  "generated_at": "2026-10-31T13:44:31Z",
   "model": "gemma-4-26b-a4b-it",
   "source": "Open-Meteo live telemetry + Windfyre ML baseline",
   "cities": {
     "bengaluru-nandini-layout": {
       "status": "ok",
-      "summary": "Bengaluru is experiencing dry, warm conditions with moderate wind gusts, deviating from recent baseline humidity and precipitation patterns.",
-      "current_conditions": "Temperature is 30.4C with 35% humidity and wind speed 8.9 km/h at 84 degrees, with gusts up to 27.7 km/h.",
-      "baseline_comparison": "Recent observations show lower humidity and higher temperature than the ML baseline, with variable wind directions.",
-      "next_24h_outlook": "Expect a warm day with temperatures around 25.3C average, low humidity (58.5%), and moderate wind gusts up to 31.3 km/h.",
-      "next_7d_outlook": "A period of increased precipitation and higher humidity is forecast, with significant rainfall expected between Nov 2 and Nov 5.",
+      "summary": "Bengaluru is experiencing warmer and drier conditions than the baseline, with significant precipitation forecasted for early November.",
+      "current_conditions": "Temperature is 26.5C with 48% humidity and 9.0 km/h wind speed.",
+      "baseline_comparison": "Current temperature is 2.3C above baseline and humidity is 25% lower than baseline.",
+      "next_24h_outlook": "Expect warmer temperatures and variable cloud cover with gusts up to 35.3 km/h.",
+      "next_7d_outlook": "A period of significant rainfall is expected from November 2nd to November 5th, with high humidity levels.",
       "anomalies": [
+        {
+          "type": "temperature",
+          "severity": "low",
+          "timeframe": "Current",
+          "description": "Temperature is slightly above the baseline average."
+        },
         {
           "type": "humidity",
           "severity": "medium",
-          "timeframe": "Last 7 days",
-          "description": "Humidity levels have been consistently lower than the ML baseline throughout the week."
+          "timeframe": "Current",
+          "description": "Humidity is significantly lower than the baseline average."
         },
         {
           "type": "precipitation",
-          "severity": "low",
+          "severity": "high",
           "timeframe": "Next 7 days",
-          "description": "Forecasted precipitation totals are significantly higher than the ML baseline for early November."
+          "description": "Forecasted precipitation is much higher than the baseline average."
         }
       ],
       "watch_items": [
-        "Increased precipitation and higher humidity expected in early November."
+        "High rainfall forecasted for early November.",
+        "Monitor wind gusts in the next 24 hours."
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecast uncertainty is present due to variability in recent wind and precipitation models.",
-      "updated_at": "2026-10-31T07:07:26Z"
+      "data_quality_note": "Forecast uncertainty is present due to variability in precipitation and wind models.",
+      "updated_at": "2026-10-31T13:44:31Z"
     },
     "nagamangala": {
       "status": "ok",
-      "summary": "Nagamangala weather shows recent precipitation and wind deviations from baseline, with a forecast of increasing humidity and precipitation through early November.",
-      "current_conditions": "Temperature is 28.4C with 52% humidity, clear skies, kludge-free wind at 8.1 km/h from the east, and no precipitation.",
-      "baseline_comparison": "Recent observations show higher precipitation and wind speeds than baseline, with wind direction shifts.",
-      "next_24h_outlook": "Expect a temperature of 24.1C, 72.5% humidity, and mostly clear to partly cloudy skies with light winds.",
-      "next_7d_outlook": "The 7-day forecast indicates increasing humidity (up to 86.7%) and precipitation (up to 6.0mm) through November 5th, with temperatures around 23C.",
+      "summary": "Nagamangala weather shows recent precipitation deviations and a forecast of increasing rainfall through early November.",
+      "current_conditions": "Temperature is 24.9C with 65% humidity and light winds of 2.5 km/h from the south.",
+      "baseline_comparison": "Recent observations showed significantly higher precipitation and wind speeds compared to the ML baseline.",
+      "next_24h_outlook": "Expect light winds and mostly clear to partly cloudy skies with temperatures around 24.2C.",
+      "next_7d_outlook": "A period of heavy rainfall is forecasted for November 2nd to 4th, with high humidity and variable winds.",
       "anomalies": [
         {
           "type": "precipitation",
           "severity": "high",
-          "timeframe": "2026-10-24 to 2026-10-25",
-          "description": "Observed precipitation (18.0mm and 17.5mm) significantly exceeded baseline (3.0mm and 2.0mm)."
+          "timeframe": "Oct 24-25",
+          "description": "Observed precipitation was significantly higher than the ML baseline."
         },
         {
           "type": "wind",
           "severity": "medium",
-          "timeframe": "2026-10-28 to 2026-10-29",
-          "description": "Wind speeds and directions were notably higher and more westerly than the baseline."
+          "timeframe": "Oct 28",
+          "description": "Average wind speeds were notably higher than the ML baseline."
         },
         {
           "type": "humidity",
           "severity": "low",
-          "timeframe": "2026-11-02 to 2026-11-06",
-          "description": "Forecasted humidity levels are expected to be higher than thebaseline. "
-        },
-        {
-          "type": "temperature",
-          "severity": "low",
-          "timeframe": "excluding recent observations",
-          "description": "Temperature averages are consistently close to the baseline. "
+          "timeframe": "Oct 24",
+          "description": "Humidity levels were higher than the ML baseline."
         }
       ],
       "watch_items": [
-        "Forecasted precipitation and humidity increase through early November."
+        "Increased rainfall forecasted for Nov 2-4",
+        "High humidity expected in early November"
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecasts are inherently uncertain; model validation data suggests a temperature MAE of 1.16C and a wind speed MAE of 3.1 km/h. ",
-      "updated_at": "2026-10-31T07:07:26Z"
+      "data_quality_note": "Forecasts are subject to uncertainty due to variable weather patterns.",
+      "updated_at": "2026-10-31T13:44:31Z"
     }
   }
 }
