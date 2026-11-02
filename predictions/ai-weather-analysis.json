@@ -1,71 +1,64 @@
 {
-  "generated_at": "2026-11-01T19:48:07Z",
+  "generated_at": "2026-11-02T07:47:41Z",
   "model": "gemma-4-26b-a4b-it",
   "source": "Open-Meteo live telemetry + Windfyre ML baseline",
   "cities": {
     "bengaluru-nandini-layout": {
       "status": "ok",
-      "summary": "Bengaluru is experiencing mild temperatures and variable wind, with increasing precipitation and humidity forecasted for the coming week.",
-      "current_conditions": "Current temperature is 22.8C with 78% humidity and a wind speed of 5.0 km/h from 131 degrees.",
-      "baseline_comparison": "Recent observations show lower humidity and higher temperature variability compared to the ML baseline.",
-      "next_24h_outlook": "The next 24 hours will see temperatures around 23.7C, increasing precipitation (3.2mm) and gusts up to 34.6 km/h.",
-      "next_7d_outlook": "The upcoming week features consistent precipitation between 2.4mm and 6.3mm daily, with humidity levels rising to 87.7%.",
+      "summary": "Bengaluru is experiencing warmer than baseline temperatures and higher wind gusts, with increasing precipitation expected over the next week.",
+      "current_conditions": "Current temperature is 29.3C with 46% humidity and wind gusts of 29.9 km/h from the NE.",
+      "baseline_comparison": "Recent observations show temperatures consistently above baseline and lower humidity levels compared to ML models.",
+      "next_24h_outlook": "Expect moderate precipitation and wind gusts up to 36.4 km/h with temperatures around 24.3C.",
+      "next_7d_outlook": "A period of increasing precipitation is forecast, peaking at 14.7mm on Nov 7, with humidity levels rising above baseline.",
       "anomalies": [
         {
-          "type": "precipitation",
-          "severity": "medium",
-          "timeframe": "2026-11-03",
-          "description": "Forecasted precipitation of 6.3mm is significantly higher than the 2.5mm baseline."
-        },
-        {
-          "type": "humidity",
+          "type": "temperature",
           "severity": "low",
-          "timeframe": "2026-11-04",
-          "description": "Forecasted humidity of 87.7% is notably higher than the 79.6% baseline."
+          "timeframe": "Last 7 days",
+          "description": "Average temperatures have been consistently higher than the ML baseline.\u5e73\u8861"
         }
       ],
       "watch_items": [
-        "Increased precipitation and higher humidity levels expected through the first week of November."
+        "Wind gusts up to 36.4 km/h",
+        "Increasing precipitation through Nov 7"
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecast uncertainty is present due to the variability in recent precipitation and wind patterns.",
-      "updated_at": "2026-11-01T19:48:07Z"
+      "data_quality_note": "Forecast uncertainty is present due to varying precipitation and wind models.",
+      "updated_at": "2026-11-02T07:47:41Z"
     },
     "nagamangala": {
       "status": "ok",
-      "summary": "Nagamangala is experiencing increased precipitation and higher humidity compared to the baseline.",
-      "current_conditions": "Temperature is 22.2C, humidity is 79%, and wind speed is 3.9 km/h from the SE.",
-      "baseline_comparison": "Recent observations show higher precipitation and humidity levels than the baseline.",
-      "next_24h_outlook": "Forecasted precipitation of 5.2mm and higher humidity (77.1%) compared to the baseline.",
-      "next_7d_outlook": "The next 7 days will see significant precipitation, peaking at 23.0mm on Nov 4, with high humidity (up to 90.9%).",
+      "summary": "Nagamangala is experiencing overcast conditions with moderate wind gusts and increasing precipitation expected over the coming week.",
+      "current_conditions": "Temperature is 27.6C with 53% humidity and wind speeds of 11.3 km/h from the NE, with gusts up to 25.9 km/h.",
+      "baseline_comparison": "Recent observations show higher wind speeds and lower humidity compared to the ML baseline.",
+      "next_24h_outlook": "Expect overcast skies with light precipitation and wind gusts up to 27.4 km/h.",
+      "next_7d_outlook": "The week ahead shows significant precipitation, peaking on Nov 3 and Nov 8, with high humidity and moderate wind gusts.",
       "anomalies": [
         {
           "type": "precipitation",
           "severity": "high",
-          "timeframe": "2026-11-04",
-          "description": "Forecasted precipitation of 23.0mm is significantly higher than the baseline of 3.1mm."
+          "timeframe": "2026-11-03",
+          "description": "Forecasted precipitation of 20.3mm is significantly higher than the ML baseline of 2.0mm."
+        },
+        {
+          "type": "wind",
+          "severity": "medium",
+          "timeframe": "2026-11-03",
+          "description": "Wind direction is forecasted to shift to the WNW, deviating from the baseline direction of 64 degrees."
         },
         {
           "type": "humidity",
-          "severity": "medium",
-          "timeframe": "2026-11-04",
-          "description": "Forecasted humidity of 90.9% is notably higher than the baseline of 77.8%."
-        },
-        {
-          "type": "weather",
           "severity": "low",
-          "timeframe": "2026-11-01",
-          "description": "Observed precipitation and weather codes indicate a shift toward wetter than baseline-expected conditions."
+          "timeframe": "2026-11-07",
+          "description": "Humidity is expected to be high at 88% compared to the baseline of 73.4%."
         }
       ],
       "watch_items": [
-        "High precipitation forecast for early November.",
-        "Monitor for high humidity levels.",
-        ""
+        "High precipitation forecast for Nov 3 and Nov 8."
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecasts are subject to uncertainty due to varying weather patterns.",
-      "updated_at": "2026-11-01T19:48:07Z"
+      "data_quality_note": "Forecast uncertainty is present due to the high variability in precipitation and wind direction models.",
+      "updated_at": "2026-11-02T07:47:41Z"
     }
   }
 }
