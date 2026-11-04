@@ -1,94 +1,57 @@
 {
-  "generated_at": "2026-11-04T07:37:04Z",
+  "generated_at": "2026-11-04T16:25:57Z",
   "model": "gemma-4-26b-a4b-it",
   "source": "Open-Meteo live telemetry + Windfyre ML baseline",
   "cities": {
     "bengaluru-nandini-layout": {
       "status": "ok",
-      "summary": "Bengaluru is experiencing warmer than baseline temperatures and higher humidity, with upcoming precipitation expected.",
-      "current_conditions": "Current temperature is 28.2C with 55% humidity and wind speeds of 5.2 km/h from the north.",
-      "baseline_comparison": "Current temperature is 1.0C above baseline, and wind speed is lower than the baseline of 11.1 km/h.",
-      "next_24h_outlook": "The next 24 hours will see temperatures around 23.0C, increased precipitation of 4.7mm, and higher humidity.",
-      "next_7d_outlook": "The next 7 days will feature consistent temperatures around 22-23C, frequent precipitation, and humidity levels between 80% and 86%.",
+      "summary": "Bengaluru is experiencing overcast conditions with high humidity and moderate wind speeds.",
+      "current_conditions": "Current temperature is 21.9C with 90% humidity and wind speed of 5.2 km/h from 119 degrees.",
+      "baseline_comparison": "Recent observations show lower humidity than baseline on some days, but recent precipitation was higher than baseline on Nov 2nd.",
+      "next_24h_outlook": "The next 24 hours will see overcast conditions with light to moderate precipitation and temperatures around 23.0C.",
+      "next_7d_outlook": "The next 7 days will feature consistent overcast and cloudy conditions with periodic light to moderate rainfall, especially on Nov 7th.",
       "anomalies": [
         {
-          "type": "temperature",
-          "severity": "low",
-          "timeframe": "current",
-          "description": "Temperature is slightly above the baseline of 27.2C."
-        },
-        {
           "type": "precipitation",
-          "severity": "medium",
-          "timeframe": "next 24h",
-          "description": "Forecasted precipitation of 4.7mm is higher than the baseline of 3.0mm."
-        },
-        {
-          "type": "humidity",
           "severity": "high",
-          "timeframe": "next 7d",
-          "description": "Humidity is expected to remain consistently above the baseline levels."
+          "timeframe": "2026-11-02",
+          "description": "Observed precipitation of 12.5mm was significantly higher than the baseline of 2.5mm."
         }
       ],
       "watch_items": [
-        "Increased precipitation and humidity levels over the coming week."
+        "Monitor for increased precipitation on Nov 7th."
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecasts are subject to uncertainty due to model variability.",
-      "updated_at": "2026-11-04T07:37:04Z"
+      "data_quality_note": "Forecasts are subject to uncertainty due to varying weather patterns.",
+      "updated_at": "2026-11-04T16:25:57Z"
     },
     "nagamangala": {
       "status": "ok",
-      "summary": "Nagamangala is experiencing mild temperatures and moderate humidity, with significant precipitation forecasted for the next few days.",
-      "current_conditions": "Current temperature is 28.9C with 59% humidity and wind speeds of 8.4 km/h from the NE.",
-      "baseline_comparison": "Current temperature is 0.8C above baseline and humidity is consistent with the baseline.",
-      "next_24h_outlook": "The next 24 hours will see a temperature of 23.5C and significant precipitation of 11.5mm.",
-      "next_7d_outlook": "The next 7 days will see a temperature of Avg 23.2C, humidity of Avg 84.2%, and precipitation of Avg 4.7mm per day.",
+      "summary": "Nagamangala is experiencing high humidity and significant precipitation forecasts for the coming days.",
+      "current_conditions": "Current temperature is 21.7C with 98% humidity and overcast conditions.",
+      "baseline_comparison": "Recent observations show higher wind speeds and lower humidity than the ML baseline.",
+      "next_24h_outlook": "Expect high precipitation (10.2mm) and high humidity (89.6%) with overcast conditions.",
+      "next_7d_outlook": "The next 7 days will see consistent humidity above 80% and periodic precipitation, with peaks on Nov 4 and Nov 8.",
       "anomalies": [
         {
           "type": "precipitation",
           "severity": "high",
           "timeframe": "2026-11-04",
-          "description": "Forecasted precipitation of 11.5mm is significantly higher than the baseline of 3.1mm."
+          "description": "Forecasted precipitation of 10.2mm is significantly higher than the ML baseline of 3.1mm."
         },
         {
           "type": "humidity",
           "severity": "medium",
-          "timeframe": "2026-11-04 to 2026-11-08",
-          "description": "Forecasted humidity levels are consistently higher than the baseline. "
-        },
-        {
-          "type": "weather",
-          "severity": "low",
-          "timeframe": "2026-10-28 to 2026-11-03",
-          "description": "Recent observations show a variety of weather codes, indicating variable weather patterns. "
-        },
-        {
-          "type": "temperature",
-          "severity": "low",
-          "timeframe": "2026-10-28 to 2026-11-03",
-          "description": "Recent observations show temperatures are consistent with the baseline. "
-        },
-        {
-          "type": "wind",
-          "severity": "low",
-          "timeframe": "2026-10-28 to 2026-11-03",
-          "description": "Recent observations show wind speeds and directions are variable. "
-        },
-        {
-          "type": "wind",
-          "severity": "medium",
-          "timeframe": "2026-10-28",
-          "description": "Wind speeds were higher than the baseline on 2026-10-28. "
+          "timeframe": "2026-11-04",
+          "description": "Forecasted humidity of 89.6% is notably higher than the ML baseline of 77.8%."
         }
       ],
       "watch_items": [
-        "High precipitation forecasted for 2026-11-04.",
-        "High humidity forecasted for the next several days."
+        "High precipitation forecast for Nov 4 and Nov 8."
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecasts are uncertain and should be used with caution. Data quality is based on historical validation. ",
-      "updated_at": "2026-11-04T07:37:04Z"
+      "data_quality_note": "Forecasts are subject to uncertainty; model validation shows good accuracy for precipitation and temperature.",
+      "updated_at": "2026-11-04T16:25:57Z"
     }
   }
 }
