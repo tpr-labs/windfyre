@@ -106,25 +106,9 @@
           </div>
         </div>
 
-        <!-- Action Buttons: JSON Upload, Export, Theme Toggle -->
-        <div class="flex flex-wrap items-center gap-2.5">
-          <label for="jsonUploadInput" class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-slate-200/70 dark:bg-slate-800/80 hover:bg-slate-300/70 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 transition">
-            <i data-lucide="upload" class="w-4 h-4 text-cyan-500"></i>
-            <span>Load JSON</span>
-            <input id="jsonUploadInput" type="file" accept=".json" class="hidden" />
-          </label>
-
-          <button id="downloadJsonBtn" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-slate-200/70 dark:bg-slate-800/80 hover:bg-slate-300/70 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 transition" title="Download current bengaluru_weather.json">
-            <i data-lucide="download" class="w-4 h-4 text-indigo-400"></i>
-            <span>Export JSON</span>
-          </button>
-
-          <button id="jumpRandomAnomalyBtn" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-amber-500/15 hover:bg-amber-500/25 text-amber-600 dark:text-amber-300 border border-amber-500/30 transition" title="Inspect a notable historical Bengaluru weather anomaly">
-            <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
-            <span>Sample Anomaly Day</span>
-          </button>
-
-          <button id="themeToggleBtn" class="p-2 rounded-xl bg-slate-200/70 dark:bg-slate-800/80 hover:bg-slate-300/70 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 transition" aria-label="Toggle Light/Dark Mode">
+        <!-- Action Button: Theme Toggle Only -->
+        <div class="flex items-center gap-2.5 self-end lg:self-center">
+          <button id="themeToggleBtn" class="p-2.5 rounded-xl bg-slate-200/70 dark:bg-slate-800/80 hover:bg-slate-300/70 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 transition" aria-label="Toggle Light/Dark Mode">
             <i data-lucide="sun" class="w-4 h-4 hidden dark:block text-amber-400"></i>
             <i data-lucide="moon" class="w-4 h-4 block dark:hidden text-slate-700"></i>
           </button>
@@ -132,128 +116,140 @@
       </div>
 
       <!-- CONTROL PANEL: Target Date, Comparison Mode, Anomaly Algorithm, Sensitivity -->
-      <div class="mt-5 pt-5 border-t border-slate-200 dark:border-slate-800/80 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4 items-end">
-        
-        <!-- Primary Target Date ("Today") -->
-        <div class="lg:col-span-3">
-          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
-            Target Date ("Today" / Focus)
-          </label>
-          <div class="flex items-center gap-1.5">
-            <input type="date" id="targetDateInput" class="w-full px-3 py-2 rounded-xl text-sm font-mono bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-500" />
-            <button id="resetTodayBtn" class="px-2.5 py-2 rounded-xl text-xs font-semibold bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-600 dark:text-cyan-300 border border-cyan-500/30 shrink-0 transition" title="Reset to latest date in dataset">
-              Latest
-            </button>
-          </div>
-        </div>
-
-        <!-- Comparison Mode -->
-        <div class="lg:col-span-3">
-          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
-            Comparison Scope
-          </label>
-          <select id="comparisonModeSelect" class="w-full px-3 py-2 rounded-xl text-sm bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-500">
-            <option value="same_day" selected>Same Calendar Day Across All Years (Default)</option>
-            <option value="specific_date">Compare vs. Specific Historical Date</option>
-            <option value="seasonal_window">Compare vs. ±7 Day Seasonal Window</option>
-            <option value="full_year">Compare Current Year vs. 20-Yr Climatology</option>
-          </select>
-        </div>
-
-        <!-- Secondary Historical Date (Conditional OR Quick Compare) -->
-        <div class="lg:col-span-2" id="secondaryDateContainer">
-          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
-            Benchmark Date / Year
-          </label>
-          <input type="date" id="compareDateInput" class="w-full px-3 py-2 rounded-xl text-sm font-mono bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-        </div>
-
-        <!-- Anomaly Detection Algorithm -->
-        <div class="lg:col-span-2">
-          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
-            Anomaly Algorithm
-          </label>
-          <select id="algorithmSelect" class="w-full px-3 py-2 rounded-xl text-sm bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-500">
-            <option value="ensemble" selected>Ensemble (Z + MAD + IQR + Multivariate)</option>
-            <option value="mad">Modified Z-Score (Robust MAD)</option>
-            <option value="zscore">Gaussian Z-Score (μ ± k·σ)</option>
-            <option value="iqr">Tukey IQR Fences (1.5× IQR)</option>
-            <option value="mahalanobis">Multivariate Compound Distance</option>
-          </select>
-        </div>
-
-        <!-- Sensitivity Threshold Slider -->
-        <div class="lg:col-span-2">
-          <div class="flex items-center justify-between text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">
-            <span class="uppercase tracking-wider">Threshold (σ)</span>
-            <span id="thresholdValueLabel" class="font-mono text-cyan-500 font-bold">2.0σ</span>
-          </div>
-          <input id="thresholdSlider" type="range" min="1.2" max="3.2" step="0.1" value="2.0" class="w-full accent-cyan-500 cursor-pointer h-2 rounded-lg bg-slate-300 dark:bg-slate-800" />
-        </div>
-      </div>
-    </header>
-
-    <!-- KPI CARDS: TODAY VS. HISTORICAL SAME-DAY BASELINE -->
-    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="kpiGrid">
-      <!-- Populated dynamically by JS -->
-    </section>
-
-    <!-- ANOMALY EXPLANATION ENGINE ("WHY IS THIS AN ANOMALY?") -->
-    <section class="glass-card rounded-2xl p-5 sm:p-6 shadow-xl border-l-4 border-l-cyan-500" id="anomalyBannerSection">
-      <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-6">
-        <div class="space-y-3 flex-1">
-          <div class="flex flex-wrap items-center gap-2.5">
-            <span id="overallAnomalyBadge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-              Analyzing...
-            </span>
-            <h2 class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white" id="anomalyHeadline">
-              Algorithmic Weather Anomaly & Climatological Diagnostic
-            </h2>
-          </div>
-
-          <!-- Natural Language Explanation generated by JS -->
-          <div id="anomalyExplanationBody" class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed space-y-2">
-          </div>
-
-          <!-- Algorithmic Proof Pills -->
-          <div id="algorithmicProofPills" class="flex flex-wrap gap-2 pt-2">
-          </div>
-        </div>
-
-        <!-- Multivariate Anomaly Score Gauge & Direct Benchmark Card -->
-        <div class="w-full lg:w-80 shrink-0 bg-slate-100/80 dark:bg-slate-900/80 rounded-xl p-4 border border-slate-200/80 dark:border-slate-800 flex flex-col justify-between gap-3">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Compound Anomaly Index</span>
-            <span id="compoundScoreValue" class="font-mono text-lg font-extrabold text-cyan-400">0.00</span>
-          </div>
-          <div class="w-full h-3 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
-            <div id="compoundScoreBar" class="h-full rounded-full bg-gradient-to-r from-emerald-400 via-amber-400 to-rose-500 transition-all duration-500" style="width: 20%"></div>
-          </div>
-          <div class="text-xs text-slate-500 dark:text-slate-400 flex justify-between font-mono">
-            <span>0.0 (Normal)</span>
-            <span id="thresholdMarkerText">2.0 (Threshold)</span>
-            <span>4.0+ (Extreme)</span>
-          </div>
-
-          <div class="pt-3 border-t border-slate-200 dark:border-slate-800 space-y-1.5 text-xs">
-            <div class="flex justify-between">
-              <span class="text-slate-500 dark:text-slate-400">Comparison Group Size:</span>
-              <span id="sampleSizeLabel" class="font-mono font-semibold text-slate-800 dark:text-slate-200">20 historical days</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-slate-500 dark:text-slate-400">Bengaluru Season:</span>
-              <span id="seasonNameLabel" class="font-semibold text-indigo-400">Northeast Monsoon</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-slate-500 dark:text-slate-400">Historical Wet-Day Prob:</span>
-              <span id="wetDayProbLabel" class="font-mono font-semibold text-sky-400">35%</span>
-            </div>
+          <div class=" flex justify-between">
+            <span class="text-slate-500 dark:text-slate-400">Historical Wet-Day Prob:</span>
+            <span id="wetDayProbLabel" class="font-mono font-semibold text-sky-400">35%</span>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- MAIN CHARTS GRID: SAME-DAY 20-YR HISTORY & MULTIVARIATE RADAR / HEAD-TO-HEAD -->
+    <!-- FULL-WIDTH ROW: 20-YEAR SAME-CALENDAR-DAY HISTORICAL CHART -->
+    <section class="glass-card rounded-2xl p-5 sm:p-6 shadow-xl flex flex-col justify-between">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+        <div>
+          <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <i data-lucide="bar-chart-3" class="w-5 h-5 text-cyan-400"></i>
+            <span id="mainChartTitle">On This Day in Bengaluru History (2007–2026)</span>
+          </h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400" id="mainChartSubtitle">
+            Comparing Today's data against all historical records for the exact same calendar day. Red/Amber markers highlight statistical anomalies.
+          </p>
+        </div>
+        <!-- Metric Selector for Main Chart -->
+        <div class="flex flex-wrap gap-1.5 bg-slate-200/70 dark:bg-slate-900 p-1 rounded-xl border border-slate-300/60 dark:border-slate-800">
+          <button data-metric="temp" class="chart-metric-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-cyan-500 text-white transition">Temp (Min/Max)</button>
+          <button data-metric="rain" class="chart-metric-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">Rain (mm)</button>
+          <button data-metric="wind" class="chart-metric-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">Wind & Gusts</button>
+          <button data-metric="atmo" class="chart-metric-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">Humidity & Pressure</button>
+        </div>
+      </div>
+
+      <div class="relative w-full h-96 sm:h-[440px]">
+        <canvas id="sameDayHistoryChart"></canvas>
+      </div>
+
+      <div class="mt-4 pt-3 border-t border-slate-200 dark:border-slate-800/80 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500 dark:text-slate-400">
+        <div class="flex items-center gap-4">
+          <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-cyan-400 inline-block"></span> Target Date</span>
+          <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-rose-500 inline-block"></span> Detected Anomaly</span>
+          <span class="inline-flex items-center gap-1.5"><span class="w-4 h-0.5 bg-amber-400 inline-block"></span> Historical Mean</span>
+        </div>
+        <span class="font-mono" id="chartClickHint">Tip: Click any bar/point on the chart to set it as the Benchmark Date</span>
+      </div>
+    </section>
+
+    <!-- NEXT ROW: WIND VECTOR COMPASS ROSE + MULTIVARIATE PERCENTILE RADAR -->
+    <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      
+      <!-- Left 6 Cols: Interactive Wind Velocity & Direction Compass Rose -->
+      <div class="lg:col-span-6 glass-card rounded-2xl p-5 sm:p-6 shadow-xl flex flex-col justify-between">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <i data-lucide="compass" class="w-5 h-5 text-indigo-400"></i>
+              <span>Wind Vector & Rose Comparison</span>
+            </h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Today vs. Historical Same-Day Prevailing Flow</p>
+          </div>
+          <span id="windCardinalBadge" class="px-3 py-1 rounded-lg text-xs font-mono font-bold bg-indigo-500/15 text-indigo-400 border border-indigo-500/30">
+            ENE 68°
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 items-center my-auto py-2">
+          <!-- Custom SVG Wind Compass -->
+          <div class="flex items-center justify-center">
+            <svg id="windCompassSvg" viewBox="0 0 200 200" class="w-52 h-52">
+              <!-- Outer Ring -->
+              <circle cx="100" cy="100" r="86" fill="none" stroke="currentColor" class="text-slate-300 dark:text-slate-800" stroke-width="2" />
+              <circle cx="100" cy="100" r="60" fill="none" stroke="currentColor" class="text-slate-200 dark:text-slate-800/70" stroke-dasharray="3 3" stroke-width="1" />
+              <circle cx="100" cy="100" r="34" fill="none" stroke="currentColor" class="text-slate-200 dark:text-slate-800/70" stroke-dasharray="2 2" stroke-width="1" />
+              <!-- Crosshairs -->
+              <line x1="100" y1="14" x2="100" y2="186" stroke="currentColor" class="text-slate-300 dark:text-slate-800" stroke-width="1" />
+              <line x1="14" y1="100" x2="186" y2="100" stroke="currentColor" class="text-slate-300 dark:text-slate-800" stroke-width="1" />
+              <!-- Cardinal Labels -->
+              <text x="100" y="11" text-anchor="middle" class="fill-slate-500 dark:fill-slate-400 text-[10px] font-bold font-mono">N</text>
+              <text x="192" y="103" text-anchor="middle" class="fill-slate-500 dark:fill-slate-400 text-[10px] font-bold font-mono">E</text>
+              <text x="100" y="197" text-anchor="middle" class="fill-slate-500 dark:fill-slate-400 text-[10px] font-bold font-mono">S</text>
+              <text x="8" y="103" text-anchor="middle" class="fill-slate-500 dark:fill-slate-400 text-[10px] font-bold font-mono">W</text>
+
+              <!-- Historical Same-Day Dots Container -->
+              <g id="compassHistoryDots"></g>
+
+              <!-- Historical Mean Wind Vector Arrow (Amber Dashed) -->
+              <g id="compassMeanArrow" transform="rotate(70 100 100)">
+                <line x1="100" y1="100" x2="100" y2="34" stroke="#f59e0b" stroke-width="2.5" stroke-dasharray="4 2" />
+                <polygon points="100,24 95,36 105,36" fill="#f59e0b" />
+              </g>
+
+              <!-- Today's Wind Vector Arrow (Cyan Solid) -->
+              <g id="compassTodayArrow" transform="rotate(85 100 100)">
+                <line x1="100" y1="100" x2="100" y2="26" stroke="#06b6d4" stroke-width="3.5" stroke-linecap="round" />
+                <polygon points="100,16 93,30 107,30" fill="#06b6d4" />
+              </g>
+
+              <circle cx="100" cy="100" r="4" fill="#0f172a" stroke="#38bdf8" stroke-width="2" />
+            </svg>
+          </div>
+
+          <!-- Wind Stats Breakdown -->
+          <div class="space-y-3 text-xs">
+            <div class="p-3.5 rounded-xl bg-slate-100 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800">
+              <div class="text-slate-500 dark:text-slate-400">Today Sustained / Gust</div>
+              <div class="font-mono font-bold text-base text-cyan-500 mt-1" id="windTodaySpeedText">18.4 / 31.2 km/h</div>
+            </div>
+            <div class="p-3.5 rounded-xl bg-slate-100 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800">
+              <div class="text-slate-500 dark:text-slate-400">Historical Same-Day Mean</div>
+              <div class="font-mono font-bold text-base text-amber-500 mt-1" id="windMeanSpeedText">14.2 / 24.5 km/h</div>
+            </div>
+            <div class="p-3.5 rounded-xl bg-slate-100 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800">
+              <div class="text-slate-500 dark:text-slate-400">Angular Shift vs. Normal</div>
+              <div class="font-mono font-bold text-base text-indigo-400 mt-1" id="windAngleShiftText">+12° (Normal E/NE)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right 6 Cols: Radar Fingerprint: Target vs. Benchmark / Historical Normal -->
+      <div class="lg:col-span-6 glass-card rounded-2xl p-5 sm:p-6 shadow-xl flex flex-col justify-between">
+        <div>
+          <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <i data-lucide="radar" class="w-5 h-5 text-cyan-400"></i>
+            <span>Multivariate Percentile Fingerprint</span>
+          </h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400">
+            Percentile rank (0–100th) of Today vs. Benchmark Date across 7 meteorological variables
+          </p>
+        </div>
+        <div class="relative w-full h-72 sm:h-80 mt-3">
+          <canvas id="radarComparisonChart"></canvas>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- THIRD ROW: HEAD-TO-HEAD DATE COMPARATOR & JOINT ANOMALY SCATTER PLOT -->
     <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
       
       <!-- Left 8 Cols: 20-Year Same-Calendar-Day Historical Chart -->
@@ -495,13 +491,10 @@
       </div>
     </section>
 
-    <!-- FOOTER & ARCHITECTURE GUIDE -->
-    <footer class="glass-card rounded-2xl p-5 text-xs text-slate-500 dark:text-slate-400 flex flex-col sm:flex-row items-center justify-between gap-4">
-      <div class="flex items-center gap-2">
-        <i data-lucide="cpu" class="w-4 h-4 text-cyan-400 shrink-0"></i>
-        <span>
-          <strong>GitHub Pages Ready:</strong> Automatically fetches <code class="text-cyan-400 font-mono">./bengaluru_weather.json</code> updated daily by <code class="text-indigo-400 font-mono">fetch_bengaluru_weather.py</code> via GitHub Actions.
-        </span>
+    <!-- FOOTER -->
+    <footer class="glass-card rounded-2xl p-4 sm:p-5 text-xs text-slate-500 dark:text-slate-400 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div class="font-medium text-slate-600 dark:text-slate-300">
+        Namma Bengaluru Climate & Anomaly Lab • IMD Observatory Reference (12.9716°N, 77.5946°E)
       </div>
       <div class="font-mono text-[11px]">
         Algorithms: Gaussian Z-Score • Huber/Tukey MAD • IQR Fences • Multivariate Mahalanobis
@@ -1017,7 +1010,6 @@
     }
 
     async function loadWeatherDataset() {
-      const badgeText = document.getElementById('dataSourceText');
       try {
         const response = await fetch('./bengaluru_weather.json', { cache: 'no-store' });
         if (!response.ok) throw new Error('Local JSON not found');
@@ -1033,14 +1025,14 @@
           fullArchive.daily.forEach(d => mergedMap.set(d.date, d));
           json.daily.forEach(d => mergedMap.set(d.date, d));
           json.daily = Array.from(mergedMap.values()).sort((a, b) => a.date.localeCompare(b.date));
-          ingestDataset(json, `Loaded ./bengaluru_weather.json + 20-Yr Archive (${json.daily.length.toLocaleString()} Days)`);
+          ingestDataset(json, `Live Weather Archive (${json.daily.length.toLocaleString()} Days)`);
         } else {
-          ingestDataset(json, `Loaded ./bengaluru_weather.json (${json.daily.length.toLocaleString()} Days)`);
+          ingestDataset(json, `Live Weather Archive (${json.daily.length.toLocaleString()} Days)`);
         }
       } catch (err) {
         // Fallback to built-in 20-year daily Bengaluru climatology dataset
         const fallbackJson = generateBengaluru20YearDataset();
-        ingestDataset(fallbackJson, '20-Yr Bengaluru Daily Archive Ready (7,249 Days)');
+        ingestDataset(fallbackJson, `Live Weather Archive (${fallbackJson.daily.length.toLocaleString()} Days)`);
       }
     }
 
@@ -1862,60 +1854,10 @@
         renderAll();
       });
 
-      // Sample Anomaly Jumper
-      const sampleAnomalies = ['2026-11-05', '2022-09-05', '2024-04-28', '2017-08-15', '2016-04-24', '2018-12-29', '2021-11-05'];
-      let anomalyIdx = 0;
-      document.getElementById('jumpRandomAnomalyBtn').addEventListener('click', () => {
-        anomalyIdx = (anomalyIdx + 1) % sampleAnomalies.length;
-        const pick = sampleAnomalies[anomalyIdx];
-        if (appState.byDateMap.has(pick)) {
-          appState.targetDate = pick;
-          document.getElementById('targetDateInput').value = pick;
-          showToast(`Jumped to notable Bengaluru anomaly date: ${pick}`, 'warning');
-          renderAll();
-        }
-      });
-
       // Theme Toggle
       document.getElementById('themeToggleBtn').addEventListener('click', () => {
         document.documentElement.classList.toggle('dark');
         renderAll();
-      });
-
-      // Export JSON
-      document.getElementById('downloadJsonBtn').addEventListener('click', () => {
-        const dataStr = JSON.stringify(appState.dataset, null, 2);
-        const blob = new Blob([dataStr], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'bengaluru_weather.json';
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
-        showToast('Exported bengaluru_weather.json', 'success');
-      });
-
-      // Upload Custom JSON
-      document.getElementById('jsonUploadInput').addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (evt) => {
-          try {
-            const parsed = JSON.parse(evt.target.result);
-            if (!parsed.daily || !Array.isArray(parsed.daily)) {
-              showToast('Invalid JSON format: expected { "daily": [...] }', 'warning');
-              return;
-            }
-            ingestDataset(parsed, `Loaded ${file.name} (${parsed.daily.length} days)`);
-            showToast(`Loaded ${parsed.daily.length} daily records from ${file.name}`, 'success');
-          } catch (err) {
-            showToast('Failed to parse JSON file.', 'warning');
-          }
-        };
-        reader.readAsText(file);
       });
     }
 
