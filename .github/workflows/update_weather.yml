@@ -1,0 +1,36 @@
+name: Update Bengaluru Daily Weather JSON
+on:
+  schedule:
+    - cron: 0 1,13 * * *
+  workflow_dispatch: null
+permissions:
+  contents: write
+jobs:
+  update-weather-data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Run Bengaluru Weather Collector (Initial 20-Yr Backfill or Daily Delta)
+        run: python fetch_bengaluru_weather.py
+      - name: Commit and Push updated bengaluru_weather.json
+        run: >
+          git config --local user.email
+          "github-actions[bot]@users.noreply.github.com"
+
+          git config --local user.name "github-actions[bot]"
+
+          git add bengaluru_weather.json
+
+          if git diff --staged --quiet; then
+            echo "No weather delta changes to commit."
+          else
+            git commit -m "chore(data): update bengaluru_weather.json with latest daily delta [skip ci]"
+            git push
+          fi
