@@ -77,7 +77,7 @@
   <!-- Top Ambient Glow -->
   <div class="fixed inset-x-0 top-0 h-80 bg-gradient-to-b from-cyan-500/10 via-indigo-500/5 to-transparent pointer-events-none z-0"></div>
 
-  <!-- Toast Notification Banner (No alert() used) -->
+  <!-- Toast Notification Banner -->
   <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none"></div>
 
   <!-- Main Container -->
@@ -116,16 +116,112 @@
       </div>
 
       <!-- CONTROL PANEL: Target Date, Comparison Mode, Anomaly Algorithm, Sensitivity -->
-          <div class=" flex justify-between">
-            <span class="text-slate-500 dark:text-slate-400">Historical Wet-Day Prob:</span>
-            <span id="wetDayProbLabel" class="font-mono font-semibold text-sky-400">35%</span>
+      <div class="mt-6 pt-5 border-t border-slate-200 dark:border-slate-800/80 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <!-- Target Date -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Target Date ("Today")</label>
+          <div class="flex items-center gap-2">
+            <input type="date" id="targetDateInput" class="w-full px-3 py-2 rounded-xl text-xs sm:text-sm font-mono bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-500" />
+            <button id="resetTodayBtn" title="Reset to latest date" class="p-2 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/30 text-cyan-400 border border-cyan-500/30 transition">
+              <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Comparison Scope -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Comparison Scope</label>
+          <select id="comparisonModeSelect" class="w-full px-3 py-2 rounded-xl text-xs sm:text-sm bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-500">
+            <option value="same_day">Same Calendar Day Across All Years</option>
+            <option value="seasonal_window">Seasonal Window (±7 Days)</option>
+            <option value="full_year">Same Month Across All Years</option>
+          </select>
+        </div>
+
+        <!-- Benchmark Date -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Benchmark Date / Year</label>
+          <input type="date" id="compareDateInput" class="w-full px-3 py-2 rounded-xl text-xs sm:text-sm font-mono bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-500" />
+        </div>
+
+        <!-- Anomaly Algorithm -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Anomaly Algorithm</label>
+          <select id="algorithmSelect" class="w-full px-3 py-2 rounded-xl text-xs sm:text-sm bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-500">
+            <option value="ensemble">Ensemble (Z-Score + MAD + IQR)</option>
+            <option value="mad">Huber/Tukey MAD (Robust)</option>
+            <option value="zscore">Parametric Gaussian Z-Score</option>
+            <option value="iqr">Tukey Interquartile Range (IQR)</option>
+          </select>
+        </div>
+
+        <!-- Threshold Sigma -->
+        <div>
+          <div class="flex justify-between items-center mb-1.5">
+            <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Threshold (σ)</label>
+            <span id="thresholdValueLabel" class="font-mono text-xs font-bold text-cyan-400">2.0σ</span>
+          </div>
+          <input type="range" id="thresholdSlider" min="1.2" max="3.5" step="0.1" value="2.0" class="w-full accent-cyan-500 cursor-pointer pt-2" />
+        </div>
+      </div>
+    </header>
+
+    <!-- KPI CARDS SUMMARY ROW -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="kpiGrid">
+      <!-- Populated dynamically by JS -->
+    </section>
+
+    <!-- ANOMALY EXPLANATION & SCIENTIFIC REASONING BANNER -->
+    <section id="anomalyBannerSection" class="glass-card rounded-2xl p-5 sm:p-6 shadow-xl border-l-4 border-l-cyan-500">
+      <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+        <div class="space-y-3 flex-1">
+          <div class="flex flex-wrap items-center gap-3">
+            <span id="overallAnomalyBadge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-cyan-500/20 text-cyan-400 border border-cyan-500/40">
+              <span class="w-2 h-2 rounded-full bg-cyan-400 pulse-dot"></span> Analyzing Weather Data...
+            </span>
+            <span class="text-xs text-slate-500 dark:text-slate-400 font-mono" id="sampleSizeLabel">Evaluating cohort...</span>
+          </div>
+          <h2 id="anomalyHeadline" class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white tracking-tight">
+            Loading Anomaly Diagnosis...
+          </h2>
+          <div id="anomalyExplanationBody" class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 space-y-2 leading-relaxed">
+            <!-- Populated by JS -->
+          </div>
+          <div class="flex flex-wrap items-center gap-2 pt-2" id="algorithmicProofPills">
+            <!-- Algorithmic proof pills populated here -->
+          </div>
+        </div>
+
+        <!-- Compound Score Gauge Box -->
+        <div class="w-full lg:w-72 bg-slate-100 dark:bg-slate-900/90 rounded-xl p-4 border border-slate-200 dark:border-slate-800 shrink-0 space-y-3">
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-slate-500 dark:text-slate-400 font-semibold uppercase">Compound Score</span>
+            <span id="compoundScoreValue" class="font-mono font-extrabold text-cyan-400 text-sm">0.00σ</span>
+          </div>
+          <!-- Gauge Bar -->
+          <div class="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-3 overflow-hidden p-0.5">
+            <div id="compoundScoreBar" class="bg-gradient-to-r from-cyan-500 via-amber-400 to-rose-500 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+          </div>
+          <div class="flex justify-between text-[11px] text-slate-400 font-mono">
+            <span>0σ (Normal)</span>
+            <span id="thresholdMarkerText">2.0σ (Threshold)</span>
+          </div>
+          <div class="pt-2 border-t border-slate-200 dark:border-slate-800 space-y-1.5 text-xs">
+            <div class="flex justify-between">
+              <span class="text-slate-500 dark:text-slate-400">Season Regime:</span>
+              <span id="seasonNameLabel" class="font-semibold text-slate-700 dark:text-slate-200">--</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-500 dark:text-slate-400">Historical Wet-Day Prob:</span>
+              <span id="wetDayProbLabel" class="font-mono font-semibold text-sky-400">--</span>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- FULL-WIDTH ROW: 20-YEAR SAME-CALENDAR-DAY HISTORICAL CHART -->
-    <section class="glass-card rounded-2xl p-5 sm:p-6 shadow-xl flex flex-col justify-between">
+    <!-- ROW 1: FULL-WIDTH 20-YEAR SAME-CALENDAR-DAY HISTORICAL CHART -->
+    <section class="glass-card rounded-2xl p-5 sm:p-6 shadow-xl">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
         <div>
           <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
@@ -159,7 +255,7 @@
       </div>
     </section>
 
-    <!-- NEXT ROW: WIND VECTOR COMPASS ROSE + MULTIVARIATE PERCENTILE RADAR -->
+    <!-- ROW 2: WIND VECTOR COMPASS ROSE & MULTIVARIATE PERCENTILE RADAR -->
     <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
       
       <!-- Left 6 Cols: Interactive Wind Velocity & Direction Compass Rose -->
@@ -249,139 +345,10 @@
 
     </section>
 
-    <!-- THIRD ROW: HEAD-TO-HEAD DATE COMPARATOR & JOINT ANOMALY SCATTER PLOT -->
+    <!-- ROW 3: METRIC STATISTICAL MATRIX & BIVARIATE SCATTER PLOT -->
     <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
       
-      <!-- Left 8 Cols: 20-Year Same-Calendar-Day Historical Chart -->
-      <div class="lg:col-span-8 glass-card rounded-2xl p-5 sm:p-6 shadow-xl flex flex-col justify-between">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-          <div>
-            <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <i data-lucide="bar-chart-3" class="w-5 h-5 text-cyan-400"></i>
-              <span id="mainChartTitle">On This Day in Bengaluru History (2007–2026)</span>
-            </h3>
-            <p class="text-xs text-slate-500 dark:text-slate-400" id="mainChartSubtitle">
-              Comparing Today's data against all historical records for the exact same calendar day. Red/Amber rings highlight statistical anomalies.
-            </p>
-          </div>
-          <!-- Metric Selector for Main Chart -->
-          <div class="flex flex-wrap gap-1.5 bg-slate-200/70 dark:bg-slate-900 p-1 rounded-xl border border-slate-300/60 dark:border-slate-800">
-            <button data-metric="temp" class="chart-metric-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-cyan-500 text-white transition">Temp (Min/Max)</button>
-            <button data-metric="rain" class="chart-metric-btn px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">Rain (mm)</button>
-            <button data-metric="wind" class="chart-metric-btn px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">Wind & Gusts</button>
-            <button data-metric="atmo" class="chart-metric-btn px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">Humidity & Pressure</button>
-          </div>
-        </div>
-
-        <div class="relative w-full h-80 sm:h-96">
-          <canvas id="sameDayHistoryChart"></canvas>
-        </div>
-
-        <div class="mt-4 pt-3 border-t border-slate-200 dark:border-slate-800/80 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500 dark:text-slate-400">
-          <div class="flex items-center gap-4">
-            <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-cyan-400 inline-block"></span> Target Date</span>
-            <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-rose-500 inline-block"></span> Detected Anomaly</span>
-            <span class="inline-flex items-center gap-1.5"><span class="w-4 h-0.5 bg-amber-400 inline-block"></span> 20-Yr Historical Mean</span>
-          </div>
-          <span class="font-mono" id="chartClickHint">Tip: Click any bar/point on the chart to set it as the Benchmark Date</span>
-        </div>
-      </div>
-
-      <!-- Right 4 Cols: Wind Direction Compass Rose + Multi-Metric Normalized Fingerprint -->
-      <div class="lg:col-span-4 flex flex-col gap-6">
-        
-        <!-- Interactive Wind Velocity & Direction Compass Rose -->
-        <div class="glass-card rounded-2xl p-5 shadow-xl">
-          <div class="flex items-center justify-between mb-3">
-            <div>
-              <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <i data-lucide="compass" class="w-4 h-4 text-indigo-400"></i>
-                <span>Wind Vector & Rose Comparison</span>
-              </h3>
-              <p class="text-xs text-slate-500 dark:text-slate-400">Today vs. 20-Yr Same-Day Prevailing Flow</p>
-            </div>
-            <span id="windCardinalBadge" class="px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-indigo-500/15 text-indigo-400 border border-indigo-500/30">
-              ENE 68°
-            </span>
-          </div>
-
-          <div class="grid grid-cols-2 gap-4 items-center">
-            <!-- Custom SVG Wind Compass -->
-            <div class="flex items-center justify-center">
-              <svg id="windCompassSvg" viewBox="0 0 200 200" class="w-40 h-40">
-                <!-- Outer Ring -->
-                <circle cx="100" cy="100" r="86" fill="none" stroke="currentColor" class="text-slate-300 dark:text-slate-800" stroke-width="2" />
-                <circle cx="100" cy="100" r="60" fill="none" stroke="currentColor" class="text-slate-200 dark:text-slate-800/70" stroke-dasharray="3 3" stroke-width="1" />
-                <circle cx="100" cy="100" r="34" fill="none" stroke="currentColor" class="text-slate-200 dark:text-slate-800/70" stroke-dasharray="2 2" stroke-width="1" />
-                <!-- Crosshairs -->
-                <line x1="100" y1="14" x2="100" y2="186" stroke="currentColor" class="text-slate-300 dark:text-slate-800" stroke-width="1" />
-                <line x1="14" y1="100" x2="186" y2="100" stroke="currentColor" class="text-slate-300 dark:text-slate-800" stroke-width="1" />
-                <!-- Cardinal Labels -->
-                <text x="100" y="11" text-anchor="middle" class="fill-slate-500 dark:fill-slate-400 text-[10px] font-bold font-mono">N</text>
-                <text x="192" y="103" text-anchor="middle" class="fill-slate-500 dark:fill-slate-400 text-[10px] font-bold font-mono">E</text>
-                <text x="100" y="197" text-anchor="middle" class="fill-slate-500 dark:fill-slate-400 text-[10px] font-bold font-mono">S</text>
-                <text x="8" y="103" text-anchor="middle" class="fill-slate-500 dark:fill-slate-400 text-[10px] font-bold font-mono">W</text>
-
-                <!-- Historical Same-Day Dots Container -->
-                <g id="compassHistoryDots"></g>
-
-                <!-- Historical Mean Wind Vector Arrow (Amber Dashed) -->
-                <g id="compassMeanArrow" transform="rotate(70 100 100)">
-                  <line x1="100" y1="100" x2="100" y2="34" stroke="#f59e0b" stroke-width="2.5" stroke-dasharray="4 2" />
-                  <polygon points="100,24 95,36 105,36" fill="#f59e0b" />
-                </g>
-
-                <!-- Today's Wind Vector Arrow (Cyan Solid) -->
-                <g id="compassTodayArrow" transform="rotate(85 100 100)">
-                  <line x1="100" y1="100" x2="100" y2="26" stroke="#06b6d4" stroke-width="3.5" stroke-linecap="round" />
-                  <polygon points="100,16 93,30 107,30" fill="#06b6d4" />
-                </g>
-
-                <circle cx="100" cy="100" r="4" fill="#0f172a" stroke="#38bdf8" stroke-width="2" />
-              </svg>
-            </div>
-
-            <!-- Wind Stats Breakdown -->
-            <div class="space-y-2.5 text-xs">
-              <div class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800">
-                <div class="text-slate-500 dark:text-slate-400">Today Sustained / Gust</div>
-                <div class="font-mono font-bold text-sm text-cyan-500 mt-0.5" id="windTodaySpeedText">18.4 / 31.2 km/h</div>
-              </div>
-              <div class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800">
-                <div class="text-slate-500 dark:text-slate-400">20-Yr Same-Day Mean</div>
-                <div class="font-mono font-bold text-sm text-amber-500 mt-0.5" id="windMeanSpeedText">14.2 / 24.5 km/h</div>
-              </div>
-              <div class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800">
-                <div class="text-slate-500 dark:text-slate-400">Angular Shift vs. Normal</div>
-                <div class="font-mono font-bold text-sm text-indigo-400 mt-0.5" id="windAngleShiftText">+12° (Normal E/NE)</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Radar Fingerprint: Target vs. Benchmark / Historical Normal -->
-        <div class="glass-card rounded-2xl p-5 shadow-xl flex-1 flex flex-col justify-between">
-          <div>
-            <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <i data-lucide="radar" class="w-4 h-4 text-cyan-400"></i>
-              <span>Multivariate Percentile Fingerprint</span>
-            </h3>
-            <p class="text-xs text-slate-500 dark:text-slate-400">
-              Percentile rank (0–100th) of Today vs. Benchmark Date across 7 variables
-            </p>
-          </div>
-          <div class="relative w-full h-56 mt-2">
-            <canvas id="radarComparisonChart"></canvas>
-          </div>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- SECOND ROW: HEAD-TO-HEAD DATE COMPARATOR & JOINT ANOMALY SCATTER PLOT -->
-    <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-      
-      <!-- Left 6 Cols: Head-to-Head Any Date Comparator & Statistical Breakdown Table -->
+      <!-- Left 7 Cols: Metric-by-Metric Statistical & Anomaly Matrix -->
       <div class="lg:col-span-7 glass-card rounded-2xl p-5 sm:p-6 shadow-xl">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
           <div>
@@ -414,7 +381,7 @@
         </div>
       </div>
 
-      <!-- Right 5 Cols: Joint Distribution Scatter (Temp vs Humidity / Rain vs Pressure) -->
+      <!-- Right 5 Cols: Joint Distribution Scatter -->
       <div class="lg:col-span-5 glass-card rounded-2xl p-5 sm:p-6 shadow-xl flex flex-col justify-between">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
           <div>
@@ -446,7 +413,7 @@
 
     </section>
 
-    <!-- THIRD ROW: 20-YEAR LONG-TERM CLIMATOLOGY & HISTORICAL RECORDS TABLE -->
+    <!-- ROW 4: HISTORICAL RECORDS TABLE -->
     <section class="glass-card rounded-2xl p-5 sm:p-6 shadow-xl space-y-5">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -505,12 +472,6 @@
 
   <!-- APPLICATION JAVASCRIPT -->
   <script>
-    /***************************************************************************
-     * 1. REALISTIC 20-YEAR BENGALURU DAILY WEATHER FALLBACK GENERATOR
-     *    Used automatically if `./bengaluru_weather.json` is not yet present on
-     *    the server (e.g., in live preview), while seamlessly loading `./bengaluru_weather.json`
-     *    when hosted on GitHub Pages.
-     ***************************************************************************/
     const BENGALURU_META = {
       city: "Bengaluru, Karnataka, India",
       latitude: 12.9716,
@@ -519,7 +480,6 @@
       timezone: "Asia/Kolkata"
     };
 
-    // Deterministic seeded PRNG (Mulberry32) so fallback historical data is 100% consistent
     function createSeededRandom(seed) {
       return function() {
         let t = seed += 0x6D2B79F5;
@@ -529,7 +489,6 @@
       };
     }
 
-    // Box-Muller transform for standard normal distribution N(0,1)
     function randomNormal(rng) {
       let u = 0, v = 0;
       while (u === 0) u = rng();
@@ -549,18 +508,12 @@
       return "Northeast Monsoon (Retreating / Cyclonic)";
     }
 
-    /**
-     * Generates 20 years (2007-01-01 to 2026-11-05) of realistic daily Bengaluru
-     * meteorological records calibrated to IMD Bengaluru City Observatory norms,
-     * including real historical extreme events.
-     */
     function generateBengaluru20YearDataset() {
       const rng = createSeededRandom(12971677);
       const startDate = new Date(Date.UTC(2007, 0, 1));
-      const endDate = new Date(Date.UTC(2026, 10, 5)); // Nov 5, 2026
+      const endDate = new Date(Date.UTC(2026, 10, 5));
       const records = [];
 
-      // Curated real/notable Bengaluru extreme anomaly dates to make exploration fascinating
       const notableEvents = {
         "2026-11-05": { temp_max: 31.8, temp_min: 22.4, precipitation_mm: 46.5, wind_speed_max: 28.4, wind_gusts_max: 49.2, wind_direction_deg: 52, humidity_mean: 88, pressure_msl: 1006.4, solar_radiation: 11.2, cloud_cover: 92 },
         "2022-09-05": { temp_max: 26.2, temp_min: 19.8, precipitation_mm: 131.6, wind_speed_max: 31.0, wind_gusts_max: 54.0, wind_direction_deg: 265, humidity_mean: 95, pressure_msl: 1004.8, solar_radiation: 8.5, cloud_cover: 98 },
@@ -572,49 +525,43 @@
         "2015-11-05": { temp_max: 25.1, temp_min: 19.2, precipitation_mm: 52.8, wind_speed_max: 24.8, wind_gusts_max: 41.0, wind_direction_deg: 60, humidity_mean: 90, pressure_msl: 1008.0, solar_radiation: 10.6, cloud_cover: 91 }
       };
 
-      // Monthly baseline climatology for Bengaluru:
-      // [maxT, minT, rainProb, rainScale, windSpeed, windDir, humidity, pressure, solar]
       const monthlyNorms = [
-        [27.9, 15.8, 0.04, 4.0,  13.5, 78,  55, 1014.2, 20.5], // Jan
-        [30.6, 17.5, 0.06, 6.0,  14.0, 88,  48, 1013.0, 22.8], // Feb
-        [33.4, 20.0, 0.10, 9.0,  14.2, 105, 42, 1011.5, 24.5], // Mar
-        [34.2, 22.0, 0.28, 14.0, 14.8, 135, 52, 1009.8, 23.8], // Apr
-        [33.1, 21.7, 0.42, 18.5, 17.5, 235, 63, 1008.5, 21.6], // May
-        [29.4, 20.2, 0.52, 13.0, 22.5, 258, 75, 1007.8, 17.2], // Jun
-        [28.3, 19.7, 0.58, 14.5, 23.8, 262, 78, 1008.0, 15.8], // Jul
-        [28.1, 19.6, 0.62, 16.5, 22.0, 260, 79, 1008.4, 16.2], // Aug
-        [28.6, 19.5, 0.58, 21.0, 17.8, 250, 77, 1009.5, 18.0], // Sep
-        [28.5, 19.1, 0.52, 19.5, 14.5, 85,  76, 1011.2, 17.8], // Oct
-        [27.4, 17.6, 0.32, 14.0, 14.2, 70,  71, 1012.8, 17.5], // Nov
-        [26.8, 16.0, 0.14, 7.5,  14.0, 72,  64, 1014.0, 18.8]  // Dec
+        [27.9, 15.8, 0.04, 4.0,  13.5, 78,  55, 1014.2, 20.5],
+        [30.6, 17.5, 0.06, 6.0,  14.0, 88,  48, 1013.0, 22.8],
+        [33.4, 20.0, 0.10, 9.0,  14.2, 105, 42, 1011.5, 24.5],
+        [34.2, 22.0, 0.28, 14.0, 14.8, 135, 52, 1009.8, 23.8],
+        [33.1, 21.7, 0.42, 18.5, 17.5, 235, 63, 1008.5, 21.6],
+        [29.4, 20.2, 0.52, 13.0, 22.5, 258, 75, 1007.8, 17.2],
+        [28.3, 19.7, 0.58, 14.5, 23.8, 262, 78, 1008.0, 15.8],
+        [28.1, 19.6, 0.62, 16.5, 22.0, 260, 79, 1008.4, 16.2],
+        [28.6, 19.5, 0.58, 21.0, 17.8, 250, 77, 1009.5, 18.0],
+        [28.5, 19.1, 0.52, 19.5, 14.5, 85,  76, 1011.2, 17.8],
+        [27.4, 17.6, 0.32, 14.0, 14.2, 70,  71, 1012.8, 17.5],
+        [26.8, 16.0, 0.14, 7.5,  14.0, 72,  64, 1014.0, 18.8]
       ];
 
       let current = new Date(startDate);
       while (current <= endDate) {
         const yyyy = current.getUTCFullYear();
-        const mm = current.getUTCMonth(); // 0..11
+        const mm = current.getUTCMonth();
         const dd = current.getUTCDate();
         const isoDate = `${yyyy}-${String(mm + 1).padStart(2, '0')}-${String(dd).padStart(2, '0')}`;
 
         const norm = monthlyNorms[mm];
-        // Slight decadal warming trend (~0.035°C / year)
         const warmingOffset = (yyyy - 2007) * 0.035;
 
-        // Generate daily values around monthly norm
         let isWet = rng() < norm[2];
         let rain = 0;
         if (isWet) {
-          // Gamma-like skewed rainfall distribution
           const u1 = Math.max(0.001, rng());
           const u2 = Math.max(0.001, rng());
-          rain = +( (-Math.log(u1 * u2) * (norm[3] * 0.55)).toFixed(1) );
+          rain = +((-Math.log(u1 * u2) * (norm[3] * 0.55)).toFixed(1));
           if (rain < 0.5) rain = 0;
         }
 
-        // Occasional unseasonal depression or heavy cloudburst (~1.2% chance)
         const isExtremePulse = rng() < 0.012;
         if (isExtremePulse && (mm >= 4 && mm <= 10)) {
-          rain = +( (rain + 35 + rng() * 55).toFixed(1) );
+          rain = +((rain + 35 + rng() * 55).toFixed(1));
         }
 
         const rainCooling = rain > 10 ? -Math.min(3.2, rain * 0.06) : 0;
@@ -631,7 +578,6 @@
         let solar = Math.max(4.5, +(norm[8] - (rain > 5 ? 5.5 : 0) + randomNormal(rng) * 2.1).toFixed(1));
         let cloudCover = Math.min(100, Math.max(5, Math.round((humidity - 20) * 1.1 + (rain > 0 ? 20 : 0))));
 
-        // Override if in curated notable events
         if (notableEvents[isoDate]) {
           const ev = notableEvents[isoDate];
           tempMax = ev.temp_max;
@@ -679,15 +625,6 @@
       };
     }
 
-    /***************************************************************************
-     * 2. STATISTICAL & MULTIVARIATE ANOMALY DETECTION ENGINE (PURE JS)
-     *    Implements:
-     *    - Standard Gaussian Z-Score: Z = (x - μ) / σ
-     *    - Modified Z-Score (Huber/Tukey MAD): M = 0.6745 * (x - median) / MAD
-     *    - Interquartile Range (IQR) Fences: Q1 - k*IQR, Q3 + k*IQR
-     *    - Empirical Percentile Rank
-     *    - Multivariate Compound Mahalanobis-like Distance Score
-     ***************************************************************************/
     const METRIC_DEFINITIONS = [
       { key: 'temp_max', label: 'Max Temp', unit: '°C', icon: 'thermometer-sun', color: '#f97316', skewed: false },
       { key: 'temp_min', label: 'Min Temp', unit: '°C', icon: 'thermometer-snowflake', color: '#38bdf8', skewed: false },
@@ -727,30 +664,14 @@
       const q3 = computeQuantile(sorted, 0.75);
       const iqr = Math.max(0.0001, q3 - q1);
 
-      return {
-        n,
-        mean,
-        std,
-        median,
-        mad,
-        q1,
-        q3,
-        iqr,
-        min: sorted[0],
-        max: sorted[n - 1],
-        sorted
-      };
+      return { n, mean, std, median, mad, q1, q3, iqr, min: sorted[0], max: sorted[n - 1], sorted };
     }
 
     function evaluateMetricAnomaly(value, stats, algorithm, thresholdSigma, isSkewed = false) {
-      // 1. Gaussian Z-score
       const zScore = (value - stats.mean) / stats.std;
-
-      // 2. Modified Z-Score (MAD) - for rainfall (zero-inflated), fallback to std if MAD is tiny
       const effectiveMad = stats.mad > 0.05 ? stats.mad : stats.std * 0.6745;
       const modZScore = 0.6745 * (value - stats.median) / Math.max(0.001, effectiveMad);
 
-      // 3. Tukey IQR Distance in units of IQR outside [Q1, Q3]
       let iqrScore = 0;
       if (value > stats.q3) {
         iqrScore = (value - stats.q3) / Math.max(0.5, stats.iqr);
@@ -758,14 +679,12 @@
         iqrScore = (value - stats.q1) / Math.max(0.5, stats.iqr);
       }
 
-      // Empirical Percentile (0..100)
       const countLessOrEqual = stats.sorted.filter(v => v <= value).length;
       const percentile = Math.round((countLessOrEqual / stats.n) * 100);
 
-      // Select active score based on chosen algorithm
       let activeScore = zScore;
       let isAnomaly = false;
-      let severity = 'normal'; // 'normal' | 'moderate' | 'extreme'
+      let severity = 'normal';
 
       if (algorithm === 'zscore') {
         activeScore = zScore;
@@ -774,18 +693,15 @@
         activeScore = modZScore;
         isAnomaly = Math.abs(modZScore) >= thresholdSigma * 1.1;
       } else if (algorithm === 'iqr') {
-        activeScore = iqrScore * 1.35; // normalized to sigma scale
-        const iqrMultiplier = thresholdSigma * 0.75; // e.g., 2.0 sigma -> 1.5 IQR
-        isAnomaly = Math.abs(iqrScore) >= iqrMultiplier;
-      } else if (algorithm === 'mahalanobis' || algorithm === 'ensemble') {
-        // Ensemble combines Z-score, Modified Z-score, and IQR
+        activeScore = iqrScore * 1.35;
+        isAnomaly = Math.abs(iqrScore) >= thresholdSigma * 0.75;
+      } else {
         activeScore = isSkewed
           ? (Math.abs(zScore) * 0.55 + Math.abs(iqrScore) * 0.45) * Math.sign(zScore || 1)
           : (zScore * 0.5 + modZScore * 0.35 + iqrScore * 0.15);
         isAnomaly = Math.abs(activeScore) >= thresholdSigma;
       }
 
-      // Special handling for zero rainfall so 0mm is never flagged as an anomaly in Bengaluru
       if (isSkewed && value <= 1.0 && stats.mean < 15) {
         isAnomaly = false;
         activeScore = 0;
@@ -795,23 +711,9 @@
         severity = Math.abs(activeScore) >= thresholdSigma * 1.35 ? 'extreme' : 'moderate';
       }
 
-      return {
-        value,
-        zScore,
-        modZScore,
-        iqrScore,
-        activeScore,
-        percentile,
-        isAnomaly,
-        severity,
-        deltaFromMean: value - stats.mean
-      };
+      return { value, zScore, modZScore, iqrScore, activeScore, percentile, isAnomaly, severity, deltaFromMean: value - stats.mean };
     }
 
-    /**
-     * Evaluates a full day record against a baseline cohort of historical records
-     * and generates both structured metrics AND a natural-language meteorological explanation.
-     */
     function analyzeDayAgainstCohort(dayRecord, cohortRecords, algorithm, thresholdSigma) {
       const metricDistributions = {};
       METRIC_DEFINITIONS.forEach(m => {
@@ -820,33 +722,18 @@
       });
 
       const evaluations = {};
-      let squaredMahalanobisSum = 0;
       const flaggedMetrics = [];
 
       METRIC_DEFINITIONS.forEach(m => {
         const val = Number(dayRecord[m.key] ?? 0);
-        const evalResult = evaluateMetricAnomaly(
-          val,
-          metricDistributions[m.key],
-          algorithm,
-          thresholdSigma,
-          m.skewed
-        );
-        evaluations[m.key] = {
-          ...evalResult,
-          stats: metricDistributions[m.key],
-          meta: m
-        };
-        squaredMahalanobisSum += Math.pow(evalResult.activeScore, 2);
+        const evalResult = evaluateMetricAnomaly(val, metricDistributions[m.key], algorithm, thresholdSigma, m.skewed);
+        evaluations[m.key] = { ...evalResult, stats: metricDistributions[m.key], meta: m };
         if (evalResult.isAnomaly) {
           flaggedMetrics.push({ key: m.key, ...evalResult, meta: m, stats: metricDistributions[m.key] });
         }
       });
 
-      // Compound Multivariate Score (RMS of top 4 active scores + joint correlation boost)
-      const sortedAbsScores = Object.values(evaluations)
-        .map(e => Math.abs(e.activeScore))
-        .sort((a, b) => b - a);
+      const sortedAbsScores = Object.values(evaluations).map(e => Math.abs(e.activeScore)).sort((a, b) => b - a);
       const topRms = Math.sqrt(
         (Math.pow(sortedAbsScores[0] || 0, 2) * 0.45) +
         (Math.pow(sortedAbsScores[1] || 0, 2) * 0.25) +
@@ -854,11 +741,9 @@
         (Math.pow(sortedAbsScores[3] || 0, 2) * 0.15)
       );
 
-      // Wet-day probability in cohort
       const wetDaysCount = cohortRecords.filter(r => r.precipitation_mm >= 2.5).length;
       const wetDayProb = Math.round((wetDaysCount / Math.max(1, cohortRecords.length)) * 100);
 
-      // Prevailing wind circular mean
       let sinSum = 0, cosSum = 0;
       cohortRecords.forEach(r => {
         const rad = (r.wind_direction_deg * Math.PI) / 180;
@@ -867,7 +752,6 @@
       });
       const meanWindDeg = Math.round(((Math.atan2(sinSum, cosSum) * 180) / Math.PI + 360) % 360);
 
-      // Sort flagged metrics by severity magnitude
       flaggedMetrics.sort((a, b) => Math.abs(b.activeScore) - Math.abs(a.activeScore));
 
       const isOverallAnomaly = flaggedMetrics.length > 0 || topRms >= thresholdSigma;
@@ -878,51 +762,19 @@
           ? 'moderate'
           : 'normal';
 
-      // Build Natural Language Meteorological & Statistical Explanation
-      const explanation = generateNaturalLanguageExplanation(
-        dayRecord,
-        evaluations,
-        flaggedMetrics,
-        topRms,
-        wetDayProb,
-        meanWindDeg,
-        algorithm,
-        thresholdSigma,
-        cohortRecords.length
-      );
+      const explanation = generateNaturalLanguageExplanation(dayRecord, evaluations, flaggedMetrics, topRms, wetDayProb, meanWindDeg, algorithm, thresholdSigma, cohortRecords.length);
 
-      return {
-        dayRecord,
-        evaluations,
-        flaggedMetrics,
-        compoundScore: topRms,
-        isOverallAnomaly,
-        overallSeverity,
-        wetDayProb,
-        meanWindDeg,
-        explanation
-      };
+      return { dayRecord, evaluations, flaggedMetrics, compoundScore: topRms, isOverallAnomaly, overallSeverity, wetDayProb, meanWindDeg, explanation };
     }
 
-    function generateNaturalLanguageExplanation(
-      day,
-      evals,
-      flagged,
-      compoundScore,
-      wetDayProb,
-      meanWindDeg,
-      algorithm,
-      threshold,
-      sampleSize
-    ) {
+    function generateNaturalLanguageExplanation(day, evals, flagged, compoundScore, wetDayProb, meanWindDeg, algorithm, threshold, sampleSize) {
       const [yyyy, mm, dd] = day.date.split('-').map(Number);
       const season = getBengaluruSeason(mm, dd);
       const algoNames = {
         ensemble: 'Ensemble Consensus (Gaussian Z + Huber MAD + Tukey IQR)',
         mad: 'Modified Z-Score (Median Absolute Deviation)',
         zscore: 'Parametric Gaussian Z-Score',
-        iqr: 'Tukey Interquartile Fence (IQR)',
-        mahalanobis: 'Multivariate Compound Phase-Space Distance'
+        iqr: 'Tukey Interquartile Fence (IQR)'
       };
 
       if (flagged.length === 0 && compoundScore < threshold) {
@@ -930,66 +782,46 @@
           headline: `Climatologically Normal Bengaluru Weather (${day.date})`,
           paragraphs: [
             `Under the <strong>${algoNames[algorithm]}</strong> detector at threshold <strong>${threshold.toFixed(1)}σ</strong> across <strong>${sampleSize} historical baselines</strong>, all meteorological variables on <span class="font-mono font-semibold text-cyan-400">${day.date}</span> fall within expected climatological bounds for Bengaluru's <em>${season}</em> regime (Compound Score: <strong>${compoundScore.toFixed(2)}</strong>).`,
-            `Daytime maximum temperature reached <strong>${day.temp_max}°C</strong> (historical mean: ${evals.temp_max.stats.mean.toFixed(1)}°C, Z = ${evals.temp_max.zScore >= 0 ? '+' : ''}${evals.temp_max.zScore.toFixed(2)}σ), with minimum temperature at <strong>${day.temp_min}°C</strong> and rainfall of <strong>${day.precipitation_mm} mm</strong>. Prevailing winds from <strong>${degToCardinal(day.wind_direction_deg)} (${day.wind_direction_deg}°)</strong> closely align with the historical vector (${degToCardinal(meanWindDeg)} ${meanWindDeg}°).`
+            `Daytime maximum temperature reached <strong>${day.temp_max}°C</strong> (historical mean: ${evals.temp_max.stats.mean.toFixed(1)}°C), with rainfall of <strong>${day.precipitation_mm} mm</strong>. Prevailing winds from <strong>${degToCardinal(day.wind_direction_deg)} (${day.wind_direction_deg}°)</strong> align with the historical vector (${degToCardinal(meanWindDeg)} ${meanWindDeg}°).`
           ],
           primaryReasonShort: 'Normal seasonal conditions'
         };
       }
 
       const top = flagged[0] || Object.values(evals).sort((a, b) => Math.abs(b.activeScore) - Math.abs(a.activeScore))[0];
-      const reasonsList = flagged.map(f => {
-        const dir = f.deltaFromMean >= 0 ? 'above' : 'below';
-        const sign = f.deltaFromMean >= 0 ? '+' : '';
-        return `<strong>${f.meta.label}</strong> (${f.value}${f.meta.unit}, ${sign}${f.deltaFromMean.toFixed(1)}${f.meta.unit} ${dir} mean ${f.stats.mean.toFixed(1)}${f.meta.unit}, Score: <strong>${f.activeScore >= 0 ? '+' : ''}${f.activeScore.toFixed(2)}σ</strong>, ${f.percentile}th percentile)`;
-      });
+      const reasonsList = flagged.map(f => `<strong>${f.meta.label}</strong> (${f.value}${f.meta.unit}, Score: <strong>${f.activeScore >= 0 ? '+' : ''}${f.activeScore.toFixed(2)}σ</strong>, ${f.percentile}th pct)`);
 
-      // Synthesize physical meteorological cause based on variable combination
       let physicalContext = '';
       if (evals.precipitation_mm.isAnomaly && day.precipitation_mm > 25) {
-        if (mm >= 10 && mm <= 12) {
-          physicalContext = `<strong>Meteorological Cause (Bengaluru Context):</strong> Heavy rainfall of <strong>${day.precipitation_mm} mm</strong> paired with lower sea-level pressure (<strong>${day.pressure_msl} hPa</strong>) and gusty <strong>${degToCardinal(day.wind_direction_deg)}</strong> winds (<strong>${day.wind_gusts_max} km/h</strong>) is characteristic of a <em>Bay of Bengal cyclonic circulation or Easterly Wave trough</em> penetrating inland across the Mysore Plateau during the Northeast Monsoon.`;
-        } else if (mm >= 3 && mm <= 5) {
-          physicalContext = `<strong>Meteorological Cause (Bengaluru Context):</strong> Intense pre-monsoon convective downpour (<em>Mango Showers / Kalbaishakhi</em>) triggered by strong daytime surface heating and wind-shear convergence over the Deccan Peninsula.`;
-        } else {
-          physicalContext = `<strong>Meteorological Cause (Bengaluru Context):</strong> Active Southwest Monsoon surge enhanced by localized urban convective uplift and orographic convergence at 920m elevation, accompanied by depressed solar radiation (<strong>${day.solar_radiation} MJ/m²</strong>).`;
-        }
+        physicalContext = `<strong>Meteorological Cause (Bengaluru Context):</strong> Heavy rainfall of <strong>${day.precipitation_mm} mm</strong> paired with lower sea-level pressure (<strong>${day.pressure_msl} hPa</strong>) and gusty <strong>${degToCardinal(day.wind_direction_deg)}</strong> winds is characteristic of an easterly wave or cyclonic trough penetrating inland across the Mysore Plateau.`;
       } else if (evals.temp_max.isAnomaly && evals.temp_max.deltaFromMean > 0) {
-        physicalContext = `<strong>Meteorological Cause (Bengaluru Context):</strong> Daytime temperature surged to <strong>${day.temp_max}°C</strong> (${evals.temp_max.percentile}th percentile) alongside suppressed relative humidity (<strong>${day.humidity_mean}%</strong>) and high solar insolation (<strong>${day.solar_radiation} MJ/m²</strong>). This indicates subsiding dry continental air and clear-sky radiative heating amplified by Bengaluru's Urban Heat Island effect.`;
-      } else if (evals.temp_min.isAnomaly && evals.temp_min.deltaFromMean < 0) {
-        physicalContext = `<strong>Meteorological Cause (Bengaluru Context):</strong> Sharp nocturnal cooling dropped the minimum temperature to <strong>${day.temp_min}°C</strong> under cloud-free skies (cloud cover ${day.cloud_cover}%), dry continental northeasterly flow, and high atmospheric pressure (<strong>${day.pressure_msl} hPa</strong>), enabling rapid longwave radiative heat loss from the 920m plateau.`;
+        physicalContext = `<strong>Meteorological Cause (Bengaluru Context):</strong> Daytime temperature surged to <strong>${day.temp_max}°C</strong> alongside low relative humidity (<strong>${day.humidity_mean}%</strong>) and high solar insolation, indicating dry continental air subsidence and Urban Heat Island amplification.`;
       } else {
-        physicalContext = `<strong>Meteorological Cause (Bengaluru Context):</strong> Multivariate phase-space divergence detected during <em>${season}</em>, driven primarily by ${top.meta.label} departing from its 20-year interquartile range [${top.stats.q1.toFixed(1)} – ${top.stats.q3.toFixed(1)} ${top.meta.unit}].`;
+        physicalContext = `<strong>Meteorological Cause (Bengaluru Context):</strong> Multivariate phase-space divergence detected during <em>${season}</em>, driven by ${top.meta.label} departing from its historical IQR range.`;
       }
 
       return {
         headline: `${flagged.length} Statistical Weather ${flagged.length === 1 ? 'Anomaly' : 'Anomalies'} Flagged on ${day.date}`,
         paragraphs: [
-          `<strong>Statistical Why (${algoNames[algorithm]}):</strong> Evaluated against <strong>${sampleSize} historical records</strong> at a <strong>${threshold.toFixed(1)}σ</strong> sensitivity threshold, this date achieved a Compound Anomaly Score of <strong>${compoundScore.toFixed(2)}</strong>. Flagged variables: ${reasonsList.join('; ')}.`,
+          `<strong>Statistical Why (${algoNames[algorithm]}):</strong> Evaluated against <strong>${sampleSize} historical records</strong> at a <strong>${threshold.toFixed(1)}σ</strong> threshold, compound score is <strong>${compoundScore.toFixed(2)}</strong>. Flagged: ${reasonsList.join('; ')}.`,
           physicalContext
         ],
         primaryReasonShort: `${top.meta.label}: ${top.value}${top.meta.unit} (${top.activeScore >= 0 ? '+' : ''}${top.activeScore.toFixed(1)}σ)`
       };
     }
 
-    /***************************************************************************
-     * 3. APPLICATION STATE & DATA CONTROLLER
-     ***************************************************************************/
     const appState = {
       dataset: null,
       byDateMap: new Map(),
       targetDate: '2026-11-05',
       compareDate: '2025-11-05',
-      comparisonMode: 'same_day', // 'same_day' | 'specific_date' | 'seasonal_window' | 'full_year'
+      comparisonMode: 'same_day',
       algorithm: 'ensemble',
       thresholdSigma: 2.0,
-      activeChartMetric: 'temp', // 'temp' | 'rain' | 'wind' | 'atmo'
+      activeChartMetric: 'temp',
       scatterAxes: 'temp_humidity',
-      tableFilterMode: 'same_day', // 'same_day' | 'top_anomalies'
-      charts: {
-        sameDay: null,
-        radar: null,
-        scatter: null
-      }
+      tableFilterMode: 'same_day',
+      charts: { sameDay: null, radar: null, scatter: null }
     };
 
     function showToast(message, type = 'info') {
@@ -1003,10 +835,7 @@
       el.className = `pointer-events-auto px-4 py-3 rounded-xl border shadow-xl text-xs font-medium flex items-center justify-between gap-3 transition-all duration-300 ${colors[type] || colors.info}`;
       el.innerHTML = `<span>${message}</span>`;
       container.appendChild(el);
-      setTimeout(() => {
-        el.style.opacity = '0';
-        setTimeout(() => el.remove(), 300);
-      }, 3800);
+      setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, 3800);
     }
 
     async function loadWeatherDataset() {
@@ -1014,25 +843,20 @@
         const response = await fetch('./bengaluru_weather.json', { cache: 'no-store' });
         if (!response.ok) throw new Error('Local JSON not found');
         const json = await response.json();
-        if (!json.daily || !Array.isArray(json.daily) || json.daily.length === 0) {
-          throw new Error('Invalid JSON structure');
-        }
-        // If bengaluru_weather.json is the starter seed (< 5000 days), merge it with the 20-year daily archive
-        // so all 7,249 days are available immediately in the UI before the Python action runs its first backfill.
+        if (!json.daily || !Array.isArray(json.daily) || json.daily.length === 0) throw new Error('Invalid JSON');
         if (json.daily.length < 5000) {
           const fullArchive = generateBengaluru20YearDataset();
           const mergedMap = new Map();
           fullArchive.daily.forEach(d => mergedMap.set(d.date, d));
           json.daily.forEach(d => mergedMap.set(d.date, d));
           json.daily = Array.from(mergedMap.values()).sort((a, b) => a.date.localeCompare(b.date));
-          ingestDataset(json, `Live Weather Archive (${json.daily.length.toLocaleString()} Days)`);
+          ingestDataset(json, `Live Archive (${json.daily.length.toLocaleString()} Days)`);
         } else {
-          ingestDataset(json, `Live Weather Archive (${json.daily.length.toLocaleString()} Days)`);
+          ingestDataset(json, `Live Archive (${json.daily.length.toLocaleString()} Days)`);
         }
       } catch (err) {
-        // Fallback to built-in 20-year daily Bengaluru climatology dataset
         const fallbackJson = generateBengaluru20YearDataset();
-        ingestDataset(fallbackJson, `Live Weather Archive (${fallbackJson.daily.length.toLocaleString()} Days)`);
+        ingestDataset(fallbackJson, `Live Archive (${fallbackJson.daily.length.toLocaleString()} Days)`);
       }
     }
 
@@ -1040,9 +864,7 @@
       appState.dataset = json;
       appState.byDateMap.clear();
       json.daily.sort((a, b) => a.date.localeCompare(b.date));
-      json.daily.forEach(record => {
-        appState.byDateMap.set(record.date, record);
-      });
+      json.daily.forEach(record => appState.byDateMap.set(record.date, record));
 
       const firstDate = json.daily[0].date;
       const lastDate = json.daily[json.daily.length - 1].date;
@@ -1052,16 +874,12 @@
 
       const targetInput = document.getElementById('targetDateInput');
       const compareInput = document.getElementById('compareDateInput');
-      targetInput.min = firstDate;
-      targetInput.max = lastDate;
-      compareInput.min = firstDate;
-      compareInput.max = lastDate;
+      targetInput.min = firstDate; targetInput.max = lastDate;
+      compareInput.min = firstDate; compareInput.max = lastDate;
 
-      // Default to latest date in dataset ("Today")
       appState.targetDate = lastDate;
       targetInput.value = lastDate;
 
-      // Default Benchmark Date to 1 year prior on same calendar day
       const [yyyy, mm, dd] = lastDate.split('-');
       const prevYearDate = `${Number(yyyy) - 1}-${mm}-${dd}`;
       appState.compareDate = appState.byDateMap.has(prevYearDate) ? prevYearDate : json.daily[Math.max(0, json.daily.length - 366)].date;
@@ -1070,68 +888,44 @@
       renderAll();
     }
 
-    /**
-     * Returns the historical comparison cohort based on `appState.comparisonMode`
-     */
     function getComparisonCohort(targetDateStr) {
       const all = appState.dataset.daily;
       const [tYear, tMonth, tDay] = targetDateStr.split('-').map(Number);
-      const monthDaySuffix = targetDateStr.slice(5); // "MM-DD"
+      const monthDaySuffix = targetDateStr.slice(5);
 
       if (appState.comparisonMode === 'same_day') {
-        // Every historical day matching MM-DD across all 15-20 years
         let sameDayList = all.filter(r => r.date.slice(5) === monthDaySuffix);
-        // Handle Feb 29 leap day gracefully by including Feb 28 / Mar 1 if needed
         if (sameDayList.length < 8) {
           sameDayList = all.filter(r => {
-            const [y, m, d] = r.date.split('-').map(Number);
+            const [, m, d] = r.date.split('-').map(Number);
             return m === tMonth && Math.abs(d - tDay) <= 2;
           });
         }
         return sameDayList;
       }
-
-      if (appState.comparisonMode === 'specific_date') {
-        // Still compute distribution statistics across same calendar day so Z-scores are meaningful,
-        // while highlighting the user's chosen specific Benchmark Date
-        return all.filter(r => r.date.slice(5) === monthDaySuffix);
-      }
-
       if (appState.comparisonMode === 'seasonal_window') {
-        // ±7 day window around target MM-DD across all years
         const targetDOY = (tMonth - 1) * 30.4 + tDay;
         return all.filter(r => {
-          const [y, m, d] = r.date.split('-').map(Number);
+          const [, m, d] = r.date.split('-').map(Number);
           const doy = (m - 1) * 30.4 + d;
           const diff = Math.abs(doy - targetDOY);
           return diff <= 7 || diff >= 358;
         });
       }
-
       if (appState.comparisonMode === 'full_year') {
-        // Compare same month across all years
         const monthPrefix = String(tMonth).padStart(2, '0');
         return all.filter(r => r.date.slice(5, 7) === monthPrefix);
       }
-
       return all.filter(r => r.date.slice(5) === monthDaySuffix);
     }
 
-    /***************************************************************************
-     * 4. UI RENDERING FUNCTIONS
-     ***************************************************************************/
     function renderAll() {
       if (!appState.dataset) return;
       const targetRecord = appState.byDateMap.get(appState.targetDate) || appState.dataset.daily[appState.dataset.daily.length - 1];
       const benchmarkRecord = appState.byDateMap.get(appState.compareDate) || appState.dataset.daily[0];
       const cohort = getComparisonCohort(targetRecord.date);
 
-      const analysis = analyzeDayAgainstCohort(
-        targetRecord,
-        cohort,
-        appState.algorithm,
-        appState.thresholdSigma
-      );
+      const analysis = analyzeDayAgainstCohort(targetRecord, cohort, appState.algorithm, appState.thresholdSigma);
 
       renderKpiCards(targetRecord, benchmarkRecord, analysis);
       renderAnomalyExplanation(targetRecord, cohort, analysis);
@@ -1142,9 +936,7 @@
       renderScatterChart(targetRecord, benchmarkRecord, cohort, analysis);
       renderHistoricalTable(targetRecord, cohort, analysis);
 
-      if (window.lucide) {
-        window.lucide.createIcons();
-      }
+      if (window.lucide) window.lucide.createIcons();
     }
 
     function renderKpiCards(target, benchmark, analysis) {
@@ -1157,9 +949,7 @@
 
       const badgeHtml = (evalObj) => {
         if (evalObj.isAnomaly) {
-          const cls = evalObj.severity === 'extreme'
-            ? 'bg-rose-500/20 text-rose-400 border-rose-500/40'
-            : 'bg-amber-500/20 text-amber-400 border-amber-500/40';
+          const cls = evalObj.severity === 'extreme' ? 'bg-rose-500/20 text-rose-400 border-rose-500/40' : 'bg-amber-500/20 text-amber-400 border-amber-500/40';
           return `<span class="px-2 py-0.5 rounded-full text-[11px] font-mono font-bold border ${cls}">ANOMALY ${evalObj.activeScore >= 0 ? '+' : ''}${evalObj.activeScore.toFixed(1)}σ</span>`;
         }
         return `<span class="px-2 py-0.5 rounded-full text-[11px] font-mono font-medium bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">Normal (${evalObj.percentile}th pct)</span>`;
@@ -1167,48 +957,32 @@
 
       const cards = [
         {
-          title: 'Temperature (Max / Min)',
-          icon: 'thermometer',
-          accent: 'from-orange-500 to-amber-500',
+          title: 'Temperature (Max / Min)', icon: 'thermometer', accent: 'from-orange-500 to-amber-500',
           primaryValue: `${target.temp_max}°C <span class="text-base font-normal text-slate-400">/ ${target.temp_min}°C</span>`,
           badge: badgeHtml(Math.abs(eTempMax.activeScore) >= Math.abs(eTempMin.activeScore) ? eTempMax : eTempMin),
-          sub1Label: '20-Yr Same-Day Normal',
-          sub1Val: `${eTempMax.stats.mean.toFixed(1)}°C / ${eTempMin.stats.mean.toFixed(1)}°C`,
-          sub2Label: `vs. Benchmark (${benchmark.date})`,
-          sub2Val: `${(target.temp_max - benchmark.temp_max) >= 0 ? '+' : ''}${(target.temp_max - benchmark.temp_max).toFixed(1)}°C max`
+          sub1Label: '20-Yr Same-Day Normal', sub1Val: `${eTempMax.stats.mean.toFixed(1)}°C / ${eTempMin.stats.mean.toFixed(1)}°C`,
+          sub2Label: `vs. Benchmark (${benchmark.date})`, sub2Val: `${(target.temp_max - benchmark.temp_max) >= 0 ? '+' : ''}${(target.temp_max - benchmark.temp_max).toFixed(1)}°C max`
         },
         {
-          title: 'Daily Precipitation',
-          icon: 'cloud-rain',
-          accent: 'from-cyan-500 to-blue-600',
+          title: 'Daily Precipitation', icon: 'cloud-rain', accent: 'from-cyan-500 to-blue-600',
           primaryValue: `${target.precipitation_mm} <span class="text-base font-normal text-slate-400">mm</span>`,
           badge: badgeHtml(eRain),
-          sub1Label: '20-Yr Same-Day Mean / Max',
-          sub1Val: `${eRain.stats.mean.toFixed(1)} mm / ${eRain.stats.max.toFixed(1)} mm`,
-          sub2Label: `vs. Benchmark (${benchmark.date})`,
-          sub2Val: `${benchmark.precipitation_mm} mm (${(target.precipitation_mm - benchmark.precipitation_mm) >= 0 ? '+' : ''}${(target.precipitation_mm - benchmark.precipitation_mm).toFixed(1)} mm)`
+          sub1Label: '20-Yr Mean / Max', sub1Val: `${eRain.stats.mean.toFixed(1)} mm / ${eRain.stats.max.toFixed(1)} mm`,
+          sub2Label: `vs. Benchmark (${benchmark.date})`, sub2Val: `${benchmark.precipitation_mm} mm (${(target.precipitation_mm - benchmark.precipitation_mm) >= 0 ? '+' : ''}${(target.precipitation_mm - benchmark.precipitation_mm).toFixed(1)} mm)`
         },
         {
-          title: 'Wind Velocity & Direction',
-          icon: 'wind',
-          accent: 'from-indigo-500 to-purple-600',
+          title: 'Wind Velocity & Direction', icon: 'wind', accent: 'from-indigo-500 to-purple-600',
           primaryValue: `${target.wind_speed_max} <span class="text-base font-normal text-slate-400">km/h</span> <span class="text-xs font-mono text-indigo-400">${degToCardinal(target.wind_direction_deg)}</span>`,
           badge: badgeHtml(eWind),
-          sub1Label: 'Peak Gusts / 20-Yr Mean',
-          sub1Val: `${target.wind_gusts_max} km/h (Mean: ${eWind.stats.mean.toFixed(1)} km/h)`,
-          sub2Label: 'Vector Azimuth',
-          sub2Val: `${target.wind_direction_deg}° (Normal: ${analysis.meanWindDeg}° ${degToCardinal(analysis.meanWindDeg)})`
+          sub1Label: 'Peak Gusts / Mean', sub1Val: `${target.wind_gusts_max} km/h (Mean: ${eWind.stats.mean.toFixed(1)} km/h)`,
+          sub2Label: 'Vector Azimuth', sub2Val: `${target.wind_direction_deg}° (Normal: ${analysis.meanWindDeg}°)`
         },
         {
-          title: 'Atmosphere & Solar',
-          icon: 'gauge',
-          accent: 'from-emerald-500 to-teal-600',
+          title: 'Atmosphere & Solar', icon: 'gauge', accent: 'from-emerald-500 to-teal-600',
           primaryValue: `${target.humidity_mean}% <span class="text-sm font-normal text-slate-400">RH • ${target.pressure_msl} hPa</span>`,
           badge: badgeHtml(eHum),
-          sub1Label: 'Solar Rad / Cloud Cover',
-          sub1Val: `${target.solar_radiation} MJ/m² • ${target.cloud_cover}% cloud`,
-          sub2Label: 'Evapotranspiration (ET₀)',
-          sub2Val: `${target.evapotranspiration} mm/day`
+          sub1Label: 'Solar Rad / Cloud', sub1Val: `${target.solar_radiation} MJ/m² • ${target.cloud_cover}%`,
+          sub2Label: 'Evapotranspiration (ET₀)', sub2Val: `${target.evapotranspiration} mm/day`
         }
       ];
 
@@ -1256,7 +1030,7 @@
         badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400 pulse-dot"></span> Statistical Weather Anomaly`;
         section.className = 'glass-card rounded-2xl p-5 sm:p-6 shadow-xl border-l-4 border-l-amber-500';
       } else {
-        badge.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/40';
+        badge.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
         badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400"></span> Within Historical Normal Bounds`;
         section.className = 'glass-card rounded-2xl p-5 sm:p-6 shadow-xl border-l-4 border-l-emerald-500';
       }
@@ -1264,22 +1038,14 @@
       headline.textContent = analysis.explanation.headline;
       body.innerHTML = analysis.explanation.paragraphs.map(p => `<p>${p}</p>`).join('');
 
-      // Proof Pills showing individual algorithmic metrics
       pills.innerHTML = METRIC_DEFINITIONS.map(m => {
         const ev = analysis.evaluations[m.key];
         const cls = ev.isAnomaly
-          ? ev.severity === 'extreme'
-            ? 'bg-rose-500/15 text-rose-300 border-rose-500/40'
-            : 'bg-amber-500/15 text-amber-300 border-amber-500/40'
+          ? ev.severity === 'extreme' ? 'bg-rose-500/15 text-rose-300 border-rose-500/40' : 'bg-amber-500/15 text-amber-300 border-amber-500/40'
           : 'bg-slate-200/70 dark:bg-slate-900/90 text-slate-600 dark:text-slate-400 border-slate-300 dark:border-slate-800';
-        return `
-          <div class="px-2.5 py-1 rounded-lg border text-xs font-mono ${cls}">
-            <span class="font-semibold">${m.label}:</span> Z=${ev.zScore >= 0 ? '+' : ''}${ev.zScore.toFixed(2)} | MAD=${ev.modZScore >= 0 ? '+' : ''}${ev.modZScore.toFixed(2)} | P${ev.percentile}
-          </div>
-        `;
+        return `<div class="px-2.5 py-1 rounded-lg border text-xs font-mono ${cls}"><span class="font-semibold">${m.label}:</span> Z=${ev.zScore >= 0 ? '+' : ''}${ev.zScore.toFixed(2)} | P${ev.percentile}</div>`;
       }).join('');
 
-      // Gauge updates
       document.getElementById('compoundScoreValue').textContent = analysis.compoundScore.toFixed(2) + 'σ';
       const pct = Math.min(100, Math.round((analysis.compoundScore / 4.0) * 100));
       document.getElementById('compoundScoreBar').style.width = `${pct}%`;
@@ -1296,7 +1062,6 @@
       document.getElementById('compassTodayArrow').setAttribute('transform', `rotate(${target.wind_direction_deg} 100 100)`);
       document.getElementById('compassMeanArrow').setAttribute('transform', `rotate(${analysis.meanWindDeg} 100 100)`);
 
-      // Plot historical wind direction + speed dots in polar coordinates
       const dotsGroup = document.getElementById('compassHistoryDots');
       const maxSpeedScale = 40;
       dotsGroup.innerHTML = cohort.slice(-30).map(r => {
@@ -1335,159 +1100,79 @@
 
         return `
           <tr class="hover:bg-slate-200/40 dark:hover:bg-slate-800/40 transition">
-            <td class="py-2.5 pr-3 font-sans font-medium text-slate-800 dark:text-slate-200">
-              ${m.label} <span class="text-slate-400 text-[11px]">(${m.unit})</span>
-            </td>
+            <td class="py-2.5 pr-3 font-sans font-medium text-slate-800 dark:text-slate-200">${m.label} <span class="text-slate-400 text-[11px]">(${m.unit})</span></td>
             <td class="py-2.5 px-2 font-bold text-cyan-500">${tVal} ${m.unit}</td>
-            <td class="py-2.5 px-2 text-indigo-400">
-              ${bVal} <span class="text-[11px] text-slate-400">(${diffSign}${diffBench.toFixed(1)})</span>
-            </td>
-            <td class="py-2.5 px-2 text-slate-600 dark:text-slate-300">
-              ${ev.stats.mean.toFixed(1)} ± ${ev.stats.std.toFixed(1)}
-            </td>
-            <td class="py-2.5 px-2">
-              <span class="${ev.isAnomaly ? 'text-amber-400 font-bold' : 'text-slate-500'}">
-                Z:${ev.zScore >= 0 ? '+' : ''}${ev.zScore.toFixed(2)} | M:${ev.modZScore >= 0 ? '+' : ''}${ev.modZScore.toFixed(2)}
-              </span>
-            </td>
+            <td class="py-2.5 px-2 text-indigo-400">${bVal} <span class="text-[11px] text-slate-400">(${diffSign}${diffBench.toFixed(1)})</span></td>
+            <td class="py-2.5 px-2 text-slate-600 dark:text-slate-300">${ev.stats.mean.toFixed(1)} ± ${ev.stats.std.toFixed(1)}</td>
+            <td class="py-2.5 px-2"><span class="${ev.isAnomaly ? 'text-amber-400 font-bold' : 'text-slate-500'}">Z:${ev.zScore >= 0 ? '+' : ''}${ev.zScore.toFixed(2)}</span></td>
             <td class="py-2.5 pl-2 text-right">${statusBadge}</td>
           </tr>
         `;
       }).join('');
     }
 
-    /***************************************************************************
-     * 5. CHART.JS INTERACTIVE VISUALIZATIONS
-     ***************************************************************************/
     function renderSameDayChart(target, benchmark, cohort, analysis) {
       const ctx = document.getElementById('sameDayHistoryChart').getContext('2d');
-      if (appState.charts.sameDay) {
-        appState.charts.sameDay.destroy();
-      }
+      if (appState.charts.sameDay) appState.charts.sameDay.destroy();
 
-      // If cohort has many records (e.g., seasonal window), filter to same calendar day or sample cleanly
       const monthDay = target.date.slice(5);
-      const displayRecords = appState.comparisonMode === 'same_day' || appState.comparisonMode === 'specific_date'
-        ? cohort
-        : appState.dataset.daily.filter(r => r.date.slice(5) === monthDay);
-
+      const displayRecords = appState.comparisonMode === 'same_day' ? cohort : appState.dataset.daily.filter(r => r.date.slice(5) === monthDay);
       const labels = displayRecords.map(r => r.date);
       const metric = appState.activeChartMetric;
 
-      document.getElementById('mainChartTitle').textContent =
-        `Bengaluru Historical Comparison for Calendar Day "${monthDay}" (${displayRecords.length} Years)`;
+      document.getElementById('mainChartTitle').textContent = `Bengaluru Historical Comparison for Calendar Day "${monthDay}" (${displayRecords.length} Years)`;
 
       let datasets = [];
-
       if (metric === 'temp') {
         const maxMean = analysis.evaluations.temp_max.stats.mean;
-        const pointColorsMax = displayRecords.map(r => {
-          if (r.date === target.date) return '#06b6d4';
-          if (r.date === benchmark.date) return '#818cf8';
-          const evalR = evaluateMetricAnomaly(r.temp_max, analysis.evaluations.temp_max.stats, appState.algorithm, appState.thresholdSigma);
-          return evalR.isAnomaly ? '#f43f5e' : '#f97316';
-        });
-        const pointRadiiMax = displayRecords.map(r => (r.date === target.date || r.date === benchmark.date ? 7 : 4.5));
-
         datasets = [
           {
-            label: 'Max Temp (°C)',
-            data: displayRecords.map(r => r.temp_max),
-            borderColor: '#f97316',
-            backgroundColor: 'rgba(249, 115, 22, 0.15)',
-            pointBackgroundColor: pointColorsMax,
-            pointRadius: pointRadiiMax,
-            borderWidth: 2.5,
-            tension: 0.25,
-            fill: '+1'
+            label: 'Max Temp (°C)', data: displayRecords.map(r => r.temp_max),
+            borderColor: '#f97316', backgroundColor: 'rgba(249, 115, 22, 0.15)',
+            pointBackgroundColor: displayRecords.map(r => r.date === target.date ? '#06b6d4' : (r.date === benchmark.date ? '#818cf8' : '#f97316')),
+            pointRadius: displayRecords.map(r => r.date === target.date || r.date === benchmark.date ? 7 : 4.5),
+            borderWidth: 2.5, tension: 0.25, fill: '+1'
           },
           {
-            label: 'Min Temp (°C)',
-            data: displayRecords.map(r => r.temp_min),
-            borderColor: '#38bdf8',
-            backgroundColor: 'rgba(56, 189, 248, 0.1)',
-            pointBackgroundColor: displayRecords.map(r => r.date === target.date ? '#06b6d4' : '#38bdf8'),
-            pointRadius: displayRecords.map(r => r.date === target.date ? 6 : 3.5),
-            borderWidth: 2,
-            tension: 0.25
+            label: 'Min Temp (°C)', data: displayRecords.map(r => r.temp_min),
+            borderColor: '#38bdf8', backgroundColor: 'rgba(56, 189, 248, 0.1)',
+            pointRadius: 3.5, borderWidth: 2, tension: 0.25
           },
           {
-            label: '20-Yr Mean Max (°C)',
-            data: displayRecords.map(() => +maxMean.toFixed(1)),
-            borderColor: '#f59e0b',
-            borderDash: [6, 4],
-            pointRadius: 0,
-            borderWidth: 1.5,
-            fill: false
+            label: '20-Yr Mean Max (°C)', data: displayRecords.map(() => +maxMean.toFixed(1)),
+            borderColor: '#f59e0b', borderDash: [6, 4], pointRadius: 0, borderWidth: 1.5, fill: false
           }
         ];
       } else if (metric === 'rain') {
         const rainMean = analysis.evaluations.precipitation_mm.stats.mean;
-        const barColors = displayRecords.map(r => {
-          if (r.date === target.date) return '#06b6d4';
-          if (r.date === benchmark.date) return '#818cf8';
-          const evalR = evaluateMetricAnomaly(r.precipitation_mm, analysis.evaluations.precipitation_mm.stats, appState.algorithm, appState.thresholdSigma, true);
-          return evalR.isAnomaly ? '#f43f5e' : 'rgba(56, 189, 248, 0.65)';
-        });
-
         datasets = [
           {
-            type: 'bar',
-            label: 'Daily Rainfall (mm)',
-            data: displayRecords.map(r => r.precipitation_mm),
-            backgroundColor: barColors,
+            type: 'bar', label: 'Daily Rainfall (mm)', data: displayRecords.map(r => r.precipitation_mm),
+            backgroundColor: displayRecords.map(r => r.date === target.date ? '#06b6d4' : (r.date === benchmark.date ? '#818cf8' : 'rgba(56, 189, 248, 0.65)')),
             borderRadius: 6
           },
           {
-            type: 'line',
-            label: '20-Yr Same-Day Mean (mm)',
-            data: displayRecords.map(() => +rainMean.toFixed(1)),
-            borderColor: '#f59e0b',
-            borderDash: [5, 5],
-            pointRadius: 0,
-            borderWidth: 2
+            type: 'line', label: '20-Yr Mean (mm)', data: displayRecords.map(() => +rainMean.toFixed(1)),
+            borderColor: '#f59e0b', borderDash: [5, 5], pointRadius: 0, borderWidth: 2
           }
         ];
       } else if (metric === 'wind') {
         datasets = [
           {
-            label: 'Peak Wind Gusts (km/h)',
-            data: displayRecords.map(r => r.wind_gusts_max),
-            borderColor: '#a855f7',
-            backgroundColor: 'rgba(168, 85, 247, 0.14)',
+            label: 'Peak Wind Gusts (km/h)', data: displayRecords.map(r => r.wind_gusts_max),
+            borderColor: '#a855f7', backgroundColor: 'rgba(168, 85, 247, 0.14)',
             pointRadius: displayRecords.map(r => r.date === target.date ? 7 : 4),
-            pointBackgroundColor: displayRecords.map(r => r.date === target.date ? '#06b6d4' : '#a855f7'),
-            borderWidth: 2,
-            tension: 0.25,
-            fill: true
+            borderWidth: 2, tension: 0.25, fill: true
           },
           {
-            label: 'Sustained Max Wind (km/h)',
-            data: displayRecords.map(r => r.wind_speed_max),
-            borderColor: '#818cf8',
-            pointRadius: displayRecords.map(r => r.date === target.date ? 6 : 3.5),
-            borderWidth: 2,
-            tension: 0.25
+            label: 'Sustained Max Wind (km/h)', data: displayRecords.map(r => r.wind_speed_max),
+            borderColor: '#818cf8', pointRadius: 3.5, borderWidth: 2, tension: 0.25
           }
         ];
       } else {
         datasets = [
-          {
-            label: 'Relative Humidity (%)',
-            data: displayRecords.map(r => r.humidity_mean),
-            borderColor: '#10b981',
-            yAxisID: 'y',
-            tension: 0.25,
-            borderWidth: 2
-          },
-          {
-            label: 'Sea-Level Pressure (hPa)',
-            data: displayRecords.map(r => r.pressure_msl),
-            borderColor: '#eab308',
-            yAxisID: 'y1',
-            tension: 0.25,
-            borderWidth: 2
-          }
+          { label: 'Relative Humidity (%)', data: displayRecords.map(r => r.humidity_mean), borderColor: '#10b981', yAxisID: 'y', tension: 0.25, borderWidth: 2 },
+          { label: 'Sea-Level Pressure (hPa)', data: displayRecords.map(r => r.pressure_msl), borderColor: '#eab308', yAxisID: 'y1', tension: 0.25, borderWidth: 2 }
         ];
       }
 
@@ -1499,50 +1184,24 @@
         type: metric === 'rain' ? 'bar' : 'line',
         data: { labels, datasets },
         options: {
-          responsive: true,
-          maintainAspectRatio: false,
+          responsive: true, maintainAspectRatio: false,
           interaction: { mode: 'index', intersect: false },
           onClick: (evt, elements) => {
             if (elements.length > 0) {
-              const idx = elements[0].index;
-              const clickedDate = displayRecords[idx].date;
+              const clickedDate = displayRecords[elements[0].index].date;
               appState.compareDate = clickedDate;
               document.getElementById('compareDateInput').value = clickedDate;
-              showToast(`Benchmark Date updated to ${clickedDate} for head-to-head comparison`, 'info');
+              showToast(`Benchmark Date updated to ${clickedDate}`, 'info');
               renderAll();
             }
           },
           plugins: {
-            legend: { labels: { color: textColor, font: { family: 'Inter', size: 11 } } },
-            tooltip: {
-              backgroundColor: 'rgba(15, 23, 42, 0.95)',
-              titleFont: { family: 'JetBrains Mono', size: 12 },
-              bodyFont: { family: 'JetBrains Mono', size: 11 },
-              padding: 10,
-              callbacks: {
-                afterBody: (items) => {
-                  const rec = displayRecords[items[0].dataIndex];
-                  return `Wind: ${rec.wind_speed_max} km/h (${degToCardinal(rec.wind_direction_deg)} ${rec.wind_direction_deg}°)\nRain: ${rec.precipitation_mm} mm | RH: ${rec.humidity_mean}%`;
-                }
-              }
-            }
+            legend: { labels: { color: textColor, font: { family: 'Inter', size: 11 } } }
           },
           scales: {
-            x: {
-              ticks: { color: textColor, font: { family: 'JetBrains Mono', size: 10 }, maxRotation: 45 },
-              grid: { color: gridColor }
-            },
-            y: {
-              ticks: { color: textColor, font: { family: 'JetBrains Mono', size: 10 } },
-              grid: { color: gridColor }
-            },
-            ...(metric === 'atmo' ? {
-              y1: {
-                position: 'right',
-                ticks: { color: '#eab308', font: { family: 'JetBrains Mono', size: 10 } },
-                grid: { drawOnChartArea: false }
-              }
-            } : {})
+            x: { ticks: { color: textColor, font: { family: 'JetBrains Mono', size: 10 }, maxRotation: 45 }, grid: { color: gridColor } },
+            y: { ticks: { color: textColor, font: { family: 'JetBrains Mono', size: 10 } }, grid: { color: gridColor } },
+            ...(metric === 'atmo' ? { y1: { position: 'right', ticks: { color: '#eab308', font: { family: 'JetBrains Mono', size: 10 } }, grid: { drawOnChartArea: false } } } : {})
           }
         }
       });
@@ -1550,9 +1209,7 @@
 
     function renderRadarChart(target, benchmark, analysis) {
       const ctx = document.getElementById('radarComparisonChart').getContext('2d');
-      if (appState.charts.radar) {
-        appState.charts.radar.destroy();
-      }
+      if (appState.charts.radar) appState.charts.radar.destroy();
 
       const radarKeys = ['temp_max', 'temp_min', 'precipitation_mm', 'wind_speed_max', 'humidity_mean', 'pressure_msl', 'solar_radiation'];
       const labels = ['Max Temp', 'Min Temp', 'Rainfall', 'Wind Speed', 'Humidity', 'Pressure', 'Solar Rad'];
@@ -1573,35 +1230,16 @@
         data: {
           labels,
           datasets: [
-            {
-              label: `Target (${target.date})`,
-              data: targetPercentiles,
-              borderColor: '#06b6d4',
-              backgroundColor: 'rgba(6, 182, 212, 0.22)',
-              pointBackgroundColor: '#06b6d4',
-              borderWidth: 2
-            },
-            {
-              label: `Benchmark (${benchmark.date})`,
-              data: benchPercentiles,
-              borderColor: '#818cf8',
-              backgroundColor: 'rgba(129, 140, 248, 0.15)',
-              pointBackgroundColor: '#818cf8',
-              borderWidth: 2
-            }
+            { label: `Target (${target.date})`, data: targetPercentiles, borderColor: '#06b6d4', backgroundColor: 'rgba(6, 182, 212, 0.22)', borderWidth: 2 },
+            { label: `Benchmark (${benchmark.date})`, data: benchPercentiles, borderColor: '#818cf8', backgroundColor: 'rgba(129, 140, 248, 0.15)', borderWidth: 2 }
           ]
         },
         options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { labels: { color: textColor, font: { family: 'JetBrains Mono', size: 10 } } }
-          },
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { labels: { color: textColor, font: { family: 'JetBrains Mono', size: 10 } } } },
           scales: {
             r: {
-              min: 0,
-              max: 100,
-              ticks: { display: false, stepSize: 25 },
+              min: 0, max: 100, ticks: { display: false, stepSize: 25 },
               grid: { color: isDark ? 'rgba(148, 163, 184, 0.15)' : 'rgba(15, 23, 42, 0.1)' },
               angleLines: { color: isDark ? 'rgba(148, 163, 184, 0.15)' : 'rgba(15, 23, 42, 0.1)' },
               pointLabels: { color: textColor, font: { family: 'Inter', size: 10, weight: '600' } }
@@ -1613,9 +1251,7 @@
 
     function renderScatterChart(target, benchmark, cohort, analysis) {
       const ctx = document.getElementById('bivariateScatterChart').getContext('2d');
-      if (appState.charts.scatter) {
-        appState.charts.scatter.destroy();
-      }
+      if (appState.charts.scatter) appState.charts.scatter.destroy();
 
       const axesMap = {
         temp_humidity: { xKey: 'temp_max', yKey: 'humidity_mean', xLabel: 'Max Temp (°C)', yLabel: 'Relative Humidity (%)' },
@@ -1634,68 +1270,28 @@
 
       cohort.forEach(r => {
         if (r.date === target.date) return;
-        const evX = evaluateMetricAnomaly(r[cfg.xKey], analysis.evaluations[cfg.xKey].stats, appState.algorithm, appState.thresholdSigma, cfg.xKey === 'precipitation_mm');
-        const evY = evaluateMetricAnomaly(r[cfg.yKey], analysis.evaluations[cfg.yKey].stats, appState.algorithm, appState.thresholdSigma, cfg.yKey === 'precipitation_mm');
+        const evX = evaluateMetricAnomaly(r[cfg.xKey], analysis.evaluations[cfg.xKey].stats, appState.algorithm, appState.thresholdSigma);
+        const evY = evaluateMetricAnomaly(r[cfg.yKey], analysis.evaluations[cfg.yKey].stats, appState.algorithm, appState.thresholdSigma);
         const pt = { x: r[cfg.xKey], y: r[cfg.yKey], date: r.date };
-        if (evX.isAnomaly || evY.isAnomaly) {
-          anomalyPoints.push(pt);
-        } else {
-          normalPoints.push(pt);
-        }
+        if (evX.isAnomaly || evY.isAnomaly) anomalyPoints.push(pt);
+        else normalPoints.push(pt);
       });
 
       appState.charts.scatter = new Chart(ctx, {
         type: 'scatter',
         data: {
           datasets: [
-            {
-              label: `Target (${target.date})`,
-              data: [{ x: target[cfg.xKey], y: target[cfg.yKey], date: target.date }],
-              backgroundColor: '#06b6d4',
-              borderColor: '#ffffff',
-              borderWidth: 2,
-              pointRadius: 9,
-              pointStyle: 'star'
-            },
-            {
-              label: 'Detected Outliers',
-              data: anomalyPoints,
-              backgroundColor: '#f43f5e',
-              pointRadius: 5.5
-            },
-            {
-              label: 'Historical Normal',
-              data: normalPoints,
-              backgroundColor: 'rgba(148, 163, 184, 0.45)',
-              pointRadius: 4
-            }
+            { label: `Target (${target.date})`, data: [{ x: target[cfg.xKey], y: target[cfg.yKey], date: target.date }], backgroundColor: '#06b6d4', pointRadius: 9, pointStyle: 'star' },
+            { label: 'Outliers', data: anomalyPoints, backgroundColor: '#f43f5e', pointRadius: 5.5 },
+            { label: 'Normal', data: normalPoints, backgroundColor: 'rgba(148, 163, 184, 0.45)', pointRadius: 4 }
           ]
         },
         options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { labels: { color: textColor, font: { family: 'Inter', size: 11 } } },
-            tooltip: {
-              callbacks: {
-                label: (ctxItem) => {
-                  const raw = ctxItem.raw;
-                  return `${raw.date}: (${raw.x}, ${raw.y})`;
-                }
-              }
-            }
-          },
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { labels: { color: textColor, font: { family: 'Inter', size: 11 } } } },
           scales: {
-            x: {
-              title: { display: true, text: cfg.xLabel, color: textColor, font: { size: 11 } },
-              ticks: { color: textColor, font: { family: 'JetBrains Mono', size: 10 } },
-              grid: { color: gridColor }
-            },
-            y: {
-              title: { display: true, text: cfg.yLabel, color: textColor, font: { size: 11 } },
-              ticks: { color: textColor, font: { family: 'JetBrains Mono', size: 10 } },
-              grid: { color: gridColor }
-            }
+            x: { title: { display: true, text: cfg.xLabel, color: textColor, font: { size: 11 } }, ticks: { color: textColor, font: { family: 'JetBrains Mono', size: 10 } }, grid: { color: gridColor } },
+            y: { title: { display: true, text: cfg.yLabel, color: textColor, font: { size: 11 } }, ticks: { color: textColor, font: { family: 'JetBrains Mono', size: 10 } }, grid: { color: gridColor } }
           }
         }
       });
@@ -1713,10 +1309,7 @@
           return { record: r, analysis: res };
         }).sort((a, b) => b.record.date.localeCompare(a.record.date));
       } else {
-        // Curate notable extremes across the 20-year archive
-        const extremeCandidates = appState.dataset.daily.filter(r =>
-          r.precipitation_mm >= 42 || r.temp_max >= 36.8 || r.temp_min <= 13.0 || r.wind_gusts_max >= 45
-        ).slice(-45);
+        const extremeCandidates = appState.dataset.daily.filter(r => r.precipitation_mm >= 42 || r.temp_max >= 36.8 || r.temp_min <= 13.0 || r.wind_gusts_max >= 45).slice(-45);
         recordsToRender = extremeCandidates.map(r => {
           const monthDay = r.date.slice(5);
           const sameDays = appState.dataset.daily.filter(d => d.date.slice(5) === monthDay);
@@ -1727,9 +1320,7 @@
 
       tbody.innerHTML = recordsToRender.map(({ record: r, analysis: a }) => {
         const isTarget = r.date === target.date;
-        const rowHighlight = isTarget
-          ? 'bg-cyan-500/10 border-l-4 border-l-cyan-400'
-          : 'hover:bg-slate-200/50 dark:hover:bg-slate-800/50';
+        const rowHighlight = isTarget ? 'bg-cyan-500/10 border-l-4 border-l-cyan-400' : 'hover:bg-slate-200/50 dark:hover:bg-slate-800/50';
 
         const scoreBadge = a.overallSeverity === 'extreme'
           ? `<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30">${a.compoundScore.toFixed(2)}σ Extreme</span>`
@@ -1739,9 +1330,7 @@
 
         return `
           <tr class="${rowHighlight} transition">
-            <td class="py-2.5 px-3 font-bold ${isTarget ? 'text-cyan-400' : 'text-slate-800 dark:text-slate-200'}">
-              ${r.date} ${isTarget ? '<span class="text-[10px] uppercase bg-cyan-500/20 text-cyan-300 px-1.5 py-0.5 rounded ml-1">Target</span>' : ''}
-            </td>
+            <td class="py-2.5 px-3 font-bold ${isTarget ? 'text-cyan-400' : 'text-slate-800 dark:text-slate-200'}">${r.date} ${isTarget ? '<span class="text-[10px] uppercase bg-cyan-500/20 text-cyan-300 px-1.5 py-0.5 rounded ml-1">Target</span>' : ''}</td>
             <td class="py-2.5 px-3">${r.temp_max}°C / <span class="text-sky-400">${r.temp_min}°C</span></td>
             <td class="py-2.5 px-3 ${r.precipitation_mm >= 20 ? 'text-cyan-400 font-bold' : ''}">${r.precipitation_mm} mm</td>
             <td class="py-2.5 px-3">${r.wind_speed_max} / <span class="text-purple-400">${r.wind_gusts_max} km/h</span></td>
@@ -1750,21 +1339,14 @@
             <td class="py-2.5 px-3">${scoreBadge}</td>
             <td class="py-2.5 px-3 font-sans text-xs text-slate-600 dark:text-slate-300">${a.explanation.primaryReasonShort}</td>
             <td class="py-2.5 px-3 text-right space-x-1 whitespace-nowrap">
-              <button onclick="selectTargetDate('${r.date}')" class="px-2 py-1 rounded-lg text-[11px] font-sans font-semibold bg-cyan-500/15 hover:bg-cyan-500/30 text-cyan-400 transition">
-                Inspect
-              </button>
-              <button onclick="selectBenchmarkDate('${r.date}')" class="px-2 py-1 rounded-lg text-[11px] font-sans font-semibold bg-indigo-500/15 hover:bg-indigo-500/30 text-indigo-400 transition">
-                Compare
-              </button>
+              <button onclick="selectTargetDate('${r.date}')" class="px-2 py-1 rounded-lg text-[11px] font-sans font-semibold bg-cyan-500/15 hover:bg-cyan-500/30 text-cyan-400 transition">Inspect</button>
+              <button onclick="selectBenchmarkDate('${r.date}')" class="px-2 py-1 rounded-lg text-[11px] font-sans font-semibold bg-indigo-500/15 hover:bg-indigo-500/30 text-indigo-400 transition">Compare</button>
             </td>
           </tr>
         `;
       }).join('');
     }
 
-    /***************************************************************************
-     * 6. EVENT LISTENERS & INTERACTIVE HANDLERS
-     ***************************************************************************/
     window.selectTargetDate = function(dateStr) {
       if (!appState.byDateMap.has(dateStr)) return;
       appState.targetDate = dateStr;
@@ -1788,7 +1370,7 @@
           appState.targetDate = e.target.value;
           renderAll();
         } else {
-          showToast('Selected date is outside the 20-year dataset range.', 'warning');
+          showToast('Selected date is outside the dataset range.', 'warning');
         }
       });
 
@@ -1823,13 +1405,12 @@
         renderAll();
       });
 
-      // Metric Switcher on Main Chart
       document.querySelectorAll('.chart-metric-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           document.querySelectorAll('.chart-metric-btn').forEach(b => {
-            b.className = 'chart-metric-btn px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition';
+            b.className = 'chart-metric-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition';
           });
-          btn.className = 'chart-metric-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-cyan-500 text-white transition';
+          btn.className = 'chart-metric-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-cyan-500 text-white transition';
           appState.activeChartMetric = btn.getAttribute('data-metric');
           renderAll();
         });
@@ -1854,7 +1435,6 @@
         renderAll();
       });
 
-      // Theme Toggle
       document.getElementById('themeToggleBtn').addEventListener('click', () => {
         document.documentElement.classList.toggle('dark');
         renderAll();
