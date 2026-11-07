@@ -1,66 +1,64 @@
 {
-  "generated_at": "2026-11-06T21:39:02Z",
+  "generated_at": "2026-11-07T07:21:58Z",
   "model": "gemma-4-26b-a4b-it",
   "source": "Open-Meteo live telemetry + Windfyre ML baseline",
   "cities": {
     "bengaluru-nandini-layout": {
       "status": "ok",
-      "summary": "Bengaluru is experiencing overcast conditions with high humidity and elevated wind speeds compared to the baseline.",
-      "current_conditions": "Temperature is 20.1C with 96% humidity, overcast skies, and wind speeds of 8.1 km/h from the east.",
-      "baseline_comparison": "Current temperature and humidity are slightly above baseline, while wind speed is higher than the city ML baseline.",
-      "next_24h_outlook": "Expect overcast skies and light precipitation, with wind speeds averaging around 10 km/h and gusts up to 35 km/h.",
-      "next_7d_outlook": "The week ahead shows consistent overcast and partly cloudy skies with moderate humidity and wind, with precipitation tapering off by mid-week.",
+      "summary": "Bengaluru is experiencing mild drizzle and elevated wind gusts, with temperatures remaining relatively stable compared to the baseline.",
+      "current_conditions": "Current temperature is 27.6C with 53% humidity and wind gusts reaching 35.3 km/h from the east-northeast.",
+      "baseline_comparison": "Recent observations show higher temperatures and wind gusts than the ML baseline, with humidity levels often exceeding baseline expectations.",
+      "next_24h_outlook": "The next 24 hours are expected to have average wind speeds of 10.7 km/h and temperatures around 23.1C with light precipitation.",
+      "next_7d_outlook": "The 7-day forecast indicates a period of light rain and variable weather, with temperatures stabilizing around 22.5C and humidity levels around 80%.",
       "anomalies": [
         {
           "type": "wind",
           "severity": "medium",
           "timeframe": "Recent observations",
-          "description": "Average wind speeds and gusts have consistently been higher than the ML baseline over the last week."
+          "description": "Wind gusts have consistently been higher than the ML baseline, frequently exceeding 34 km/h."
         }
       ],
       "watch_items": [
-        "Elevated wind gusts up to 36 km/h expected in the coming days."
+        "High wind gusts expected through the next few days."
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecast uncertainty is present due to variability in recent precipitation and wind patterns.",
-      "updated_at": "2026-11-06T21:39:02Z"
+      "data_quality_note": "Forecasts are subject to uncertainty due to variable weather patterns and model validation metrics.",
+      "updated_at": "2026-11-07T07:21:58Z"
     },
     "nagamangala": {
       "status": "ok",
-      "summary": "Nagamangala is experiencing high humidity and overcast conditions, with recent precipitation and wind deviations from the baseline.",
-      "current_conditions": "Temperature is 20.8C with 97% humidity and overcast skies (weather code 3). Wind speed is 4.3 km/h from 73 degrees.",
-      "baseline_comparison": "Current temperature and humidity are slightly above baseline. Recent precipitation and wind direction have shown significant deviations from the ML baseline.",
-      "next_24h_outlook": "Forecast predicts 23.4C average temperature, 81.8% humidity, and 3.4mm of precipitation with overcast and light rain.",
-      "next_7d_outlook": "The 7-day forecast shows a trend of decreasing humidity and temperature, with precipitation tapering off towards the end of the week.",
+      "summary": "Nagamangala is experiencing moderate wind and variable cloud cover with recent precipitation trends.",
+      "current_conditions": "Temperature is 28.1C with 56% humidity, wind at 13.3 km/h from 81 degrees, and gusts up to 31.3 km/h.",
+      "baseline_comparison": "Recent observations show higher humidity and precipitation levels compared to the ML baseline.",
+      "next_24h_outlook": "Expect continued cloud cover and moderate wind speeds with some light precipitation possible.",
+      "next_7d_outlook": "The forecast indicates a period of wet weather with a peak in precipitation on November 10th, followed by a drying trend.",
       "anomalies": [
         {
           "type": "precipitation",
           "severity": "high",
           "timeframe": "2026-11-04",
-          "description": "Observed precipitation of 10.5mm significantly exceeds the baseline of 3.1mm."
+          "description": "Precipitation reached 10.5mm, significantly exceeding the baseline of 3.1mm."
         },
         {
           "type": "wind",
           "severity": "medium",
           "timeframe": "2026-11-06",
-          "description": "Wind speed and gusts up to 35.6 km/h deviate from the baseline. Wind direction also shows a shift. "
+          "description": "Wind gusts reached 35.6 km/h, higher than typical levels."
         },
         {
           "type": "humidity",
-          "severity": "low",
+          "severity": "medium",
           "timeframe": "2026-11-04",
-          "description": "Humidity levels were notably higher than the baseline on Nov 4th."
+          "description": "Humidity averaged 88.8%, which is notably higher than the baseline of 77.8%."
         }
       ],
       "watch_items": [
-        "High humidity and overcast conditions.",
-        "Potential for light rain and wind gusts.",
-        "Monitoring precipitation levels.",
-        "Wind direction shifts. "
+        "High precipitation forecast for November 10th",
+        "Monitor wind gusts during the next few days"
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecasts are inherently uncertain; model validation data suggests moderate accuracy for temperature and humidity. ",
-      "updated_at": "2026-11-06T21:39:02Z"
+      "data_quality_note": "Forecast uncertainty is present due to the variability in recent weather patterns.",
+      "updated_at": "2026-11-07T07:21:58Z"
     }
   }
 }
