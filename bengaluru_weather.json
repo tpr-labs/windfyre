@@ -5,8 +5,8 @@
     "longitude": 77.5946,
     "elevation_m": 920,
     "timezone": "Asia/Kolkata",
-    "last_updated": "2026-11-09T13:15:57.797348+05:30",
-    "total_days": 7618,
+    "last_updated": "2026-11-10T04:25:24.168661+05:30",
+    "total_days": 7619,
     "source": "Open-Meteo Historical Archive & Forecast API"
   },
   "daily": [
@@ -114267,18 +114267,33 @@
     },
     {
       "date": "2026-11-09",
-      "temp_max": 29.0,
+      "temp_max": 28.7,
       "temp_min": 19.5,
       "temp_mean": 23.6,
       "precipitation_mm": 0.0,
-      "wind_speed_max": 15.7,
+      "wind_speed_max": 14.5,
       "wind_gusts_max": 38.2,
-      "wind_direction_deg": 78,
-      "humidity_mean": 70,
+      "wind_direction_deg": 76,
+      "humidity_mean": 69,
       "pressure_msl": 1015.9,
-      "solar_radiation": 20.0,
-      "cloud_cover": 88,
-      "evapotranspiration": 4.65
+      "solar_radiation": 18.8,
+      "cloud_cover": 92,
+      "evapotranspiration": 4.43
+    },
+    {
+      "date": "2026-11-10",
+      "temp_max": 29.8,
+      "temp_min": 19.0,
+      "temp_mean": 23.9,
+      "precipitation_mm": 0.0,
+      "wind_speed_max": 11.2,
+      "wind_gusts_max": 32.4,
+      "wind_direction_deg": 62,
+      "humidity_mean": 63,
+      "pressure_msl": 1015.2,
+      "solar_radiation": 19.7,
+      "cloud_cover": 68,
+      "evapotranspiration": 4.66
     }
   ]
 }
