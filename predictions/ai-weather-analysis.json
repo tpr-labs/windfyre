@@ -1,77 +1,63 @@
 {
-  "generated_at": "2026-11-08T19:47:49Z",
+  "generated_at": "2026-11-09T08:10:19Z",
   "model": "gemma-4-26b-a4b-it",
   "source": "Open-Meteo live telemetry + Windfyre ML baseline",
   "cities": {
     "bengaluru-nandini-layout": {
       "status": "ok",
-      "summary": "Bengaluru is experiencing overcast conditions with elevated wind speeds and humidity compared to recent baseline trends.",
-      "current_conditions": "Current temperature is 20.1C with 92% humidity and wind speeds of 11.1 km/h from the east.",
-      "baseline_comparison": "Recent observations show higher wind speeds and humidity levels than the ML baseline.",
-      "next_24h_outlook": "The next 24 hours will see overcast conditions with temperatures around 23.5C and wind gusts up to 38.5 km/h.",
-      "next_7d_outlook": "The 7-day forecast indicates a trend toward lower humidity and stable temperatures around 23C, with minimal precipitation.",
+      "summary": "Bengaluru is experiencing warmer temperatures and higher wind speeds than the baseline, with intermittent light precipitation and variable cloud cover.",
+      "current_conditions": "Current temperature is 28.8C with 42% humidity and wind speeds of 12.3 km/h from the east-northeast.",
+      "baseline_comparison": "Recent observations show higher average wind speeds and temperatures compared to the ML baseline, with lower humidity levels.",
+      "next_24h_outlook": "The next 24 hours will likely see temperatures around 23.6C and wind speeds of 12.5 km/h with light precipitation.",
+      "next_7d_outlook": "The 7-day forecast indicates a period of stable temperatures between 22.8C and 24.6C with decreasing humidity and minimal precipitation.",
       "anomalies": [
         {
           "type": "wind",
           "severity": "medium",
           "timeframe": "Recent observations",
-          "description": "Average wind speeds have been consistently higher than the ML baseline. "
-        },
-        {
-          "type": "humidity",
-          "severity": "low",
-          "timeframe": "Recent observations",
-          "description": "Humidity levels have been consistently higher than the ML baseline. "
-        },
-        {
-          "type": "precipitation",
-          "severity": "low",
-          "timeframe": "Recent observations",
-          "description": "Total precipitation has been higher than the ML baseline on several recent days. "
+          "description": "Average wind speeds have been consistently higher than the ML baseline over the last week."
         }
       ],
       "watch_items": [
-        "Wind gusts up to 39 km/h",
-        "Humidity levels above 90%"
+        "Wind gusts up to 39.2 km/h observed recently."
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecasts are subject to uncertainty due to variable weather patterns. ",
-      "updated_at": "2026-11-08T19:47:49Z"
+      "data_quality_note": "Forecasts are subject to uncertainty; model validation shows good accuracy for precipitation and temperature.",
+      "updated_at": "2026-11-09T08:10:19Z"
     },
     "nagamangala": {
       "status": "ok",
-      "summary": "Nagamangala is experiencing overcast conditions with elevated humidity and moderate wind speeds.",
-      "current_conditions": "Temperature is 20.8C with 92% humidity and wind speed of 5.0 km/h from 105 degrees.",
-      "baseline_comparison": "Recent observations show higher humidity and wind speeds compared to the ML baseline.",
-      "next_24h_outlook": "Expect overcast-to-clear skies with wind speeds around 9.1 km/h and minimal precipitation.",
-      "next_7d_outlook": "The week ahead shows a trend of decreasing humidity and temperature fluctuations, with mostly clear to overcast skies.",
+      "summary": "Nagamangala is experiencing overcast conditions with moderate wind gusts and higher than average temperatures.",
+      "current_conditions": "Current temperature is 28.7C with 49% humidity and wind speeds of 12.5 km/h from the east.",
+      "baseline_comparison": "Recent observations show higher wind speeds and temperatures compared to the ML baseline.",
+      "next_24h_outlook": "The next 24 hours will likely see overcast conditions with wind gusts up to 31 km/h.",
+      "next_7d_outlook": "The 7-day forecast indicates a trend toward clearer skies and lower humidity, with temperatures remaining stable.",
       "anomalies": [
         {
-          "type": "humidity",
-          "severity": "medium",
-          "timeframe": "last 7 days",
-          "description": "Humidity levels have been consistently higher than the ML baseline."
-        },
-        {
           "type": "wind",
-          "severity": "low",
-          "timeframe": "last 7 days",
-          "description": "Wind speeds and gusts have been slightly higher than the ML baseline."
+          "severity": "medium",
+          "timeframe": "Recent observations",
+          "description": "Wind speeds and gusts have been consistently higher than the ML baseline. "
         },
         {
-          "type": "precipitation",
+          "type": "temperature",
           "severity": "low",
-          "timeframe": "last 7 days",
-          "description": "Total precipitation has been higher than the ML baseline over the recent period."
+          "timeframe": "Today",
+          "description": "Current temperature is slightly above the historical baseline. "
+        },
+        {
+          "type": "humidity",
+          "severity": "low",
+          "timeframe": "Recent observations",
+          "description": "Humidity levels have fluctuated but generally remain within normal ranges. "
         }
       ],
       "watch_items": [
-        "High humidity levels",
-        "Wind gusts up to 33.1 km/h"
+        "Wind gusts up to 35 km/h observed recently."
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecasts are subject to uncertainty due to model validation metrics. See context for details.",
-      "updated_at": "2026-11-08T19:47:49Z"
+      "data_quality_note": "Forecasts are subject to uncertainty due to variability in recent weather patterns.",
+      "updated_at": "2026-11-09T08:10:19Z"
     }
   }
 }
