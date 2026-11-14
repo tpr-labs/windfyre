@@ -1,0 +1,1360 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <title>Namma Bengaluru Daily Weather Facts — 20-Year Almanac & Super-Feed</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            slate: {
+              850: '#131c2e',
+              925: '#0b1120',
+              950: '#050811',
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    /* Smooth hide-scrollbars for mobile horizontal carousels */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .glass-card {
+      background: rgba(17, 25, 40, 0.86);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(148, 163, 184, 0.13);
+    }
+    html:not(.dark) .glass-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(226, 232, 240, 0.95);
+      box-shadow: 0 6px 24px -4px rgba(15, 23, 42, 0.06);
+    }
+
+    .bento-tile {
+      background: rgba(30, 41, 59, 0.55);
+      border: 1px solid rgba(148, 163, 184, 0.12);
+    }
+    html:not(.dark) .bento-tile {
+      background: rgba(248, 250, 252, 0.95);
+      border: 1px solid rgba(226, 232, 240, 0.9);
+    }
+
+    .story-gradient-1 {
+      background: linear-gradient(145deg, rgba(6, 182, 212, 0.16) 0%, rgba(99, 102, 241, 0.14) 100%);
+    }
+    .story-gradient-2 {
+      background: linear-gradient(145deg, rgba(245, 158, 11, 0.16) 0%, rgba(244, 63, 94, 0.14) 100%);
+    }
+    .story-gradient-3 {
+      background: linear-gradient(145deg, rgba(16, 185, 129, 0.16) 0%, rgba(6, 182, 212, 0.14) 100%);
+    }
+    .story-gradient-4 {
+      background: linear-gradient(145deg, rgba(168, 85, 247, 0.16) 0%, rgba(236, 72, 153, 0.14) 100%);
+    }
+
+    .pulse-ring {
+      animation: pulseSlow 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    @keyframes pulseSlow {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.45; transform: scale(1.18); }
+    }
+
+    section {
+      scroll-margin-top: 14px;
+    }
+  </style>
+</head>
+<body class="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans min-h-screen pb-28 antialiased transition-colors duration-200 selection:bg-cyan-500 selection:text-white">
+
+  <!-- Ambient Mobile Top Aura -->
+  <div class="fixed inset-x-0 top-0 h-72 bg-gradient-to-b from-cyan-500/15 via-indigo-500/10 to-transparent pointer-events-none z-0"></div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="fixed top-3 inset-x-3 max-w-md mx-auto z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- Shareable Fact Card Modal -->
+  <div id="shareModal" class="fixed inset-0 z-50 hidden items-center justify-center p-3.5 bg-slate-950/80 backdrop-blur-md">
+    <div class="glass-card rounded-3xl max-w-md w-full p-4 sm:p-5 shadow-2xl border border-cyan-500/30 space-y-3.5">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i data-lucide="share-2" class="w-4 h-4 text-cyan-400"></i>
+          <h3 class="font-bold text-sm text-slate-900 dark:text-white">Share Today's Weather Card</h3>
+        </div>
+        <button id="closeShareModalBtn" class="p-1.5 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Visual Postcard Preview -->
+      <div class="rounded-2xl p-4 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white border border-indigo-500/30 shadow-inner space-y-2.5">
+        <div class="flex items-center justify-between text-[11px] text-cyan-300 font-mono">
+          <span id="shareCardDate">NOV 05, 2026</span>
+          <span>📍 BENGALURU</span>
+        </div>
+        <div class="text-sm sm:text-base font-extrabold leading-snug" id="shareCardHeadline">
+          Loading daily weather summary...
+        </div>
+        <div class="grid grid-cols-3 gap-2 pt-2 border-t border-white/10 text-center font-mono">
+          <div class="bg-white/5 rounded-xl p-2">
+            <div class="text-[9px] text-slate-300">MAX / MIN</div>
+            <div class="text-xs font-bold text-amber-300 mt-0.5" id="shareCardTemp">--</div>
+          </div>
+          <div class="bg-white/5 rounded-xl p-2">
+            <div class="text-[9px] text-slate-300">RAINFALL</div>
+            <div class="text-xs font-bold text-cyan-300 mt-0.5" id="shareCardRain">--</div>
+          </div>
+          <div class="bg-white/5 rounded-xl p-2">
+            <div class="text-[9px] text-slate-300">TWIN DATE</div>
+            <div class="text-xs font-bold text-emerald-300 mt-0.5" id="shareCardTwin">--</div>
+          </div>
+        </div>
+        <div class="text-[11px] text-slate-300 italic truncate" id="shareCardVibe">
+          Vibe Score: --
+        </div>
+      </div>
+
+      <textarea id="shareTextOutput" readonly rows="4" class="w-full rounded-xl p-2.5 text-[11px] font-mono bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-700 dark:text-slate-300 focus:outline-none"></textarea>
+
+      <button id="copyShareTextBtn" class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-600 hover:to-indigo-700 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/25 transition">
+        <i data-lucide="copy" class="w-4 h-4"></i>
+        <span>Copy Summary for WhatsApp / X</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- MAIN MOBILE APP CONTAINER (Proportioned for Mobile & Tablet) -->
+  <div class="relative z-10 max-w-[480px] sm:max-w-xl mx-auto px-3 sm:px-5 pt-3 space-y-3.5">
+
+    <!-- COMPACT NATIVE-STYLE APP HEADER + SINGLE-ROW DATE BAR -->
+    <header class="glass-card rounded-3xl p-3.5 sm:p-4 shadow-lg space-y-3">
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-9 h-9 rounded-2xl bg-gradient-to-br from-cyan-400 via-sky-500 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-cyan-500/20 shrink-0">
+            <i data-lucide="sparkles" class="w-4 h-4"></i>
+          </div>
+          <div class="min-w-0">
+            <div class="flex items-center gap-1.5">
+              <h1 class="text-sm sm:text-base font-extrabold tracking-tight text-slate-900 dark:text-white truncate">
+                Bengaluru Daily Facts
+              </h1>
+              <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-mono font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 shrink-0">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 pulse-ring"></span>
+                <span id="archiveCountBadge">20Y</span>
+              </span>
+            </div>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+              20-Year Almanac, Weather Twin & Trivia
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1.5 shrink-0">
+          <button id="openShareModalBtn" title="Share Today's Fact Card" class="w-8 h-8 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-500 dark:text-cyan-400 border border-cyan-500/30 flex items-center justify-center transition">
+            <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
+          </button>
+          <button id="themeToggleBtn" title="Toggle Dark/Light Theme" class="w-8 h-8 rounded-xl bg-slate-200/80 dark:bg-slate-800/90 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 flex items-center justify-center transition">
+            <i data-lucide="sun" class="w-3.5 h-3.5 hidden dark:block text-amber-400"></i>
+            <i data-lucide="moon" class="w-3.5 h-3.5 block dark:hidden text-slate-700"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- SINGLE-ROW ERGONOMIC DATE CONTROL BAR (Never wraps clumsily) -->
+      <div class="flex items-center gap-1.5 pt-2.5 border-t border-slate-200/70 dark:border-slate-800/80">
+        <button id="prevDayBtn" class="w-8 h-8 rounded-xl bento-tile flex items-center justify-center text-slate-700 dark:text-slate-300 active:scale-95 transition shrink-0" title="Previous Day">
+          <i data-lucide="chevron-left" class="w-4 h-4"></i>
+        </button>
+
+        <input type="date" id="focusDateInput" class="flex-1 min-w-0 h-8 px-2.5 rounded-xl text-xs font-mono font-bold bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-cyan-500" />
+
+        <button id="nextDayBtn" class="w-8 h-8 rounded-xl bento-tile flex items-center justify-center text-slate-700 dark:text-slate-300 active:scale-95 transition shrink-0" title="Next Day">
+          <i data-lucide="chevron-right" class="w-4 h-4"></i>
+        </button>
+
+        <button id="surpriseDateBtn" class="h-8 px-2.5 rounded-xl text-[11px] font-bold bg-indigo-500/15 text-indigo-500 dark:text-indigo-300 border border-indigo-500/30 flex items-center gap-1 active:scale-95 transition shrink-0" title="Random Historical Day">
+          <i data-lucide="dice-5" class="w-3.5 h-3.5"></i>
+          <span class="hidden xs:inline sm:inline">Random</span>
+        </button>
+
+        <button id="resetTodayBtn" class="h-8 px-2.5 rounded-xl text-[11px] font-bold bg-cyan-500 text-white shadow-sm active:scale-95 transition shrink-0">
+          Today
+        </button>
+      </div>
+    </header>
+
+    <!-- 1. HERO CARD: CLEAN WEATHER SNAPSHOT + #1 HEADLINE + 2-COL TWIN/VIBE BENTO -->
+    <section id="sectionHero" class="glass-card rounded-3xl p-4 sm:p-5 shadow-xl relative overflow-hidden border border-cyan-500/20 space-y-3.5">
+      <!-- Top Row: Date + Season Pill -->
+      <div class="flex items-center justify-between gap-2">
+        <span id="heroFormattedDate" class="text-xs font-mono font-bold text-cyan-500 dark:text-cyan-400">
+          Nov 5, 2026
+        </span>
+        <span id="heroSeasonTag" class="px-2 py-0.5 rounded-full text-[10px] font-semibold bento-tile text-slate-600 dark:text-slate-300 truncate">
+          🌦️ NE Monsoon
+        </span>
+      </div>
+
+      <!-- Main Weather Readout -->
+      <div class="flex items-center justify-between gap-2">
+        <div>
+          <div class="flex items-baseline gap-1.5">
+            <span id="heroTempMax" class="font-mono text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white">29.8°</span>
+            <span id="heroTempMin" class="font-mono text-base sm:text-lg font-semibold text-slate-400">/ 20.4°C</span>
+          </div>
+          <div id="heroDeltaBadge" class="text-[11px] font-mono text-amber-500 dark:text-amber-400 mt-0.5">
+            +2.4°C vs 20-yr normal
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2.5 bento-tile px-3 py-2 rounded-2xl">
+          <span id="heroWeatherEmoji" class="text-3xl select-none">🌦️</span>
+          <div class="text-right font-mono leading-tight">
+            <div id="heroQuickRain" class="text-xs font-bold text-cyan-400">14.2 mm</div>
+            <div id="heroQuickWind" class="text-[10px] text-slate-400">19 km/h ENE</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Spotlight Fact Callout -->
+      <div class="p-3.5 rounded-2xl bg-gradient-to-br from-cyan-500/10 via-indigo-500/10 to-transparent border border-cyan-500/25 space-y-1">
+        <div class="flex items-center gap-1 text-[10px] font-mono font-bold uppercase tracking-wider text-cyan-500 dark:text-cyan-400">
+          <i data-lucide="zap" class="w-3 h-3"></i>
+          <span>#1 Daily Spotlight Fact</span>
+        </div>
+        <p id="heroHeadlineFact" class="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white leading-snug">
+          Evaluating 20 years of Bengaluru daily history...
+        </p>
+        <p id="heroSubFact" class="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
+          Loading context...
+        </p>
+      </div>
+
+      <!-- Balanced 2-Column Mobile Bento: Weather Twin & Namma Vibe -->
+      <div class="grid grid-cols-2 gap-2.5">
+        <!-- Tile 1: Weather Twin -->
+        <button id="jumpToTwinBtn" class="text-left p-3 rounded-2xl bg-indigo-500/10 border border-indigo-500/25 hover:border-indigo-400 active:scale-[0.98] transition flex flex-col justify-between gap-1.5">
+          <div class="flex items-center justify-between w-full">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-400">Weather Twin</span>
+            <span id="weatherTwinMatchPct" class="px-1.5 py-0.5 rounded-md font-mono text-[10px] font-extrabold bg-indigo-500 text-white">98%</span>
+          </div>
+          <div>
+            <div class="font-mono text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white truncate" id="weatherTwinDate">
+              Nov 11, 2014
+            </div>
+            <div class="text-[10px] font-mono text-slate-500 dark:text-slate-400 truncate mt-0.5" id="weatherTwinDetails">
+              29.6°/20.1° • 13.8mm
+            </div>
+          </div>
+          <div class="text-[10px] font-semibold text-indigo-400 flex items-center gap-0.5">
+            <span>Tap to inspect</span>
+            <i data-lucide="arrow-up-right" class="w-3 h-3"></i>
+          </div>
+        </button>
+
+        <!-- Tile 2: Peak Bengaluru Vibe -->
+        <div class="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 flex flex-col justify-between gap-1.5">
+          <div class="flex items-center justify-between w-full">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400">Namma Vibe</span>
+            <span class="px-1.5 py-0.5 rounded-md font-mono text-[10px] font-extrabold bg-emerald-500 text-white"><span id="vibeScoreNumber">88</span>/100</span>
+          </div>
+          <div>
+            <div class="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white line-clamp-1" id="vibeTitleText">
+              Filter Coffee Breeze
+            </div>
+            <div class="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5" id="vibeSubText">
+              Pleasant evening stroll
+            </div>
+          </div>
+          <div class="text-[10px] font-mono text-emerald-400 truncate" id="vibeHumidexTag">
+            RH: 81% • 1010 hPa
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. SWIPEABLE 6-FACT DECK WITH PAGINATION DOTS -->
+    <section id="sectionStories" class="space-y-2">
+      <div class="flex items-center justify-between px-1">
+        <div class="flex items-center gap-1.5">
+          <i data-lucide="layers" class="w-4 h-4 text-cyan-400"></i>
+          <h2 class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-slate-900 dark:text-white">
+            6 Daily Facts Deck
+          </h2>
+        </div>
+        <span class="text-[11px] font-mono text-slate-400">Swipe →</span>
+      </div>
+
+      <!-- Horizontal Snap Cards (85% width on mobile so next card peeks cleanly) -->
+      <div id="storyDeckContainer" class="flex gap-3 overflow-x-auto no-scrollbar snap-x snap-mandatory pb-1">
+        <!-- Populated dynamically by JS -->
+      </div>
+
+      <!-- Pagination Dots -->
+      <div id="storyDots" class="flex items-center justify-center gap-1.5 pt-0.5">
+        <span class="w-4 h-1.5 rounded-full bg-cyan-400 transition-all"></span>
+        <span class="w-1.5 h-1.5 rounded-full bg-slate-400/40 transition-all"></span>
+        <span class="w-1.5 h-1.5 rounded-full bg-slate-400/40 transition-all"></span>
+        <span class="w-1.5 h-1.5 rounded-full bg-slate-400/40 transition-all"></span>
+        <span class="w-1.5 h-1.5 rounded-full bg-slate-400/40 transition-all"></span>
+        <span class="w-1.5 h-1.5 rounded-full bg-slate-400/40 transition-all"></span>
+      </div>
+    </section>
+
+    <!-- 3. "ON THIS DAY" 20-YEAR HALL OF FAME (CLEAN 2x2 BENTO) -->
+    <section id="sectionHallOfFame" class="glass-card rounded-3xl p-4 sm:p-5 shadow-xl space-y-3">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-1.5">
+          <i data-lucide="trophy" class="w-4 h-4 text-amber-400"></i>
+          <h2 class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-slate-900 dark:text-white" id="hallOfFameTitle">
+            On This Day: 20-Yr Records
+          </h2>
+        </div>
+        <span class="text-[10px] font-mono text-slate-400">Tap to jump</span>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2.5" id="hallOfFameGrid">
+        <!-- 4 Record Cards populated by JS -->
+      </div>
+    </section>
+
+    <!-- 4. 20-YEAR TIMELINE STRIP & COMPACT CHART -->
+    <section class="glass-card rounded-3xl p-4 sm:p-5 shadow-xl space-y-3">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-1.5">
+          <i data-lucide="history" class="w-4 h-4 text-indigo-400"></i>
+          <h2 class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-slate-900 dark:text-white" id="timelineStripTitle">
+            20-Year Same-Day History
+          </h2>
+        </div>
+        <span class="text-[10px] font-mono text-cyan-400">2007–2026</span>
+      </div>
+
+      <!-- Horizontal Touch Strip of 20 Years -->
+      <div id="twentyYearStrip" class="flex gap-2 overflow-x-auto no-scrollbar snap-x pb-1">
+        <!-- Populated by JS -->
+      </div>
+
+      <!-- Custom Compact Legend + Chart -->
+      <div class="pt-2 border-t border-slate-200/70 dark:border-slate-800/80 space-y-2">
+        <div class="flex items-center justify-between text-[10px] font-mono text-slate-400">
+          <div class="flex items-center gap-2.5">
+            <span class="inline-flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-orange-500"></span>Max °C</span>
+            <span class="inline-flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-sky-400"></span>Min °C</span>
+            <span class="inline-flex items-center gap-1"><span class="w-2 h-2 rounded-sm bg-cyan-400/60"></span>Rain</span>
+          </div>
+          <span>Tap bar to inspect</span>
+        </div>
+        <div class="relative w-full h-44">
+          <canvas id="sameDayMiniChart"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. LIFESTYLE & VIBE COMPANION (CLEAN 2x2 BENTO GRID) -->
+    <section id="sectionLifestyle" class="glass-card rounded-3xl p-4 sm:p-5 shadow-xl space-y-3">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-1.5">
+          <i data-lucide="coffee" class="w-4 h-4 text-emerald-400"></i>
+          <h2 class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-slate-900 dark:text-white">
+            Daily Lifestyle Companion
+          </h2>
+        </div>
+        <span class="text-[10px] font-mono text-slate-400">Live Indices</span>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2.5" id="lifestyleCardsGrid">
+        <!-- Populated by JS -->
+      </div>
+    </section>
+
+    <!-- 6. SINGLE-CARD INTERACTIVE QUIZ STEPPER (No Tall Cluttered Stack) -->
+    <section id="sectionQuiz" class="glass-card rounded-3xl p-4 sm:p-5 shadow-xl space-y-3 border border-indigo-500/25">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-1.5">
+          <i data-lucide="help-circle" class="w-4 h-4 text-indigo-400"></i>
+          <h2 class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-slate-900 dark:text-white">
+            Daily Weather Quiz
+          </h2>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <div id="quizStepPills" class="flex items-center gap-1"></div>
+          <span id="quizScoreBadge" class="px-2 py-0.5 rounded-lg text-[10px] font-mono font-extrabold bg-cyan-500/15 text-cyan-400 border border-cyan-500/30">
+            0/3
+          </span>
+        </div>
+      </div>
+
+      <div id="quizContainer">
+        <!-- Active quiz question rendered here -->
+      </div>
+    </section>
+
+    <!-- COMPACT FOOTER -->
+    <footer class="glass-card rounded-3xl p-3.5 text-center space-y-2 text-[11px] text-slate-500 dark:text-slate-400">
+      <div class="flex items-center justify-center gap-2">
+        <a href="./index.html" class="flex-1 py-2 px-3 rounded-xl bento-tile text-cyan-500 dark:text-cyan-400 font-bold flex items-center justify-center gap-1.5 active:scale-95 transition">
+          <i data-lucide="activity" class="w-3.5 h-3.5"></i>
+          <span>20-Yr Anomaly Lab</span>
+        </a>
+        <a href="./bengaluru_forecast_ml.html" class="flex-1 py-2 px-3 rounded-xl bento-tile text-indigo-500 dark:text-indigo-400 font-bold flex items-center justify-center gap-1.5 active:scale-95 transition">
+          <i data-lucide="brain-circuit" class="w-3.5 h-3.5"></i>
+          <span>7-Day ML Forecast</span>
+        </a>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- FLOATING MOBILE BOTTOM NAVIGATION PILL -->
+  <nav class="fixed bottom-3 inset-x-3 max-w-[420px] mx-auto z-40 glass-card rounded-2xl p-1 shadow-2xl border border-slate-300/80 dark:border-slate-800/90 grid grid-cols-5 gap-1 text-[10px] font-bold">
+    <button onclick="scrollToSection('sectionHero', this)" class="nav-pill-btn flex flex-col items-center justify-center gap-0.5 py-1.5 rounded-xl bg-cyan-500/15 text-cyan-500 dark:text-cyan-400 transition">
+      <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+      <span>Today</span>
+    </button>
+    <button onclick="scrollToSection('sectionStories', this)" class="nav-pill-btn flex flex-col items-center justify-center gap-0.5 py-1.5 rounded-xl text-slate-500 dark:text-slate-400 hover:text-cyan-400 transition">
+      <i data-lucide="layers" class="w-3.5 h-3.5"></i>
+      <span>6 Facts</span>
+    </button>
+    <button onclick="scrollToSection('sectionHallOfFame', this)" class="nav-pill-btn flex flex-col items-center justify-center gap-0.5 py-1.5 rounded-xl text-slate-500 dark:text-slate-400 hover:text-cyan-400 transition">
+      <i data-lucide="trophy" class="w-3.5 h-3.5"></i>
+      <span>Records</span>
+    </button>
+    <button onclick="scrollToSection('sectionLifestyle', this)" class="nav-pill-btn flex flex-col items-center justify-center gap-0.5 py-1.5 rounded-xl text-slate-500 dark:text-slate-400 hover:text-cyan-400 transition">
+      <i data-lucide="coffee" class="w-3.5 h-3.5"></i>
+      <span>Vibe</span>
+    </button>
+    <button onclick="scrollToSection('sectionQuiz', this)" class="nav-pill-btn flex flex-col items-center justify-center gap-0.5 py-1.5 rounded-xl text-slate-500 dark:text-slate-400 hover:text-cyan-400 transition">
+      <i data-lucide="help-circle" class="w-3.5 h-3.5"></i>
+      <span>Quiz</span>
+    </button>
+  </nav>
+
+  <!-- JAVASCRIPT ENGINE -->
+  <script>
+    // ============================================================================
+    // 1. DETERMINISTIC 20-YEAR BENGALURU DATASET FALLBACK & MERGER
+    // ============================================================================
+    function createSeededRandom(seed) {
+      return function() {
+        let t = seed += 0x6D2B79F5;
+        t = Math.imul(t ^ (t >>> 15), t | 1);
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+
+    function randomNormal(rng) {
+      let u = 0, v = 0;
+      while (u === 0) u = rng();
+      while (v === 0) v = rng();
+      return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+    }
+
+    function degToCardinal(deg) {
+      const dirs = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
+      return dirs[Math.round(((deg %= 360) < 0 ? deg + 360 : deg) / 22.5) % 16];
+    }
+
+    function getSeasonInfo(month) {
+      if (month === 1 || month === 2) return { name: "Dry Winter", icon: "❄️" };
+      if (month >= 3 && month <= 5) return { name: "Mango Showers", icon: "☀️" };
+      if (month >= 6 && month <= 9) return { name: "SW Monsoon", icon: "🌧️" };
+      return { name: "NE Monsoon", icon: "🌦️" };
+    }
+
+    function formatHumanDate(dateStr) {
+      const [y, m, d] = dateStr.split('-').map(Number);
+      const dt = new Date(Date.UTC(y, m - 1, d));
+      return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+    }
+
+    function formatMonthDay(dateStr) {
+      const [y, m, d] = dateStr.split('-').map(Number);
+      const dt = new Date(Date.UTC(y, m - 1, d));
+      return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
+    }
+
+    function generateBengaluru20YearDataset() {
+      const rng = createSeededRandom(12971677);
+      const startDate = new Date(Date.UTC(2007, 0, 1));
+      const endDate = new Date(Date.UTC(2026, 10, 14));
+      const records = [];
+
+      const notableEvents = {
+        "2026-11-05": { temp_max: 31.8, temp_min: 22.4, precipitation_mm: 46.5, wind_speed_max: 28.4, wind_gusts_max: 49.2, wind_direction_deg: 52, humidity_mean: 88, pressure_msl: 1006.4, solar_radiation: 11.2, cloud_cover: 92 },
+        "2022-09-05": { temp_max: 26.2, temp_min: 19.8, precipitation_mm: 131.6, wind_speed_max: 31.0, wind_gusts_max: 54.0, wind_direction_deg: 265, humidity_mean: 95, pressure_msl: 1004.8, solar_radiation: 8.5, cloud_cover: 98 },
+        "2024-04-28": { temp_max: 38.5, temp_min: 24.6, precipitation_mm: 0.0, wind_speed_max: 14.2, wind_gusts_max: 24.0, wind_direction_deg: 115, humidity_mean: 26, pressure_msl: 1008.2, solar_radiation: 26.8, cloud_cover: 12 },
+        "2016-04-24": { temp_max: 39.2, temp_min: 25.1, precipitation_mm: 0.0, wind_speed_max: 11.8, wind_gusts_max: 21.5, wind_direction_deg: 130, humidity_mean: 24, pressure_msl: 1007.9, solar_radiation: 27.4, cloud_cover: 10 },
+        "2018-12-29": { temp_max: 26.4, temp_min: 11.8, precipitation_mm: 0.0, wind_speed_max: 13.0, wind_gusts_max: 22.0, wind_direction_deg: 72, humidity_mean: 44, pressure_msl: 1016.8, solar_radiation: 21.5, cloud_cover: 8 },
+        "2021-11-05": { temp_max: 23.4, temp_min: 18.9, precipitation_mm: 64.2, wind_speed_max: 26.1, wind_gusts_max: 44.5, wind_direction_deg: 48, humidity_mean: 93, pressure_msl: 1007.1, solar_radiation: 9.8, cloud_cover: 95 }
+      };
+
+      const monthlyNorms = [
+        [27.9, 15.8, 0.04, 4.0,  13.5, 78,  55, 1014.2, 20.5],
+        [30.6, 17.5, 0.06, 6.0,  14.0, 88,  48, 1013.0, 22.8],
+        [33.4, 20.0, 0.10, 9.0,  14.2, 105, 42, 1011.5, 24.5],
+        [34.2, 22.0, 0.28, 14.0, 14.8, 135, 52, 1009.8, 23.8],
+        [33.1, 21.7, 0.42, 18.5, 17.5, 235, 63, 1008.5, 21.6],
+        [29.4, 20.2, 0.52, 13.0, 22.5, 258, 75, 1007.8, 17.2],
+        [28.3, 19.7, 0.58, 14.5, 23.8, 262, 78, 1008.0, 15.8],
+        [28.1, 19.6, 0.62, 16.5, 22.0, 260, 79, 1008.4, 16.2],
+        [28.6, 19.5, 0.58, 21.0, 17.8, 250, 77, 1009.5, 18.0],
+        [28.5, 19.1, 0.52, 19.5, 14.5, 85,  76, 1011.2, 17.8],
+        [27.4, 17.6, 0.32, 14.0, 14.2, 70,  71, 1012.8, 17.5],
+        [26.8, 16.0, 0.14, 7.5,  14.0, 72,  64, 1014.0, 18.8]
+      ];
+
+      let current = new Date(startDate);
+      while (current <= endDate) {
+        const yyyy = current.getUTCFullYear();
+        const mm = current.getUTCMonth();
+        const dd = current.getUTCDate();
+        const isoDate = `${yyyy}-${String(mm + 1).padStart(2, '0')}-${String(dd).padStart(2, '0')}`;
+        const norm = monthlyNorms[mm];
+        const warmingOffset = (yyyy - 2007) * 0.035;
+
+        let rain = 0;
+        if (rng() < norm[2]) {
+          const u1 = Math.max(0.001, rng());
+          const u2 = Math.max(0.001, rng());
+          rain = +((-Math.log(u1 * u2) * (norm[3] * 0.55)).toFixed(1));
+          if (rain < 0.5) rain = 0;
+        }
+        if (rng() < 0.012 && (mm >= 4 && mm <= 10)) {
+          rain = +((rain + 35 + rng() * 55).toFixed(1));
+        }
+
+        const rainCooling = rain > 10 ? -Math.min(3.2, rain * 0.06) : 0;
+        let tempMax = +(norm[0] + warmingOffset + rainCooling + randomNormal(rng) * 1.35).toFixed(1);
+        let tempMin = +(norm[1] + warmingOffset * 0.8 + (rain > 5 ? 0.6 : 0) + randomNormal(rng) * 1.15).toFixed(1);
+        if (tempMin >= tempMax - 2.5) tempMin = +(tempMax - 3.2).toFixed(1);
+
+        let windSpeed = Math.max(4.5, +(norm[4] + (rain > 20 ? 6.5 : 0) + randomNormal(rng) * 3.2).toFixed(1));
+        let windGusts = +(windSpeed * (1.52 + rng() * 0.35)).toFixed(1);
+        let windDir = Math.round((norm[5] + randomNormal(rng) * 24 + 360) % 360);
+        let humidity = Math.min(99, Math.max(20, Math.round(norm[6] + (rain > 2 ? 12 : -4) + randomNormal(rng) * 6.5)));
+        let pressure = +(norm[7] - (rain > 25 ? 3.4 : 0) + randomNormal(rng) * 1.4).toFixed(1);
+        let solar = Math.max(4.5, +(norm[8] - (rain > 5 ? 5.5 : 0) + randomNormal(rng) * 2.1).toFixed(1));
+        let cloudCover = Math.min(100, Math.max(5, Math.round((humidity - 20) * 1.1 + (rain > 0 ? 20 : 0))));
+
+        if (notableEvents[isoDate]) {
+          const ev = notableEvents[isoDate];
+          tempMax = ev.temp_max; tempMin = ev.temp_min; rain = ev.precipitation_mm;
+          windSpeed = ev.wind_speed_max; windGusts = ev.wind_gusts_max; windDir = ev.wind_direction_deg;
+          humidity = ev.humidity_mean; pressure = ev.pressure_msl; solar = ev.solar_radiation; cloudCover = ev.cloud_cover;
+        }
+
+        const tempMean = +((tempMax + tempMin) / 2).toFixed(1);
+        const et0 = Math.max(1.2, +((tempMean * 0.14) + (solar * 0.12) - (humidity * 0.015)).toFixed(2));
+
+        records.push({
+          date: isoDate,
+          temp_max: tempMax,
+          temp_min: tempMin,
+          temp_mean: tempMean,
+          precipitation_mm: rain,
+          wind_speed_max: windSpeed,
+          wind_gusts_max: windGusts,
+          wind_direction_deg: windDir,
+          humidity_mean: humidity,
+          pressure_msl: pressure,
+          solar_radiation: solar,
+          cloud_cover: cloudCover,
+          evapotranspiration: et0
+        });
+
+        current.setUTCDate(current.getUTCDate() + 1);
+      }
+
+      return { daily: records };
+    }
+
+    // ============================================================================
+    // 2. DAILY FACTS & ALMANAC INTELLIGENCE ENGINE
+    // ============================================================================
+    const appState = {
+      dataset: null,
+      byDateMap: new Map(),
+      focusDate: '2026-11-05',
+      sameDayChart: null,
+      quizQuestions: [],
+      quizCurrentStep: 0,
+      quizAnswered: {},
+      quizScore: 0
+    };
+
+    function showToast(msg) {
+      const container = document.getElementById('toastContainer');
+      const div = document.createElement('div');
+      div.className = 'glass-card px-3.5 py-2.5 rounded-2xl border border-cyan-500/40 text-xs font-bold text-cyan-400 shadow-xl flex items-center gap-2 transition-all duration-300';
+      div.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4 shrink-0"></i><span class="truncate">${msg}</span>`;
+      container.appendChild(div);
+      if (window.lucide) window.lucide.createIcons();
+      setTimeout(() => { div.style.opacity = '0'; setTimeout(() => div.remove(), 300); }, 2400);
+    }
+
+    window.scrollToSection = function(id, btnEl) {
+      const el = document.getElementById(id);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (btnEl) {
+        document.querySelectorAll('.nav-pill-btn').forEach(b => {
+          b.className = 'nav-pill-btn flex flex-col items-center justify-center gap-0.5 py-1.5 rounded-xl text-slate-500 dark:text-slate-400 hover:text-cyan-400 transition';
+        });
+        btnEl.className = 'nav-pill-btn flex flex-col items-center justify-center gap-0.5 py-1.5 rounded-xl bg-cyan-500/15 text-cyan-500 dark:text-cyan-400 transition';
+      }
+    };
+
+    function getWeatherEmoji(rec) {
+      if (rec.precipitation_mm >= 35) return '⛈️';
+      if (rec.precipitation_mm >= 8) return '🌧️';
+      if (rec.precipitation_mm >= 1) return '🌦️';
+      if (rec.temp_max >= 35) return '🥵';
+      if (rec.temp_min <= 14.5) return '🧥';
+      if (rec.cloud_cover >= 75) return '☁️';
+      if (rec.cloud_cover >= 40) return '⛅';
+      return '☀️';
+    }
+
+    function computeDailyFactsBundle(focusRecord) {
+      const all = appState.dataset.daily;
+      const focusIdx = all.findIndex(r => r.date === focusRecord.date);
+      const monthDay = focusRecord.date.slice(5);
+      const sameDayRecords = all.filter(r => r.date.slice(5) === monthDay);
+
+      const mean = (arr, k) => arr.reduce((s, r) => s + Number(r[k] || 0), 0) / Math.max(1, arr.length);
+      const avgMax = mean(sameDayRecords, 'temp_max');
+      const avgMin = mean(sameDayRecords, 'temp_min');
+      const avgRain = mean(sameDayRecords, 'precipitation_mm');
+      const avgWind = mean(sameDayRecords, 'wind_speed_max');
+      const avgHum = mean(sameDayRecords, 'humidity_mean');
+
+      // 1. Weather Twin
+      let bestTwin = all[0];
+      let minTwinDist = Infinity;
+      for (let i = 0; i < all.length; i++) {
+        if (Math.abs(i - focusIdx) <= 5) continue;
+        const cand = all[i];
+        const dist = Math.sqrt(
+          Math.pow((focusRecord.temp_max - cand.temp_max) / 2.2, 2) +
+          Math.pow((focusRecord.temp_min - cand.temp_min) / 1.8, 2) +
+          Math.pow((Math.log1p(focusRecord.precipitation_mm) - Math.log1p(cand.precipitation_mm)) / 0.9, 2) +
+          Math.pow((focusRecord.humidity_mean - cand.humidity_mean) / 10.0, 2) +
+          Math.pow((focusRecord.wind_speed_max - cand.wind_speed_max) / 5.0, 2)
+        );
+        if (dist < minTwinDist) {
+          minTwinDist = dist;
+          bestTwin = cand;
+        }
+      }
+      const twinMatchPct = Math.max(85, Math.min(99, Math.round(100 - minTwinDist * 4.2)));
+
+      // 2. Namma Vibe Score
+      let vibeScore = 100;
+      vibeScore -= Math.abs(focusRecord.temp_max - 26.8) * 3.4;
+      vibeScore -= Math.abs(focusRecord.temp_min - 17.8) * 2.0;
+      vibeScore -= Math.max(0, focusRecord.humidity_mean - 68) * 0.45;
+      if (focusRecord.precipitation_mm > 5) vibeScore -= Math.min(28, focusRecord.precipitation_mm * 0.45);
+      vibeScore = Math.max(38, Math.min(99, Math.round(vibeScore)));
+
+      let vibeTitle = "AC-Free Bliss";
+      let vibeSub = "Ideal rooftop breeze";
+      if (focusRecord.precipitation_mm >= 25) {
+        vibeTitle = "Bajji & Heavy Rain";
+        vibeSub = `${focusRecord.precipitation_mm}mm downpour alert`;
+      } else if (focusRecord.precipitation_mm >= 3) {
+        vibeTitle = "Chai & Drizzle Vibe";
+        vibeSub = `Fresh ${focusRecord.precipitation_mm}mm showers`;
+      } else if (focusRecord.temp_max >= 34) {
+        vibeTitle = "Warm Sunny Peak";
+        vibeSub = `Seek Cubbon Park shade`;
+      } else if (focusRecord.temp_min <= 15.5) {
+        vibeTitle = "Sweater & Kaapi";
+        vibeSub = `Crisp ${focusRecord.temp_min}°C dawn chill`;
+      }
+
+      // 3. Same-Day Records
+      const hottestDay = [...sameDayRecords].sort((a, b) => b.temp_max - a.temp_max)[0];
+      const chilliestDay = [...sameDayRecords].sort((a, b) => a.temp_min - b.temp_min)[0];
+      const wettestDay = [...sameDayRecords].sort((a, b) => b.precipitation_mm - a.precipitation_mm)[0];
+      const windiestDay = [...sameDayRecords].sort((a, b) => b.wind_gusts_max - a.wind_gusts_max)[0];
+
+      // 4. Active Streaks
+      let dryStreak = 0, wetStreak = 0, warmStreak = 0;
+      for (let i = focusIdx; i >= 0; i--) {
+        if (all[i].precipitation_mm < 1.0) dryStreak++; else break;
+      }
+      for (let i = focusIdx; i >= 0; i--) {
+        if (all[i].precipitation_mm >= 1.0) wetStreak++; else break;
+      }
+      for (let i = focusIdx; i >= 0; i--) {
+        if (all[i].temp_max > avgMax) warmStreak++; else break;
+      }
+
+      // 5. Rain Roulette
+      const wetSameDays = sameDayRecords.filter(r => r.precipitation_mm >= 1.0);
+      const rainOddsPct = Math.round((wetSameDays.length / sameDayRecords.length) * 100);
+
+      // 6. Decade Shift
+      const dec1 = sameDayRecords.filter(r => Number(r.date.slice(0, 4)) <= 2016);
+      const dec2 = sameDayRecords.filter(r => Number(r.date.slice(0, 4)) >= 2017);
+      const dec1Max = mean(dec1, 'temp_max');
+      const dec2Max = mean(dec2, 'temp_max');
+      const decadeShift = +(dec2Max - dec1Max).toFixed(2);
+
+      const tempRank = [...sameDayRecords].sort((a, b) => b.temp_max - a.temp_max).findIndex(r => r.date === focusRecord.date) + 1;
+      const rainRank = [...sameDayRecords].sort((a, b) => b.precipitation_mm - a.precipitation_mm).findIndex(r => r.date === focusRecord.date) + 1;
+
+      let headlineFact = "";
+      let subFact = "";
+      const tempDiff = +(focusRecord.temp_max - avgMax).toFixed(1);
+
+      if (focusRecord.date === wettestDay.date && focusRecord.precipitation_mm > 10) {
+        headlineFact = `Wettest ${formatMonthDay(focusRecord.date)} in 20 Years (${focusRecord.precipitation_mm} mm)!`;
+        subFact = `Shattered the 20-year average (${avgRain.toFixed(1)} mm) with ${focusRecord.wind_gusts_max} km/h gusts.`;
+      } else if (focusRecord.date === hottestDay.date) {
+        headlineFact = `Warmest ${formatMonthDay(focusRecord.date)} in Two Decades (${focusRecord.temp_max}°C)!`;
+        subFact = `Ranked #1 out of ${sameDayRecords.length} years (${tempDiff >= 0 ? '+' : ''}${tempDiff}°C above the ${avgMax.toFixed(1)}°C normal).`;
+      } else if (focusRecord.date === chilliestDay.date) {
+        headlineFact = `Chilliest ${formatMonthDay(focusRecord.date)} Dawn in 20 Years (${focusRecord.temp_min}°C)!`;
+        subFact = `Dropped ${(avgMin - focusRecord.temp_min).toFixed(1)}°C below the 20-year normal morning low (${avgMin.toFixed(1)}°C).`;
+      } else if (focusRecord.precipitation_mm >= 15) {
+        headlineFact = `#${rainRank} Wettest ${formatMonthDay(focusRecord.date)} Since 2007 (${focusRecord.precipitation_mm} mm)`;
+        subFact = `Only ${rainOddsPct}% of years see rain on ${formatMonthDay(focusRecord.date)} (normal: ${avgRain.toFixed(1)} mm).`;
+      } else {
+        headlineFact = `Ranks #${tempRank} Warmest ${formatMonthDay(focusRecord.date)} in 20 Years (${focusRecord.temp_max}°C)`;
+        subFact = `20-yr normal is ${avgMax.toFixed(1)}°/${avgMin.toFixed(1)}°C with ${degToCardinal(focusRecord.wind_direction_deg)} breeze.`;
+      }
+
+      return {
+        focusRecord, sameDayRecords, avgMax, avgMin, avgRain, avgWind, avgHum,
+        bestTwin, twinMatchPct, vibeScore, vibeTitle, vibeSub,
+        hottestDay, chilliestDay, wettestDay, windiestDay,
+        dryStreak, wetStreak, warmStreak, rainOddsPct,
+        wetSameDaysCount: wetSameDays.length,
+        decadeShift, dec1Max, dec2Max, tempRank, rainRank,
+        headlineFact, subFact
+      };
+    }
+
+    // ============================================================================
+    // 3. UI RENDERERS (MOBILE-FIRST BENTO LAYOUT)
+    // ============================================================================
+    function renderAll() {
+      if (!appState.dataset) return;
+      const focusRecord = appState.byDateMap.get(appState.focusDate) || appState.dataset.daily[appState.dataset.daily.length - 1];
+      const bundle = computeDailyFactsBundle(focusRecord);
+
+      renderHeroSection(bundle);
+      renderSwipeableStoryDeck(bundle);
+      renderHallOfFame(bundle);
+      renderTwentyYearStripAndChart(bundle);
+      renderLifestyleCompanion(bundle);
+      initDailyQuiz(bundle);
+      populateShareModal(bundle);
+
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    function renderHeroSection(b) {
+      const r = b.focusRecord;
+      const [, mm] = r.date.split('-').map(Number);
+      const season = getSeasonInfo(mm);
+
+      document.getElementById('heroFormattedDate').textContent = formatHumanDate(r.date);
+      document.getElementById('heroSeasonTag').textContent = `${season.icon} ${season.name}`;
+      document.getElementById('heroTempMax').textContent = `${r.temp_max}°`;
+      document.getElementById('heroTempMin').textContent = `/ ${r.temp_min}°C`;
+      document.getElementById('heroWeatherEmoji').textContent = getWeatherEmoji(r);
+      document.getElementById('heroQuickRain').textContent = `${r.precipitation_mm} mm`;
+      document.getElementById('heroQuickWind').textContent = `${r.wind_speed_max} km/h ${degToCardinal(r.wind_direction_deg)}`;
+
+      const diff = +(r.temp_max - b.avgMax).toFixed(1);
+      const diffEl = document.getElementById('heroDeltaBadge');
+      diffEl.textContent = `${diff >= 0 ? '+' : ''}${diff}°C vs 20-yr normal (${b.avgMax.toFixed(1)}°C)`;
+      diffEl.className = `text-[11px] font-mono mt-0.5 ${Math.abs(diff) > 2 ? 'text-amber-400 font-bold' : 'text-emerald-400'}`;
+
+      document.getElementById('heroHeadlineFact').textContent = b.headlineFact;
+      document.getElementById('heroSubFact').textContent = b.subFact;
+
+      // Weather Twin Tile
+      document.getElementById('weatherTwinDate').textContent = formatHumanDate(b.bestTwin.date);
+      document.getElementById('weatherTwinDetails').textContent = `${b.bestTwin.temp_max}°/${b.bestTwin.temp_min}° • ${b.bestTwin.precipitation_mm}mm`;
+      document.getElementById('weatherTwinMatchPct').textContent = `${b.twinMatchPct}%`;
+      document.getElementById('jumpToTwinBtn').onclick = () => {
+        selectDate(b.bestTwin.date);
+        showToast(`Jumped to Weather Twin: ${b.bestTwin.date}`);
+      };
+
+      // Vibe Tile
+      document.getElementById('vibeTitleText').textContent = b.vibeTitle;
+      document.getElementById('vibeSubText').textContent = b.vibeSub;
+      document.getElementById('vibeScoreNumber').textContent = b.vibeScore;
+      document.getElementById('vibeHumidexTag').textContent = `RH: ${r.humidity_mean}% • ${r.pressure_msl} hPa`;
+    }
+
+    function renderSwipeableStoryDeck(b) {
+      const r = b.focusRecord;
+      const container = document.getElementById('storyDeckContainer');
+
+      const roofKwh = +(r.solar_radiation * 0.2778 * 15 * 0.18).toFixed(1);
+      const coffeeCups = Math.round(roofKwh * 85);
+
+      const streakMetric = b.wetStreak > 0 ? `${b.wetStreak}-Day Wet Streak` : `${b.dryStreak}-Day Dry Streak`;
+      const streakBody = b.wetStreak > 0
+        ? `${b.wetStreak} consecutive rainy day(s) recorded up to ${formatMonthDay(r.date)}.`
+        : `${b.dryStreak} consecutive dry day(s) (<1mm) leading up to ${formatMonthDay(r.date)}.`;
+
+      const stories = [
+        {
+          tag: '1/6 • RAIN ROULETTE',
+          icon: 'umbrella',
+          grad: 'story-gradient-1',
+          accent: 'text-cyan-400',
+          metric: `${b.rainOddsPct}% Rain Odds`,
+          body: `${formatMonthDay(r.date)} saw rain in <strong>${b.wetSameDaysCount} of ${b.sameDayRecords.length} years</strong>. Wet-day avg is ${(b.avgRain * (b.sameDayRecords.length / Math.max(1, b.wetSameDaysCount))).toFixed(1)} mm.`
+        },
+        {
+          tag: '2/6 • ACTIVE STREAK',
+          icon: 'flame',
+          grad: 'story-gradient-2',
+          accent: 'text-amber-400',
+          metric: streakMetric,
+          body: `${streakBody} Highs above 20-yr mean for <strong>${b.warmStreak} day(s)</strong>.`
+        },
+        {
+          tag: '3/6 • DECADE SHIFT',
+          icon: 'trending-up',
+          grad: 'story-gradient-3',
+          accent: 'text-emerald-400',
+          metric: `${b.decadeShift >= 0 ? '+' : ''}${b.decadeShift}°C Shift`,
+          body: `${formatMonthDay(r.date)} avg high moved from <strong>${b.dec1Max.toFixed(1)}°C</strong> (2007–16) to <strong>${b.dec2Max.toFixed(1)}°C</strong> (2017–26).`
+        },
+        {
+          tag: '4/6 • KAAPI SOLAR POWER',
+          icon: 'sun',
+          grad: 'story-gradient-4',
+          accent: 'text-purple-400',
+          metric: `${coffeeCups.toLocaleString()} Cups Kaapi`,
+          body: `${r.solar_radiation} MJ/m² solar on a 3kW roof yields <strong>${roofKwh} kWh</strong> — brews ${coffeeCups.toLocaleString()} filter coffees!`
+        },
+        {
+          tag: '5/6 • DIURNAL SWING',
+          icon: 'thermometer',
+          grad: 'story-gradient-1',
+          accent: 'text-sky-400',
+          metric: `${(r.temp_max - r.temp_min).toFixed(1)}°C Swing`,
+          body: `Shifted ${(r.temp_max - r.temp_min).toFixed(1)}°C from dawn (${r.temp_min}°C) to peak (${r.temp_max}°C) vs ${(b.avgMax - b.avgMin).toFixed(1)}°C normal.`
+        },
+        {
+          tag: '6/6 • WIND & PRESSURE',
+          icon: 'wind',
+          grad: 'story-gradient-3',
+          accent: 'text-indigo-400',
+          metric: `${degToCardinal(r.wind_direction_deg)} ${r.wind_gusts_max} km/h`,
+          body: `Peak gusts hit <strong>${r.wind_gusts_max} km/h</strong> (${r.pressure_msl} hPa) vs 20-yr mean breeze of ${b.avgWind.toFixed(1)} km/h.`
+        }
+      ];
+
+      container.innerHTML = stories.map(s => `
+        <div class="snap-center shrink-0 w-[84%] sm:w-64 glass-card ${s.grad} rounded-3xl p-4 border border-white/10 flex flex-col justify-between gap-2">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-mono font-bold uppercase tracking-wider ${s.accent}">${s.tag}</span>
+            <i data-lucide="${s.icon}" class="w-4 h-4 ${s.accent}"></i>
+          </div>
+          <div class="font-mono text-base sm:text-lg font-extrabold text-slate-900 dark:text-white truncate">
+            ${s.metric}
+          </div>
+          <p class="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed line-clamp-2">
+            ${s.body}
+          </p>
+        </div>
+      `).join('');
+    }
+
+    function renderHallOfFame(b) {
+      const mdLabel = formatMonthDay(b.focusRecord.date);
+      document.getElementById('hallOfFameTitle').textContent = `On ${mdLabel}: 20-Yr Records`;
+
+      const cards = [
+        {
+          label: 'Hottest',
+          emoji: '🔥',
+          val: `${b.hottestDay.temp_max}°C`,
+          year: b.hottestDay.date.slice(0, 4),
+          date: b.hottestDay.date,
+          sub: `Low ${b.hottestDay.temp_min}°C • ${b.hottestDay.humidity_mean}% RH`,
+          color: 'border-orange-500/30 bg-orange-500/10 text-orange-400'
+        },
+        {
+          label: 'Chilliest',
+          emoji: '❄️',
+          val: `${b.chilliestDay.temp_min}°C`,
+          year: b.chilliestDay.date.slice(0, 4),
+          date: b.chilliestDay.date,
+          sub: `High ${b.chilliestDay.temp_max}°C • Crisp`,
+          color: 'border-sky-500/30 bg-sky-500/10 text-sky-400'
+        },
+        {
+          label: 'Wettest',
+          emoji: '🌧️',
+          val: `${b.wettestDay.precipitation_mm}mm`,
+          year: b.wettestDay.date.slice(0, 4),
+          date: b.wettestDay.date,
+          sub: `High ${b.wettestDay.temp_max}°C • ${b.wettestDay.humidity_mean}% RH`,
+          color: 'border-cyan-500/30 bg-cyan-500/10 text-cyan-400'
+        },
+        {
+          label: 'Windiest',
+          emoji: '💨',
+          val: `${b.windiestDay.wind_gusts_max}km/h`,
+          year: b.windiestDay.date.slice(0, 4),
+          date: b.windiestDay.date,
+          sub: `Flow ${degToCardinal(b.windiestDay.wind_direction_deg)} ${b.windiestDay.wind_speed_max}km/h`,
+          color: 'border-purple-500/30 bg-purple-500/10 text-purple-400'
+        }
+      ];
+
+      document.getElementById('hallOfFameGrid').innerHTML = cards.map(c => `
+        <button onclick="selectDate('${c.date}')" class="text-left p-3 rounded-2xl border ${c.color} active:scale-95 transition flex flex-col justify-between gap-1">
+          <div class="flex items-center justify-between w-full">
+            <span class="text-[10px] font-bold uppercase tracking-wider">${c.emoji} ${c.label}</span>
+            <span class="font-mono text-[10px] font-extrabold px-1.5 py-0.5 rounded-md bg-slate-900/60 text-white">${c.year}</span>
+          </div>
+          <div class="font-mono text-base sm:text-lg font-extrabold text-slate-900 dark:text-white truncate mt-0.5">
+            ${c.val}
+          </div>
+          <div class="text-[10px] text-slate-500 dark:text-slate-400 font-mono truncate w-full">${c.sub}</div>
+        </button>
+      `).join('');
+    }
+
+    function renderTwentyYearStripAndChart(b) {
+      const strip = document.getElementById('twentyYearStrip');
+      const sorted = [...b.sameDayRecords].sort((a, c) => c.date.localeCompare(a.date));
+
+      document.getElementById('timelineStripTitle').textContent = `Every ${formatMonthDay(b.focusRecord.date)} (20 Yrs)`;
+
+      strip.innerHTML = sorted.map(r => {
+        const isCurrent = r.date === b.focusRecord.date;
+        const yr = r.date.slice(0, 4);
+        const cls = isCurrent
+          ? 'bg-cyan-500 text-white border-cyan-400 shadow-md shadow-cyan-500/25'
+          : 'bento-tile text-slate-700 dark:text-slate-300';
+        return `
+          <button onclick="selectDate('${r.date}')" class="snap-start shrink-0 w-16 py-2 px-1.5 rounded-2xl border ${cls} active:scale-95 transition flex flex-col items-center gap-0.5 font-mono">
+            <span class="text-[11px] font-extrabold">${yr}</span>
+            <span class="text-base leading-none my-0.5">${getWeatherEmoji(r)}</span>
+            <span class="text-[10px] font-bold">${r.temp_max}°</span>
+            <span class="text-[9px] opacity-75 truncate max-w-full">${r.precipitation_mm > 0 ? r.precipitation_mm + 'mm' : r.temp_min + '°'}</span>
+          </button>
+        `;
+      }).join('');
+
+      const ctx = document.getElementById('sameDayMiniChart').getContext('2d');
+      if (appState.sameDayChart) appState.sameDayChart.destroy();
+
+      const chronological = [...b.sameDayRecords].sort((a, c) => a.date.localeCompare(c.date));
+      const labels = chronological.map(r => "'" + r.date.slice(2, 4));
+      const isDark = document.documentElement.classList.contains('dark');
+      const textColor = isDark ? '#94a3b8' : '#475569';
+      const gridColor = isDark ? 'rgba(148, 163, 184, 0.08)' : 'rgba(15, 23, 42, 0.06)';
+
+      appState.sameDayChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [
+            {
+              type: 'line',
+              label: 'Max °C',
+              data: chronological.map(r => r.temp_max),
+              borderColor: '#f97316',
+              borderWidth: 2,
+              pointRadius: chronological.map(r => r.date === b.focusRecord.date ? 5 : 2),
+              pointBackgroundColor: chronological.map(r => r.date === b.focusRecord.date ? '#06b6d4' : '#f97316'),
+              tension: 0.3,
+              yAxisID: 'y'
+            },
+            {
+              type: 'line',
+              label: 'Min °C',
+              data: chronological.map(r => r.temp_min),
+              borderColor: '#38bdf8',
+              borderWidth: 1.5,
+              pointRadius: 1.5,
+              tension: 0.3,
+              yAxisID: 'y'
+            },
+            {
+              type: 'bar',
+              label: 'Rain mm',
+              data: chronological.map(r => r.precipitation_mm),
+              backgroundColor: chronological.map(r => r.date === b.focusRecord.date ? '#06b6d4' : 'rgba(56, 189, 248, 0.35)'),
+              borderRadius: 3,
+              yAxisID: 'y1'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          onClick: (evt, el) => {
+            if (el.length > 0) selectDate(chronological[el[0].index].date);
+          },
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { color: textColor, font: { family: 'JetBrains Mono', size: 9 }, maxRotation: 0 }, grid: { display: false } },
+            y: { position: 'left', ticks: { color: textColor, font: { family: 'JetBrains Mono', size: 9 }, maxTicksLimit: 5 }, grid: { color: gridColor } },
+            y1: { position: 'right', ticks: { color: '#38bdf8', font: { family: 'JetBrains Mono', size: 9 }, maxTicksLimit: 4 }, grid: { drawOnChartArea: false } }
+          }
+        }
+      });
+    }
+
+    function renderLifestyleCompanion(b) {
+      const r = b.focusRecord;
+      const grid = document.getElementById('lifestyleCardsGrid');
+
+      const dryingMinutes = Math.round(Math.max(45, Math.min(360, 210 - (r.evapotranspiration * 22) - (r.wind_speed_max * 1.8) + (r.humidity_mean - 55) * 1.9 + (r.precipitation_mm > 2 ? 140 : 0))));
+      const dryingDesc = r.precipitation_mm > 5 ? 'Use indoor rack' : (dryingMinutes <= 95 ? 'Fast terrace dry' : 'Moderate dry');
+
+      const walkScore = Math.max(40, Math.min(99, Math.round(100 - Math.max(0, r.temp_min - 20) * 5 - (r.precipitation_mm > 2 ? 30 : 0))));
+      const commuteDesc = r.precipitation_mm >= 10 ? 'Pack rain gear' : (r.precipitation_mm >= 1 ? 'Light drizzle' : 'Clear smooth ride');
+
+      const netWater = +(r.precipitation_mm - r.evapotranspiration).toFixed(1);
+      const gardenDesc = netWater >= 0 ? `Skip watering` : `Water plants`;
+
+      const items = [
+        {
+          emoji: '👕',
+          title: 'Laundry Dry',
+          val: r.precipitation_mm > 5 ? 'Indoor' : `~${dryingMinutes}m`,
+          desc: dryingDesc,
+          color: 'border-amber-500/25 bg-amber-500/10 text-amber-400'
+        },
+        {
+          emoji: '🌳',
+          title: 'Park Walk',
+          val: `${walkScore}/100`,
+          desc: `Dawn ${r.temp_min}°C • ${r.humidity_mean}% RH`,
+          color: 'border-emerald-500/25 bg-emerald-500/10 text-emerald-400'
+        },
+        {
+          emoji: '🛵',
+          title: '2-Wheeler',
+          val: `${b.rainOddsPct}% Rain`,
+          desc: commuteDesc,
+          color: 'border-cyan-500/25 bg-cyan-500/10 text-cyan-400'
+        },
+        {
+          emoji: '🪴',
+          title: 'Garden ET₀',
+          val: `${r.evapotranspiration}mm`,
+          desc: gardenDesc,
+          color: 'border-indigo-500/25 bg-indigo-500/10 text-indigo-400'
+        }
+      ];
+
+      grid.innerHTML = items.map(item => `
+        <div class="p-3 rounded-2xl border ${item.color} flex flex-col justify-between gap-1">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-bold uppercase tracking-wider">${item.title}</span>
+            <span class="text-sm">${item.emoji}</span>
+          </div>
+          <div class="font-mono text-base font-extrabold text-slate-900 dark:text-white truncate">
+            ${item.val}
+          </div>
+          <div class="text-[10px] text-slate-500 dark:text-slate-400 truncate">${item.desc}</div>
+        </div>
+      `).join('');
+    }
+
+    // ============================================================================
+    // 4. COMPACT 1-CARD INTERACTIVE QUIZ STEPPER
+    // ============================================================================
+    function initDailyQuiz(b) {
+      const r = b.focusRecord;
+      const md = formatMonthDay(r.date);
+
+      appState.quizAnswered = {};
+      appState.quizScore = 0;
+      appState.quizCurrentStep = 0;
+
+      const isWarmerThanNormal = r.temp_max >= b.avgMax;
+      const wetYear = b.wettestDay.date.slice(0, 4);
+      const hotYear = b.hottestDay.date.slice(0, 4);
+
+      appState.quizQuestions = [
+        {
+          id: 'q0',
+          q: `Was ${formatHumanDate(r.date)} (${r.temp_max}°C) warmer or cooler than the 20-year average for ${md}?`,
+          options: [
+            { label: 'Warmer than 20-Yr Normal', correct: isWarmerThanNormal },
+            { label: 'Cooler than 20-Yr Normal', correct: !isWarmerThanNormal }
+          ],
+          explain: `20-yr average max on ${md} is ${b.avgMax.toFixed(1)}°C (${r.date} was ${Math.abs(r.temp_max - b.avgMax).toFixed(1)}°C ${isWarmerThanNormal ? 'warmer' : 'cooler'}).`
+        },
+        {
+          id: 'q1',
+          q: `Which year had the heaviest rainfall on ${md} (${b.wettestDay.precipitation_mm} mm)?`,
+          options: buildYearOptions(wetYear),
+          explain: `${b.wettestDay.date} recorded ${b.wettestDay.precipitation_mm} mm — the wettest ${md} in 20 years!`
+        },
+        {
+          id: 'q2',
+          q: `What is the all-time 20-year high temperature for ${md} (set in ${hotYear})?`,
+          options: [
+            { label: `${b.hottestDay.temp_max}°C (${hotYear})`, correct: true },
+            { label: `${+(b.hottestDay.temp_max + 2.8).toFixed(1)}°C`, correct: false },
+            { label: `${+(b.hottestDay.temp_max - 3.1).toFixed(1)}°C`, correct: false }
+          ],
+          explain: `Record high for ${md} is ${b.hottestDay.temp_max}°C on ${b.hottestDay.date}.`
+        }
+      ];
+
+      renderActiveQuizStep();
+    }
+
+    function renderActiveQuizStep() {
+      const step = appState.quizCurrentStep;
+      const qObj = appState.quizQuestions[step];
+      const ans = appState.quizAnswered[step];
+
+      document.getElementById('quizScoreBadge').textContent = `${appState.quizScore}/3`;
+
+      document.getElementById('quizStepPills').innerHTML = [0, 1, 2].map(idx => {
+        const isCurrent = idx === step;
+        const done = appState.quizAnswered[idx] !== undefined;
+        const cls = isCurrent
+          ? 'bg-indigo-500 text-white'
+          : (done ? 'bg-emerald-500/20 text-emerald-400' : 'bento-tile text-slate-400');
+        return `<button onclick="setQuizStep(${idx})" class="w-6 h-6 rounded-lg font-mono text-[10px] font-bold ${cls} transition">Q${idx + 1}</button>`;
+      }).join('');
+
+      const container = document.getElementById('quizContainer');
+      container.innerHTML = `
+        <div class="p-3.5 rounded-2xl bento-tile space-y-2.5">
+          <div class="text-xs font-bold text-slate-900 dark:text-white leading-snug">${qObj.q}</div>
+          <div class="grid grid-cols-1 gap-1.5">
+            ${qObj.options.map((opt, oIdx) => {
+              let btnCls = 'bg-white/80 dark:bg-slate-900/90 border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200';
+              if (ans !== undefined) {
+                if (opt.correct) btnCls = 'bg-emerald-500 text-white border-emerald-400';
+                else if (ans.pickedIdx === oIdx) btnCls = 'bg-rose-500 text-white border-rose-400';
+              }
+              return `
+                <button onclick="answerQuiz(${step}, ${opt.correct}, ${oIdx})" class="py-2 px-3 rounded-xl text-xs font-mono font-bold border ${btnCls} transition text-left flex items-center justify-between">
+                  <span>${opt.label}</span>
+                  ${ans !== undefined && opt.correct ? '<span>✓</span>' : ''}
+                </button>
+              `;
+            }).join('')}
+          </div>
+          ${ans !== undefined ? `
+            <div class="pt-1 flex items-center justify-between gap-2 border-t border-slate-300/60 dark:border-slate-800">
+              <p class="text-[11px] text-cyan-500 dark:text-cyan-400 font-medium">${qObj.explain}</p>
+              ${step < 2 ? `<button onclick="setQuizStep(${step + 1})" class="px-2.5 py-1 rounded-lg bg-indigo-500 text-white text-[10px] font-bold shrink-0">Next →</button>` : ''}
+            </div>
+          ` : ''}
+        </div>
+      `;
+    }
+
+    function buildYearOptions(correctYearStr) {
+      const correctYr = Number(correctYearStr);
+      const fake1 = correctYr >= 2022 ? correctYr - 4 : correctYr + 3;
+      const fake2 = correctYr <= 2011 ? correctYr + 6 : correctYr - 5;
+      return [
+        { label: `${correctYr}`, correct: true },
+        { label: `${fake1}`, correct: false },
+        { label: `${fake2}`, correct: false }
+      ].sort((a, b) => a.label.localeCompare(b.label));
+    }
+
+    window.setQuizStep = function(idx) {
+      appState.quizCurrentStep = idx;
+      renderActiveQuizStep();
+    };
+
+    window.answerQuiz = function(stepIdx, isCorrect, pickedIdx) {
+      if (appState.quizAnswered[stepIdx] !== undefined) return;
+      appState.quizAnswered[stepIdx] = { isCorrect, pickedIdx };
+      if (isCorrect) appState.quizScore++;
+      renderActiveQuizStep();
+    };
+
+    // ============================================================================
+    // 5. SHAREABLE SUMMARY CARD & CLIPBOARD
+    // ============================================================================
+    function populateShareModal(b) {
+      const r = b.focusRecord;
+      document.getElementById('shareCardDate').textContent = formatHumanDate(r.date).toUpperCase();
+      document.getElementById('shareCardHeadline').textContent = b.headlineFact;
+      document.getElementById('shareCardTemp').textContent = `${r.temp_max}° / ${r.temp_min}°C`;
+      document.getElementById('shareCardRain').textContent = `${r.precipitation_mm} mm`;
+      document.getElementById('shareCardTwin').textContent = `${b.bestTwin.date}`;
+      document.getElementById('shareCardVibe').textContent = `Namma Vibe: ${b.vibeScore}/100 — ${b.vibeTitle}`;
+
+      const shareText = [
+        `🌦️ Namma Bengaluru Weather Facts (${formatHumanDate(r.date)})`,
+        `• ${b.headlineFact}`,
+        `• Today: ${r.temp_max}°/${r.temp_min}°C | Rain: ${r.precipitation_mm}mm | Wind: ${r.wind_speed_max}km/h ${degToCardinal(r.wind_direction_deg)}`,
+        `• Weather Twin: ${formatHumanDate(b.bestTwin.date)} (${b.twinMatchPct}% Match)`,
+        `• Namma Vibe Score: ${b.vibeScore}/100 (${b.vibeTitle})`
+      ].join('\n');
+
+      document.getElementById('shareTextOutput').value = shareText;
+    }
+
+    // ============================================================================
+    // 6. INITIALIZATION & EVENT BINDINGS
+    // ============================================================================
+    window.selectDate = function(dateStr) {
+      if (!appState.byDateMap.has(dateStr)) return;
+      appState.focusDate = dateStr;
+      document.getElementById('focusDateInput').value = dateStr;
+      renderAll();
+    };
+
+    async function initApp() {
+      let archive = generateBengaluru20YearDataset();
+      try {
+        const res = await fetch('./bengaluru_weather.json', { cache: 'no-store' });
+        if (res.ok) {
+          const json = await res.json();
+          if (json.daily && Array.isArray(json.daily)) {
+            const merged = new Map();
+            archive.daily.forEach(d => merged.set(d.date, d));
+            json.daily.forEach(d => merged.set(d.date, d));
+            archive.daily = Array.from(merged.values()).sort((a, b) => a.date.localeCompare(b.date));
+          }
+        }
+      } catch (_) {}
+
+      appState.dataset = archive;
+      appState.byDateMap.clear();
+      archive.daily.forEach(r => appState.byDateMap.set(r.date, r));
+
+      const firstDate = archive.daily[0].date;
+      const lastDate = archive.daily[archive.daily.length - 1].date;
+      appState.focusDate = lastDate;
+
+      const dateInput = document.getElementById('focusDateInput');
+      dateInput.min = firstDate;
+      dateInput.max = lastDate;
+      dateInput.value = lastDate;
+
+      document.getElementById('archiveCountBadge').textContent = `${Math.round(archive.daily.length / 365)}Y`;
+
+      renderAll();
+    }
+
+    function bindEvents() {
+      document.getElementById('focusDateInput').addEventListener('change', (e) => {
+        if (appState.byDateMap.has(e.target.value)) {
+          selectDate(e.target.value);
+        } else {
+          showToast('Date outside archive range');
+        }
+      });
+
+      document.getElementById('prevDayBtn').addEventListener('click', () => {
+        const all = appState.dataset.daily;
+        const idx = all.findIndex(r => r.date === appState.focusDate);
+        if (idx > 0) selectDate(all[idx - 1].date);
+      });
+
+      document.getElementById('nextDayBtn').addEventListener('click', () => {
+        const all = appState.dataset.daily;
+        const idx = all.findIndex(r => r.date === appState.focusDate);
+        if (idx >= 0 && idx < all.length - 1) selectDate(all[idx + 1].date);
+      });
+
+      document.getElementById('resetTodayBtn').addEventListener('click', () => {
+        const last = appState.dataset.daily[appState.dataset.daily.length - 1].date;
+        selectDate(last);
+        showToast(`Reset to Today (${last})`);
+      });
+
+      document.getElementById('surpriseDateBtn').addEventListener('click', () => {
+        const all = appState.dataset.daily;
+        const randomRec = all[Math.floor(Math.random() * all.length)];
+        selectDate(randomRec.date);
+        showToast(`Time-traveled to ${formatHumanDate(randomRec.date)}`);
+      });
+
+      // Update pagination dots when swiping the 6-Fact Deck
+      const deck = document.getElementById('storyDeckContainer');
+      deck.addEventListener('scroll', () => {
+        const cardWidth = deck.firstElementChild ? deck.firstElementChild.offsetWidth + 12 : 260;
+        const activeIdx = Math.min(5, Math.max(0, Math.round(deck.scrollLeft / cardWidth)));
+        const dots = document.getElementById('storyDots').children;
+        for (let i = 0; i < dots.length; i++) {
+          dots[i].className = i === activeIdx
+            ? 'w-4 h-1.5 rounded-full bg-cyan-400 transition-all'
+            : 'w-1.5 h-1.5 rounded-full bg-slate-400/40 transition-all';
+        }
+      });
+
+      // Share Modal
+      const shareModal = document.getElementById('shareModal');
+      document.getElementById('openShareModalBtn').addEventListener('click', () => {
+        shareModal.classList.remove('hidden');
+        shareModal.classList.add('flex');
+      });
+      document.getElementById('closeShareModalBtn').addEventListener('click', () => {
+        shareModal.classList.add('hidden');
+        shareModal.classList.remove('flex');
+      });
+
+      document.getElementById('copyShareTextBtn').addEventListener('click', () => {
+        const textarea = document.getElementById('shareTextOutput');
+        textarea.select();
+        document.execCommand('copy');
+        showToast('Copied Weather Summary to clipboard!');
+      });
+
+      document.getElementById('themeToggleBtn').addEventListener('click', () => {
+        document.documentElement.classList.toggle('dark');
+        renderAll();
+      });
+    }
+
+    window.onload = function() {
+      bindEvents();
+      initApp();
+    };
+  </script>
+</body>
+</html>
