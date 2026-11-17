@@ -1,64 +1,51 @@
 {
-  "generated_at": "2026-11-15T21:07:01Z",
+  "generated_at": "2026-11-17T09:20:36Z",
   "model": "gemma-4-26b-a4b-it",
   "source": "Open-Meteo live telemetry + Windfyre ML baseline",
   "cities": {
     "bengaluru-nandini-layout": {
       "status": "ok",
-      "summary": "Bengaluru is experiencing overcast conditions with lower than expected humidity and minimal precipitation compared to the ML baseline.",
-      "current_conditions": "Temperature is 18.8C with 78% humidity and wind speeds of 6.2 km/h from the east.",
+      "summary": "Bengaluru is experiencing dry, relatively warm conditions with lower than baseline humidity and wind speeds.",
+      "current_conditions": "Temperature is 28.0\u00b0C with 33% humidity and northwesterly winds at 7.1 km/h.",
       "baseline_comparison": "Recent observations show significantly lower humidity and precipitation than the ML baseline.",
-      "next_24h_outlook": "Expect overcast skies with temperatures around 22.6C and humidity around 57.6%.",
-      "next_7d_outlook": "The 7-day forecast indicates mostly overcast or cloudy skies with temperatures between 22.1C and 24.5C and low precipitation.",
+      "next_24h_outlook": "Expect continued dry conditions with temperatures around 22.3\u00b0C and light winds.",
+      "next_7d_outlook": "The week ahead shows stable temperatures and low precipitation, with a slight increase in wind and humidity by Nov 23.",
       "anomalies": [
         {
           "type": "humidity",
-          "severity": "medium",
-          "timeframe": "Recent 7 days",
-          "description": "Observed humidity has been consistently lower than the ML baseline."
-        },
-        {
-          "type": "precipitation",
-          "severity": "low",
-          "timeframe": "Recent 7 days",
-          "description": "Total precipitation has been significantly lower than the ML baseline."
-        },
-        {
-          "type": "wind",
-          "severity": "low",
-          "timeframe": "Forecasted 7 days",
-          "description": "Wind direction is forecasted to deviate from the ML baseline."
+          "severity": "high",
+          "timeframe": "Last 7 days",
+          "description": "Observed humidity levels have been consistently lower than the ML baseline."
         }
       ],
       "watch_items": [
-        "Low humidity levels",
-        "Minimal precipitation compared to baseline"
+        "Low humidity levels"
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecasts are subject to uncertainty due to model validation metrics.",
-      "updated_at": "2026-11-15T21:07:01Z"
+      "data_quality_note": "Forecasts are subject to uncertainty due to variability in recent wind and humidity patterns.",
+      "updated_at": "2026-11-17T09:20:36Z"
     },
     "nagamangala": {
       "status": "ok",
-      "summary": "Nagamangala is experiencing relatively stable temperatures and low precipitation, though humidity levels are consistently lower than the ML baseline.",
-      "current_conditions": "Current temperature is 20.0C with 70% humidity and wind speeds of 8.7 km/h from the WNW.",
-      "baseline_comparison": "Recent observations show lower humidity and precipitation compared to the ML baseline, with wind directions varying more frequently.",
-      "next_24h_outlook": "The next 24 hours are expected to have temperatures around 23.0C and wind speeds of 7.4 km/h with no precipitation.",
-      "next_7d_outlook": "The next 7 days will see temperatures between 22.4C and 24.0C, with increased wind speeds and gusts around Nov 19-20.",
+      "summary": "Nagamangala is experiencing warmer temperatures and significantly lower humidity compared to the historical baseline.",
+      "current_conditions": "Current temperature is 28.6C with 36% humidity and wind speeds of 8.7 km/h.",
+      "baseline_comparison": "Recent observations show temperatures consistently above baseline and humidity levels significantly below baseline.",
+      "next_24h_outlook": "The next 24 hours will see temperatures around 22.3C with low humidity and light to moderate wind.",
+      "next_7d_outlook": "The upcoming week shows stable temperatures between 21.7C and 23.7C, with a notable increase in wind and precipitation on Nov 23.",
       "anomalies": [
         {
           "type": "humidity",
-          "severity": "medium",
+          "severity": "high",
           "timeframe": "Last 7 days",
-          "description": "Average humidity has been consistently lower than the ML baseline, often in the 50-70% range."
+          "description": "Humidity levels have been consistently lower than the ML baseline throughout the week."
         }
       ],
       "watch_items": [
-        "Monitor wind gusts up to 35 km/h expected around Nov 19."
+        "Increased wind speeds and precipitation expected on Nov 23."
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecasts are subject to uncertainty; model validation shows a temperature MAE of 1.16C and wind speed MAE of 3.1 km/h.",
-      "updated_at": "2026-11-15T21:07:01Z"
+      "data_quality_note": "Forecast uncertainty is present; model validation data suggests moderate accuracy for temperature and wind.",
+      "updated_at": "2026-11-17T09:20:36Z"
     }
   }
 }
