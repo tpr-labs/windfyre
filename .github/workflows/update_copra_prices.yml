@@ -1,27 +1,33 @@
 name: Update Tiptur Copra Prices Daily
-​on:
-schedule:
-# Runs every day at 20:30 IST (15:00 UTC)
-- cron: '30 15 * * *'
-workflow_dispatch: # Allows manual trigger from GitHub Actions tab
-​permissions:
-contents: write
-​jobs:
-update-prices:
-runs-on: ubuntu-latest
-steps:
-- name: Checkout Repository
-uses: actions/checkout@v4
-​- name: Set up Python
-uses: actions/setup-python@v5
-with:
-python-version: '3.10'
-​- name: Run Price Generator / Updater Script
-run: |
-python generate_coconut_prices.py
-​- name: Commit and Push Changes
-run: |
-git config --global user.name "github-actions[bot]"
-git config --global user.email "github-actions[bot]@users.noreply.github.com"
-git add coconut_prices.json
-git diff --quiet && git diff --staged --quiet || (git commit -m "chore: automated daily Tiptur APMC price sync [skip ci]" && git push)
+
+on:
+  schedule:
+    # Runs every day at 20:30 IST (15:00 UTC)
+    - cron: '0 15 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-prices:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Run Price Generator Script
+        run: python generate_coconut_prices.py
+
+      - name: Commit and Push Changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add coconut_prices.json
+          git diff --quiet && git diff --staged --quiet || (git commit -m "chore: automated daily Tiptur APMC price sync [skip ci]" && git push)
