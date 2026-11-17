@@ -77,9 +77,9 @@ cursor: pointer;
 <div class="flex flex-wrap items-center gap-2.5 text-xs">
 <div id="dataSourceBadge" class="px-3 py-1.5 rounded-lg bg-gray-900 border border-gray-800 text-gray-300 font-mono flex items-center gap-2" title="">
 <span id="dataSourceDot" class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
-<span id="dataSourceText">Loading coconut_prices.json...</span>
+<span id="dataSourceText">Initializing...</span>
 </div>
-<button onclick="initApp()" class="px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-200 border border-gray-700 font-medium transition cursor-pointer" title="Re-fetch coconut_prices.json">
+<button onclick="syncLiveJson()" class="px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-200 border border-gray-700 font-medium transition cursor-pointer" title="Re-fetch coconut_prices.json">
 Reload JSON
 </button>
 <button onclick="jumpToLatest()" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-medium transition cursor-pointer">
@@ -89,7 +89,7 @@ Today's Rate
 </div>
 </header>
 ​<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-​<!-- Optional Load Warning Banner (Hidden when Live JSON loads cleanly) -->
+​<!-- Diagnostic Banner (Only shown if Live JSON fetch fails or has an error) -->
 <div id="jsonStatusBanner" class="hidden rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-xs text-amber-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
 <div id="jsonStatusMessage"></div>
 <button onclick="document.getElementById('jsonStatusBanner').classList.add('hidden')" class="text-amber-300 hover:text-white underline self-start sm:self-auto cursor-pointer">Dismiss</button>
@@ -298,7 +298,7 @@ Recent Back-Predictions (Real vs ML)
 </footer>
 ​<script>
 // =========================================================================
-// 1. GLOBAL STATE & ROBUST GITHUB PAGES DATA LOADER
+// 1. GLOBAL STATE, UTC DATE HELPERS & INSTANT-RENDER + LIVE JSON SYNC
 // =========================================================================
 let fullDataset = [];
 let selectedDateStr = null;
@@ -332,6 +332,13 @@ let pickerBound = false;
 ["2026-11-02", 30739], ["2026-11-05", 31500], ["2026-11-09", 31707],
 ["2026-11-12", 31608], ["2026-11-14", 31650], ["2026-11-17", 31720]
 ];
+​// Strict UTC parser so IST (+5:30) never shifts YYYY-MM-DD backward by 1 day
+function parseUTC(dateStr) {
+return new Date(dateStr + 'T00:00:00Z');
+}
+​function formatUTC(dt) {
+return dt.toISOString().slice(0, 10);
+}
 ​function normalizeRow(row) {
 const modal = Number(row.modal_price);
 return {
@@ -345,32 +352,27 @@ arrivals_qtl: Number(row.arrivals_qtl ?? 420),
 copra_ref_qtl: Number(row.copra_ref_qtl ?? Math.round(modal * 0.75))
 };
 }
-​// Densifies sparse JSON (e.g., 31 benchmark rows) into continuous daily records
-// while preserving EVERY exact JSON record verbatim on its date.
-function ensureDailySeries(rawRows) {
+​function ensureDailySeries(rawRows) {
 const cleaned = rawRows
 .filter(r => r && r.date && !isNaN(Number(r.modal_price)))
 .map(normalizeRow)
 .sort((a, b) => a.date.localeCompare(b.date));
 ​if (cleaned.length < 2) return cleaned;
-​// Deduplicate by date (keep latest entry for a given date)
-const exactMap = new Map();
+​const exactMap = new Map();
 cleaned.forEach(r => exactMap.set(r.date, r));
 const uniqueSorted = Array.from(exactMap.values()).sort((a, b) => a.date.localeCompare(b.date));
-​const startMs = new Date(uniqueSorted[0].date + 'T00:00:00').getTime();
-const endMs = new Date(uniqueSorted[uniqueSorted.length - 1].date + 'T00:00:00').getTime();
+​const startMs = parseUTC(uniqueSorted[0].date).getTime();
+const endMs = parseUTC(uniqueSorted[uniqueSorted.length - 1].date).getTime();
 const totalSpanDays = Math.round((endMs - startMs) / 86400000) + 1;
-​// Already dense daily data
-if (uniqueSorted.length >= totalSpanDays * 0.9 && uniqueSorted.length >= 60) {
+​if (uniqueSorted.length >= totalSpanDays * 0.9 && uniqueSorted.length >= 60) {
 return uniqueSorted;
 }
-​// Smooth cosine interpolation between exact JSON records so ML always has daily continuity
-const densified = [];
+​const densified = [];
 let segIdx = 0;
-const cur = new Date(uniqueSorted[0].date + 'T00:00:00');
-const end = new Date(uniqueSorted[uniqueSorted.length - 1].date + 'T00:00:00');
+const cur = parseUTC(uniqueSorted[0].date);
+const end = parseUTC(uniqueSorted[uniqueSorted.length - 1].date);
 ​while (cur <= end) {
-const dStr = cur.toISOString().slice(0, 10);
+const dStr = formatUTC(cur);
 if (exactMap.has(dStr)) {
 densified.push(exactMap.get(dStr));
 } else {
@@ -379,8 +381,8 @@ segIdx++;
 }
 const r0 = uniqueSorted[segIdx];
 const r1 = uniqueSorted[Math.min(segIdx + 1, uniqueSorted.length - 1)];
-const t0 = new Date(r0.date + 'T00:00:00').getTime();
-const t1 = new Date(r1.date + 'T00:00:00').getTime();
+const t0 = parseUTC(r0.date).getTime();
+const t1 = parseUTC(r1.date).getTime();
 const t = cur.getTime();
 const u = t1 > t0 ? (t - t0) / (t1 - t0) : 0;
 const w = (1 - Math.cos(u * Math.PI)) / 2;
@@ -397,12 +399,12 @@ arrivals_qtl: +lerp(r0.arrivals_qtl, r1.arrivals_qtl).toFixed(1),
 copra_ref_qtl: Math.round(lerp(r0.copra_ref_qtl, r1.copra_ref_qtl))
 });
 }
-cur.setDate(cur.getDate() + 1);
+cur.setUTCDate(cur.getUTCDate() + 1);
 }
 return densified;
 }
 ​function buildFallbackDataset() {
-const parsed = OFFICIAL_ANCHORS.map(([d, p]) => [new Date(d + "T00:00:00").getTime(), p]);
+const parsed = OFFICIAL_ANCHORS.map(([d, p]) => [parseUTC(d).getTime(), p]);
 function interpAnchor(tMs) {
 if (tMs <= parsed[0][0]) return parsed[0][1];
 if (tMs >= parsed[parsed.length - 1][0]) return parsed[parsed.length - 1][1];
@@ -420,14 +422,14 @@ let seed = 42;
 function rand() { seed = (seed * 1664525 + 1013904223) % 4294967296; return seed / 4294967296; }
 function randn() { return Math.sqrt(-2 * Math.log(Math.max(1e-9, rand()))) * Math.cos(2 * Math.PI * rand()); }
 ​const rows = [];
-let cur = new Date("2022-01-01T00:00:00");
-const end = new Date("2026-11-17T00:00:00");
+const cur = parseUTC("2022-01-01");
+const end = parseUTC("2026-11-17");
 let arNoise = 0, arrState = 480;
 ​while (cur <= end) {
-const dStr = cur.toISOString().slice(0, 10);
+const dStr = formatUTC(cur);
 const base = interpAnchor(cur.getTime());
 arNoise = 0.80 * arNoise + randn() * 75;
-​let modal = exactMap.has(dStr) ? exactMap.get(dStr) : Math.round(Math.max(7200, base + arNoise));
+​const modal = exactMap.has(dStr) ? exactMap.get(dStr) : Math.round(Math.max(7200, base + arNoise));
 let minP = Math.round(modal - (900 + rand() * 550));
 let maxP = Math.round(modal + (650 + rand() * 650));
 ​if (dStr === "2026-10-15") { minP = 27000; maxP = 32031; }
@@ -437,7 +439,7 @@ if (dStr === "2026-11-05") { minP = 29800; maxP = 32000; }
 if (dStr === "2026-11-09") { minP = 30000; maxP = 32100; }
 if (dStr === "2026-11-12") { minP = 30000; maxP = 32300; }
 if (dStr === "2026-11-17") { minP = 30200; maxP = 32500; }
-​const wk = cur.getDay();
+​const wk = cur.getUTCDay();
 const sunFactor = wk === 0 ? 0.30 : ([1, 4].includes(wk) ? 1.15 : 1.0);
 arrState = 0.72 * arrState + 0.28 * (460 * sunFactor + randn() * 25);
 const arrivals = Math.round(Math.max(95, arrState) * 10) / 10;
@@ -452,77 +454,13 @@ per_nut_inr: +(modal / 700).toFixed(2),
 arrivals_qtl: arrivals,
 copra_ref_qtl: rawQtl
 });
-cur.setDate(cur.getDate() + 1);
+cur.setUTCDate(cur.getUTCDate() + 1);
 }
 return rows;
 }
-​function getCandidateJsonUrls() {
-const path = window.location.pathname || '/';
-// Properly handle GitHub Pages project URLs with OR without trailing slash:
-// e.g. /my-repo  -> /my-repo/coconut_prices.json
-//      /my-repo/ -> /my-repo/coconut_prices.json
-//      /my-repo/index.html -> /my-repo/coconut_prices.json
-const dirPath = path.endsWith('/')
-? path
-: path.endsWith('.html')
-? path.substring(0, path.lastIndexOf('/') + 1)
-: path + '/';
-​const rawCandidates = [
-${dirPath}coconut_prices.json,
-'./coconut_prices.json',
-'coconut_prices.json',
-'/coconut_prices.json'
-];
-return [...new Set(rawCandidates)];
-}
-​async function initApp() {
-const badgeEl = document.getElementById('dataSourceBadge');
-const dotEl = document.getElementById('dataSourceDot');
-const textEl = document.getElementById('dataSourceText');
-const bannerEl = document.getElementById('jsonStatusBanner');
-const bannerMsg = document.getElementById('jsonStatusMessage');
-​textEl.textContent = 'Loading coconut_prices.json...';
-bannerEl.classList.add('hidden');
-​const candidateUrls = getCandidateJsonUrls();
-const attemptLogs = [];
-let loadedOk = false;
-​for (const baseUrl of candidateUrls) {
-try {
-const url = ${baseUrl}?t=${Date.now()};
-const resp = await fetch(url, { cache: 'no-store' });
-if (!resp.ok) {
-attemptLogs.push(${baseUrl} → HTTP ${resp.status});
-continue;
-}
-const json = await resp.json();
-const rawArr = Array.isArray(json) ? json : (json && Array.isArray(json.data) ? json.data : null);
-if (rawArr && rawArr.length > 0) {
-fullDataset = ensureDailySeries(rawArr);
-const latestDate = fullDataset[fullDataset.length - 1].date;
-dotEl.className = 'h-2 w-2 rounded-full bg-emerald-400 animate-pulse';
-textEl.textContent = rawArr.length === fullDataset.length
-? Live JSON (${fullDataset.length} days • Latest: ${latestDate})
-: Live JSON (${rawArr.length} pts → ${fullDataset.length} daily • Latest: ${latestDate});
-badgeEl.title = Successfully loaded from ${baseUrl};
-loadedOk = true;
-break;
-} else {
-attemptLogs.push(${baseUrl} → Empty or invalid JSON structure);
-}
-} catch (err) {
-attemptLogs.push(${baseUrl} → ${err.message});
-}
-}
-​if (!loadedOk) {
-fullDataset = buildFallbackDataset();
-const latestDate = fullDataset[fullDataset.length - 1].date;
-dotEl.className = 'h-2 w-2 rounded-full bg-amber-400';
-textEl.textContent = Built-in Archive (${fullDataset.length} days • Latest: ${latestDate});
-badgeEl.title = Fallback active. Tried: ${attemptLogs.join(' | ')};
-bannerMsg.innerHTML = <strong>Notice:</strong> Could not fetch <code>coconut_prices.json</code> (${attemptLogs[0] || 'network/CORS error'}). Showing built-in archive instead. Ensure <code>coconut_prices.json</code> is committed in the same root folder as <code>index.html</code>.;
-bannerEl.classList.remove('hidden');
-}
-​const minDate = fullDataset[0].date;
+​function applyDataset(dataset) {
+fullDataset = dataset;
+const minDate = fullDataset[0].date;
 const maxDate = fullDataset[fullDataset.length - 1].date;
 const picker = document.getElementById('datePicker');
 picker.min = minDate;
@@ -537,6 +475,88 @@ if (e.target.value) selectClosestDate(e.target.value);
 pickerBound = true;
 }
 ​runAnalysisForDate(selectedDateStr);
+}
+​function getCandidateJsonUrls() {
+const path = window.location.pathname || '/';
+const dirPath = path.endsWith('/')
+? path
+: path.endsWith('.html')
+? path.substring(0, path.lastIndexOf('/') + 1)
+: path + '/';
+​return [...new Set([
+${dirPath}coconut_prices.json,
+'./coconut_prices.json',
+'coconut_prices.json',
+'/coconut_prices.json'
+])];
+}
+​async function fetchWithTimeout(url, timeoutMs = 4500) {
+const controller = new AbortController();
+const timer = setTimeout(() => controller.abort(), timeoutMs);
+try {
+return await fetch(url, { cache: 'no-store', signal: controller.signal });
+} finally {
+clearTimeout(timer);
+}
+}
+​async function syncLiveJson() {
+const badgeEl = document.getElementById('dataSourceBadge');
+const dotEl = document.getElementById('dataSourceDot');
+const textEl = document.getElementById('dataSourceText');
+const bannerEl = document.getElementById('jsonStatusBanner');
+const bannerMsg = document.getElementById('jsonStatusMessage');
+​const candidateUrls = getCandidateJsonUrls();
+const attemptLogs = [];
+​for (const baseUrl of candidateUrls) {
+try {
+const resp = await fetchWithTimeout(${baseUrl}?t=${Date.now()}, 4500);
+if (!resp.ok) {
+attemptLogs.push(${baseUrl} → HTTP ${resp.status});
+continue;
+}
+const json = await resp.json();
+const rawArr = Array.isArray(json) ? json : (json && Array.isArray(json.data) ? json.data : null);
+if (rawArr && rawArr.length > 0) {
+const daily = ensureDailySeries(rawArr);
+const latestDate = daily[daily.length - 1].date;
+dotEl.className = 'h-2 w-2 rounded-full bg-emerald-400 animate-pulse';
+textEl.textContent = rawArr.length === daily.length
+? Live JSON (${daily.length} days • Latest: ${latestDate})
+: Live JSON (${rawArr.length} pts → ${daily.length} daily • Latest: ${latestDate});
+badgeEl.title = Loaded live from ${baseUrl};
+bannerEl.classList.add('hidden');
+applyDataset(daily);
+return;
+} else {
+attemptLogs.push(${baseUrl} → Invalid JSON format);
+}
+} catch (err) {
+attemptLogs.push(${baseUrl} → ${err.name === 'AbortError' ? 'Timeout' : err.message});
+}
+}
+​const latestDate = fullDataset[fullDataset.length - 1].date;
+dotEl.className = 'h-2 w-2 rounded-full bg-amber-400';
+textEl.textContent = Built-in Archive (${fullDataset.length} days • Latest: ${latestDate});
+badgeEl.title = Fallback active. Tried: ${attemptLogs.join(' | ')};
+bannerMsg.innerHTML = <strong>Live JSON not found:</strong> Showing built-in 5-year Tiptur APMC archive instead. (${attemptLogs[0] || 'Check coconut_prices.json path'}).;
+bannerEl.classList.remove('hidden');
+}
+​function initApp() {
+try {
+// 1. Render built-in archive IMMEDIATELY so UI never gets stuck on Loading
+const fallback = buildFallbackDataset();
+const latest = fallback[fallback.length - 1].date;
+document.getElementById('dataSourceText').textContent = Syncing JSON... (Archive: ${latest});
+applyDataset(fallback);
+​// 2. Fetch live coconut_prices.json in background and hot-swap on success
+syncLiveJson();
+} catch (err) {
+const bannerEl = document.getElementById('jsonStatusBanner');
+const bannerMsg = document.getElementById('jsonStatusMessage');
+document.getElementById('dataSourceText').textContent = 'Init Error';
+bannerMsg.textContent = Initialization error: ${err.message};
+bannerEl.classList.remove('hidden');
+}
 }
 ​function selectClosestDate(targetStr) {
 let bestIdx = fullDataset.length - 1;
@@ -589,8 +609,8 @@ runAnalysisForDate(selectedDateStr);
 // 2. CLIENT-SIDE ML ENGINE: RIDGE REGRESSION (ARX + FOURIER HARMONICS)
 // =========================================================================
 function getDayOfYear(dateStr) {
-const dt = new Date(dateStr + 'T00:00:00');
-const start = new Date(dt.getFullYear(), 0, 0);
+const dt = parseUTC(dateStr);
+const start = new Date(Date.UTC(dt.getUTCFullYear(), 0, 0));
 return Math.floor((dt - start) / 86400000);
 }
 ​function extractFeatures(series, idx) {
@@ -683,12 +703,10 @@ function runAnalysisForDate(anchorDateStr) {
 const anchorIdx = fullDataset.findIndex(d => d.date === anchorDateStr);
 if (anchorIdx < 2) return;
 ​const anchorRow = fullDataset[anchorIdx];
-​// Strict Out-of-Sample Back-Prediction for the chosen anchor date
-const backModel1d = trainHorizonModel(fullDataset, anchorIdx - 1, 1);
+​const backModel1d = trainHorizonModel(fullDataset, anchorIdx - 1, 1);
 const backPredAnchor = Math.round(backModel1d.predict(extractFeatures(fullDataset, anchorIdx - 1)));
 const backErrPct = ((backPredAnchor - anchorRow.modal_price) / anchorRow.modal_price) * 100;
-​// Walk-forward out-of-sample backtest for trailing 90 days
-const btSplitIdx = Math.max(Math.min(35, Math.floor(anchorIdx / 2)), anchorIdx - 90);
+​const btSplitIdx = Math.max(Math.min(35, Math.floor(anchorIdx / 2)), anchorIdx - 90);
 const oosModel1d = trainHorizonModel(fullDataset, btSplitIdx, 1);
 ​const backtestSeries = [];
 let sumAbsPctErr = 0, sumSqErr = 0, sumActual = 0;
@@ -708,8 +726,7 @@ const rmse = Math.sqrt(sumSqErr / btLen);
 const meanAct = sumActual / btLen;
 const ssTot = backtestSeries.reduce((acc, r) => acc + Math.pow(r.actual - meanAct, 2), 0);
 const r2 = Math.max(0, 1 - (sumSqErr / (ssTot || 1)));
-​// Direct Multi-Horizon Forecast (1..30 days) trained strictly <= anchorIdx
-const anchorFeatures = extractFeatures(fullDataset, anchorIdx);
+​const anchorFeatures = extractFeatures(fullDataset, anchorIdx);
 const keyHorizons = [1, 5, 10, 15, 20, 25, 30];
 const anchorForecasts = {};
 let model30d = null;
@@ -719,7 +736,7 @@ if (h === 30) model30d = m;
 anchorForecasts[h] = m.predict(anchorFeatures);
 });
 ​const forecastSeries = [];
-const baseAnchorDate = new Date(anchorRow.date + 'T00:00:00');
+const baseAnchorDate = parseUTC(anchorRow.date);
 for (let h = 1; h <= 30; h++) {
 let hLow = 1, hHigh = 30;
 for (let k = 0; k < keyHorizons.length - 1; k++) {
@@ -732,12 +749,11 @@ break;
 const frac = (h - hLow) / (hHigh - hLow || 1);
 const predPrice = Math.round(anchorForecasts[hLow] + frac * (anchorForecasts[hHigh] - anchorForecasts[hLow]));
 const stdBand = Math.round(rmse * 1.25 * Math.sqrt(h / 4));
-​const fDate = new Date(baseAnchorDate);
-fDate.setDate(fDate.getDate() + h);
-const fDateStr = fDate.toISOString().slice(0, 10);
+​const fDate = new Date(baseAnchorDate.getTime());
+fDate.setUTCDate(fDate.getUTCDate() + h);
 ​forecastSeries.push({
 horizon: h,
-date: fDateStr,
+date: formatUTC(fDate),
 predicted: predPrice,
 lower95: Math.max(6000, predPrice - stdBand),
 upper95: predPrice + stdBand,
@@ -749,9 +765,11 @@ const delta30Pct = ((target30.predicted - anchorRow.modal_price) / anchorRow.mod
 ​updateKPICards(anchorRow, backPredAnchor, backErrPct, target30, delta30Pct);
 updateDiagnostics(mape, rmse, r2);
 renderEvidenceExplanation(anchorIdx, anchorRow, target30, delta30Pct, backErrPct);
+renderLedgerTable(backtestSeries, forecastSeries);
+​if (typeof Chart !== 'undefined') {
 renderMainChart(anchorIdx, backtestSeries, forecastSeries);
 renderFeatureChart(model30d);
-renderLedgerTable(backtestSeries, forecastSeries);
+}
 }
 ​function formatINR(num) {
 return '₹' + Math.round(num).toLocaleString('en-IN');
@@ -803,7 +821,7 @@ const prev30 = fullDataset[Math.max(0, anchorIdx - 30)];
 const mom14Pct = ((anchorRow.modal_price - prev14.modal_price) / prev14.modal_price) * 100;
 const mom30Pct = ((anchorRow.modal_price - prev30.modal_price) / prev30.modal_price) * 100;
 ​const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-const curMonthIdx = new Date(anchorRow.date + 'T00:00:00').getMonth();
+const curMonthIdx = parseUTC(anchorRow.date).getUTCMonth();
 const nextMonthIdx = (curMonthIdx + 1) % 12;
 const seasonalNote = [1, 2, 3, 8, 9, 10].includes(nextMonthIdx)
 ? Entering ${monthNames[nextMonthIdx]} — historically a robust demand window in Karnataka APMCs due to temple/festive procurement and moderate winter arrivals.
@@ -995,7 +1013,11 @@ return <tr class="hover:bg-gray-800/40 cursor-pointer" onclick="selectClosestDat
 }).join('');
 }
 }
-​window.addEventListener('DOMContentLoaded', initApp);
+​if (document.readyState === 'loading') {
+window.addEventListener('DOMContentLoaded', initApp);
+} else {
+initApp();
+}
 </script>
 </body>
 </html>
