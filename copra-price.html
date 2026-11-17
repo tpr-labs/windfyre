@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tiptur APMC Ball Copra Intelligence &amp; ML Forecaster</title>
+  <title>Tiptur APMC Ball Copra Intelligence Suite | Full Market Analytics &amp; ML</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -33,7 +33,10 @@
       box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.65);
     }
     .stat-glow-emerald {
-      box-shadow: inset 0 1px 0 0 rgba(16, 185, 129, 0.3);
+      box-shadow: inset 0 1px 0 0 rgba(16, 185, 129, 0.35);
+    }
+    .stat-glow-amber {
+      box-shadow: inset 0 1px 0 0 rgba(245, 158, 11, 0.35);
     }
     ::-webkit-scrollbar {
       width: 6px;
@@ -46,313 +49,555 @@
       background: #374151;
       border-radius: 3px;
     }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #4b5563;
+    }
     input[type="date"]::-webkit-calendar-picker-indicator {
       filter: invert(0.85);
       cursor: pointer;
+    }
+    @media print {
+      header button, .no-print {
+        display: none !important;
+      }
+      body {
+        background: #0b0f17 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
     }
   </style>
 </head>
 <body class="min-h-screen antialiased selection:bg-emerald-500/30 selection:text-emerald-200">
 
-  <!-- Header -->
-  <header class="sticky top-0 z-30 border-b border-gray-800/80 bg-[#0b0f17]/90 backdrop-blur-md">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+  <!-- Sticky Header -->
+  <header class="sticky top-0 z-30 border-b border-gray-800/80 bg-[#0b0f17]/95 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
       <div class="flex items-center gap-3">
-        <div class="h-10 w-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-mono font-bold text-lg">
+        <div class="h-10 w-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-mono font-bold text-lg shrink-0">
           🥥
         </div>
         <div>
           <div class="flex items-center gap-2 flex-wrap">
-            <h1 class="text-lg sm:text-xl font-bold tracking-tight text-white">Tiptur APMC Ball Copra Intelligence</h1>
-            <span class="px-2 py-0.5 text-[11px] font-mono font-medium rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-              ₹/QUINTAL LIVE ML
+            <h1 class="text-base sm:text-xl font-bold tracking-tight text-white">Tiptur APMC Ball Copra Intelligence Suite</h1>
+            <span class="px-2 py-0.5 text-[10px] font-mono font-semibold rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+              QUANT &amp; ML TERMINAL
             </span>
           </div>
-          <p class="text-xs text-gray-400">Karnataka APMC Benchmark (Tiptur • Arsikere • Tumakuru) &bull; 5-Year Archive (2022–2026)</p>
+          <p class="text-xs text-gray-400">Karnataka APMC Benchmark (Tiptur • Arsikere • Tumakuru) &bull; ₹/Quintal (100 kg)</p>
         </div>
       </div>
 
-      <div class="flex flex-wrap items-center gap-2 text-xs">
+      <div class="flex flex-wrap items-center gap-2 text-xs no-print">
         <div id="dataSourceBadge" class="px-3 py-1.5 rounded-lg bg-gray-900 border border-gray-800 text-gray-300 font-mono flex items-center gap-2">
           <span id="dataSourceDot" class="h-2 w-2 rounded-full bg-amber-400 animate-pulse"></span>
           <span id="dataSourceText">Initializing...</span>
         </div>
-        <button onclick="loadLiveJson()" class="px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-200 border border-gray-700 font-medium transition cursor-pointer">
+        <button onclick="loadLiveJson()" class="px-2.5 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-200 border border-gray-700 font-medium transition cursor-pointer" title="Re-fetch coconut_prices.json">
           Reload JSON
         </button>
+        <button onclick="exportActiveCSV()" class="px-2.5 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-sky-300 border border-gray-700 font-medium transition cursor-pointer" title="Download CSV">
+          Export CSV
+        </button>
+        <button onclick="window.print()" class="px-2.5 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700 font-medium transition cursor-pointer" title="Print Market Brief">
+          Print
+        </button>
         <button onclick="jumpToLatest()" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-medium transition cursor-pointer">
-          Latest Rate
+          Latest
         </button>
       </div>
     </div>
   </header>
 
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 space-y-5">
 
-    <!-- Diagnostic Banner (Hidden when Live JSON loads cleanly) -->
-    <div id="jsonStatusBanner" class="hidden rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-xs text-amber-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+    <!-- Diagnostic Banner -->
+    <div id="jsonStatusBanner" class="hidden rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2.5 text-xs text-amber-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
       <div id="jsonStatusMessage"></div>
       <button onclick="document.getElementById('jsonStatusBanner').classList.add('hidden')" class="text-amber-300 hover:text-white underline self-start sm:self-auto cursor-pointer">
         Dismiss
       </button>
     </div>
 
-    <!-- Date Navigator -->
-    <section class="glass-card rounded-2xl p-4 sm:p-5">
+    <!-- Temporal Inspector & 52-Week Range Bar -->
+    <section class="glass-card rounded-2xl p-4 sm:p-5 space-y-4">
       <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
-          <h2 class="text-sm font-semibold uppercase tracking-wider text-emerald-400">
-            Temporal Inspector &amp; Walk-Forward Backtester
+          <h2 class="text-xs font-semibold uppercase tracking-wider text-emerald-400">
+            Temporal Inspector &amp; Walk-Forward Time Machine
           </h2>
           <p class="text-xs text-gray-400 mt-0.5">
-            Select any historical date (2022–present) to inspect Tiptur Ball Copra ₹/Quintal rates, back-test accuracy, and 30-day forward ML projections.
+            Inspect any date from 2022–present. All technicals, seasonal comparisons, and ML models re-train strictly on data &le; selected date.
           </p>
         </div>
 
-        <div class="flex flex-wrap items-center gap-2">
-          <button onclick="stepDate(-30)" class="px-2.5 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-xs font-mono text-gray-200 border border-gray-700 transition cursor-pointer">
-            &laquo; -30d
-          </button>
-          <button onclick="stepDate(-7)" class="px-2.5 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-xs font-mono text-gray-200 border border-gray-700 transition cursor-pointer">
-            &lsaquo; -7d
-          </button>
+        <div class="flex flex-wrap items-center gap-1.5 no-print">
+          <button onclick="stepDate(-30)" class="px-2 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-xs font-mono text-gray-200 border border-gray-700 transition cursor-pointer">&laquo; -30d</button>
+          <button onclick="stepDate(-7)" class="px-2 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-xs font-mono text-gray-200 border border-gray-700 transition cursor-pointer">-7d</button>
+          <button onclick="stepDate(-1)" class="px-2 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-xs font-mono text-gray-200 border border-gray-700 transition cursor-pointer">-1d</button>
           <input
             type="date"
             id="datePicker"
-            class="bg-gray-900 border border-emerald-500/40 focus:border-emerald-400 focus:outline-none rounded-lg px-3.5 py-1.5 text-sm font-mono text-white"
+            class="bg-gray-900 border border-emerald-500/40 focus:border-emerald-400 focus:outline-none rounded-lg px-3 py-1 text-sm font-mono text-white"
           />
-          <button onclick="stepDate(7)" class="px-2.5 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-xs font-mono text-gray-200 border border-gray-700 transition cursor-pointer">
-            +7d &rsaquo;
-          </button>
-          <button onclick="stepDate(30)" class="px-2.5 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-xs font-mono text-gray-200 border border-gray-700 transition cursor-pointer">
-            +30d &raquo;
-          </button>
+          <button onclick="stepDate(1)" class="px-2 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-xs font-mono text-gray-200 border border-gray-700 transition cursor-pointer">+1d</button>
+          <button onclick="stepDate(7)" class="px-2 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-xs font-mono text-gray-200 border border-gray-700 transition cursor-pointer">+7d</button>
+          <button onclick="stepDate(30)" class="px-2 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-xs font-mono text-gray-200 border border-gray-700 transition cursor-pointer">+30d &raquo;</button>
         </div>
       </div>
 
-      <div class="mt-3.5 pt-3.5 border-t border-gray-800/80 flex flex-wrap items-center gap-2 text-xs">
-        <span class="text-gray-400 font-medium mr-1">Quick Jump:</span>
-        <button onclick="jumpToLatest()" id="quickJumpLatest" class="px-2.5 py-1 rounded-md bg-gray-800/70 hover:bg-gray-700 text-emerald-300 border border-gray-700/70 transition cursor-pointer">
-          Latest
-        </button>
-        <button onclick="selectClosestDate('2026-10-24')" class="px-2.5 py-1 rounded-md bg-gray-800/70 hover:bg-gray-700 text-amber-300 border border-gray-700/70 transition cursor-pointer">
-          Festive Peak (Oct 24)
-        </button>
-        <button onclick="selectClosestDate('2025-07-20')" class="px-2.5 py-1 rounded-md bg-gray-800/70 hover:bg-gray-700 text-gray-300 border border-gray-700/70 transition cursor-pointer">
-          2025 Bull Run
-        </button>
-        <button onclick="selectClosestDate('2024-03-15')" class="px-2.5 py-1 rounded-md bg-gray-800/70 hover:bg-gray-700 text-gray-300 border border-gray-700/70 transition cursor-pointer">
-          2024 Recovery
-        </button>
-        <button onclick="selectClosestDate('2023-12-15')" class="px-2.5 py-1 rounded-md bg-gray-800/70 hover:bg-gray-700 text-gray-300 border border-gray-700/70 transition cursor-pointer">
-          2023 Trough
-        </button>
-        <button onclick="selectClosestDate('2022-03-15')" class="px-2.5 py-1 rounded-md bg-gray-800/70 hover:bg-gray-700 text-gray-300 border border-gray-700/70 transition cursor-pointer">
-          2022 Start
-        </button>
-      </div>
-    </section>
+      <!-- Quick Jumps + 52-Week Range Meter -->
+      <div class="pt-3 border-t border-gray-800/80 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+        <div class="flex flex-wrap items-center gap-1.5 text-xs no-print">
+          <span class="text-gray-400 font-medium mr-1">Jump:</span>
+          <button onclick="jumpToLatest()" id="quickJumpLatest" class="px-2.5 py-1 rounded-md bg-gray-800/80 hover:bg-gray-700 text-emerald-300 border border-gray-700/70 transition cursor-pointer">Latest</button>
+          <button onclick="selectClosestDate('2026-10-24')" class="px-2.5 py-1 rounded-md bg-gray-800/80 hover:bg-gray-700 text-amber-300 border border-gray-700/70 transition cursor-pointer">Oct 24 Peak</button>
+          <button onclick="selectClosestDate('2026-04-15')" class="px-2.5 py-1 rounded-md bg-gray-800/80 hover:bg-gray-700 text-gray-300 border border-gray-700/70 transition cursor-pointer">Apr 26 High</button>
+          <button onclick="selectClosestDate('2025-07-20')" class="px-2.5 py-1 rounded-md bg-gray-800/80 hover:bg-gray-700 text-gray-300 border border-gray-700/70 transition cursor-pointer">2025 Rally</button>
+          <button onclick="selectClosestDate('2024-03-15')" class="px-2.5 py-1 rounded-md bg-gray-800/80 hover:bg-gray-700 text-gray-300 border border-gray-700/70 transition cursor-pointer">2024 Base</button>
+          <button onclick="selectClosestDate('2023-12-15')" class="px-2.5 py-1 rounded-md bg-gray-800/80 hover:bg-gray-700 text-gray-300 border border-gray-700/70 transition cursor-pointer">2023 Low</button>
+        </div>
 
-    <!-- Primary KPI Cards -->
-    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      <div class="glass-card stat-glow-emerald rounded-2xl p-5">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-medium uppercase tracking-wider text-gray-400">Modal Price (Tiptur APMC)</span>
-          <span id="kpiDateBadge" class="text-[11px] font-mono px-2 py-0.5 rounded bg-gray-800 text-gray-300">--</span>
-        </div>
-        <div class="mt-2 flex items-baseline gap-2">
-          <span id="kpiActualPrice" class="text-2xl sm:text-3xl font-bold font-mono text-white">₹--</span>
-          <span class="text-xs text-gray-400">/ Quintal</span>
-        </div>
-        <div class="mt-2 flex items-center justify-between text-xs gap-2">
-          <span id="kpiPerKg" class="font-mono text-emerald-400">₹-- / kg</span>
-          <span id="kpiSpread" class="text-gray-400 truncate">Range: --</span>
-        </div>
-      </div>
-
-      <div class="glass-card rounded-2xl p-5">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-medium uppercase tracking-wider text-gray-400">Implied Per-Nut Value</span>
-          <span id="kpiBackErrorBadge" class="text-[11px] font-mono px-2 py-0.5 rounded bg-sky-500/15 text-sky-300 border border-sky-500/30">Err: --%</span>
-        </div>
-        <div class="mt-2 flex items-baseline gap-2">
-          <span id="kpiPerNutPrice" class="text-2xl sm:text-3xl font-bold font-mono text-sky-400">₹--</span>
-          <span class="text-xs text-gray-400">/ nut (700/Qtl)</span>
-        </div>
-        <div class="mt-2 flex items-center justify-between text-xs">
-          <span id="kpiBackPred" class="font-mono text-gray-300">ML Back-Pred: ₹--</span>
-          <span class="text-gray-500">Out-of-Sample</span>
-        </div>
-      </div>
-
-      <div class="glass-card rounded-2xl p-5">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-medium uppercase tracking-wider text-gray-400">+30 Day Quintal Target</span>
-          <span id="kpiForecastDeltaBadge" class="text-[11px] font-mono px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30">--%</span>
-        </div>
-        <div class="mt-2 flex items-baseline gap-2">
-          <span id="kpiForecast30d" class="text-2xl sm:text-3xl font-bold font-mono text-amber-400">₹--</span>
-          <span class="text-xs text-gray-400">/ Quintal</span>
-        </div>
-        <div class="mt-2 flex items-center justify-between text-xs">
-          <span id="kpiForecastPerKg" class="font-mono text-amber-300/90">₹-- / kg</span>
-          <span id="kpiForecastCI" class="text-gray-400">95% CI: --</span>
-        </div>
-      </div>
-
-      <div class="glass-card rounded-2xl p-5 flex flex-col justify-between">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-medium uppercase tracking-wider text-gray-400">Copra Curing Signal</span>
-          <span id="kpiArrivalsBadge" class="text-[11px] font-mono text-gray-400">Arr: -- Qtl</span>
-        </div>
-        <div class="my-1.5">
-          <span id="kpiActionSignal" class="inline-block text-lg font-bold tracking-tight text-emerald-400">ANALYZING...</span>
-        </div>
-        <p id="kpiActionSubtext" class="text-xs text-gray-400 leading-relaxed">
-          Evaluating Tiptur ball copra conversion margins...
-        </p>
-      </div>
-    </section>
-
-    <!-- Farm Quintal / Nut Realization Calculator -->
-    <section class="glass-card rounded-2xl p-5">
-      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h3 class="text-sm font-semibold uppercase tracking-wider text-emerald-400">
-            Farm Payout Calculator (Based on Selected Tiptur Modal Rate)
-          </h3>
-          <p class="text-xs text-gray-400 mt-0.5">
-            Enter your cured copra weight in Quintals or raw coconut count (700 nuts ≈ 1 Quintal Ball Copra) to estimate gross &amp; net APMC realization.
-          </p>
-        </div>
-        <div class="flex flex-wrap items-center gap-3 text-xs font-mono">
-          <label class="flex items-center gap-2 bg-gray-900 border border-gray-800 rounded-lg px-3 py-2">
-            <span class="text-gray-400">Quintals:</span>
-            <input
-              id="calcQuintals"
-              type="number"
-              min="0.1"
-              step="0.5"
-              value="5"
-              oninput="updateFarmCalculator('qtl')"
-              class="w-20 bg-transparent text-white font-semibold focus:outline-none text-right"
-            />
-          </label>
-          <label class="flex items-center gap-2 bg-gray-900 border border-gray-800 rounded-lg px-3 py-2">
-            <span class="text-gray-400">Nuts:</span>
-            <input
-              id="calcNuts"
-              type="number"
-              min="100"
-              step="100"
-              value="3500"
-              oninput="updateFarmCalculator('nuts')"
-              class="w-24 bg-transparent text-white font-semibold focus:outline-none text-right"
-            />
-          </label>
-          <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-lg px-3.5 py-2">
-            <span class="text-gray-400">Gross:</span>
-            <span id="calcGross" class="text-emerald-300 font-bold ml-1">₹--</span>
-            <span class="text-gray-500 mx-1.5">|</span>
-            <span class="text-gray-400">Net (~96.5%):</span>
-            <span id="calcNet" class="text-white font-bold ml-1">₹--</span>
+        <div class="flex items-center gap-3 text-xs font-mono min-w-[280px]">
+          <span class="text-gray-400 shrink-0">52W Range:</span>
+          <span id="range52Low" class="text-rose-400">₹--</span>
+          <div class="flex-1 h-2 bg-gray-800 rounded-full overflow-hidden relative min-w-[90px]">
+            <div id="range52Bar" class="h-full bg-gradient-to-r from-rose-500 via-amber-400 to-emerald-400 rounded-full" style="width: 50%"></div>
           </div>
+          <span id="range52High" class="text-emerald-400">₹--</span>
         </div>
       </div>
     </section>
 
-    <!-- Main Time-Series Chart -->
+    <!-- 6-Card Executive KPI Strip -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3.5">
+      <!-- 1. Spot Modal -->
+      <div class="glass-card stat-glow-emerald rounded-2xl p-4">
+        <div class="flex items-center justify-between gap-1">
+          <span class="text-[11px] font-medium uppercase tracking-wider text-gray-400">Modal Price</span>
+          <span id="kpiDateBadge" class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-gray-800 text-gray-300">--</span>
+        </div>
+        <div class="mt-1.5 flex items-baseline gap-1.5">
+          <span id="kpiActualPrice" class="text-2xl font-bold font-mono text-white">₹--</span>
+          <span class="text-[11px] text-gray-400">/Qtl</span>
+        </div>
+        <div class="mt-2 flex items-center justify-between text-[11px] font-mono">
+          <span id="kpiPerKg" class="text-emerald-400">₹--/kg</span>
+          <span id="kpiDelta7d" class="text-gray-300">7d: --%</span>
+        </div>
+      </div>
+
+      <!-- 2. Per-Nut & Spread -->
+      <div class="glass-card rounded-2xl p-4">
+        <div class="flex items-center justify-between gap-1">
+          <span class="text-[11px] font-medium uppercase tracking-wider text-gray-400">Per-Nut &amp; Range</span>
+          <span id="kpiSpreadPct" class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-gray-800 text-gray-300">Spr: --%</span>
+        </div>
+        <div class="mt-1.5 flex items-baseline gap-1.5">
+          <span id="kpiPerNutPrice" class="text-2xl font-bold font-mono text-sky-400">₹--</span>
+          <span class="text-[11px] text-gray-400">/nut</span>
+        </div>
+        <div class="mt-2 text-[11px] font-mono text-gray-400 truncate" id="kpiSpread">Min -- – Max --</div>
+      </div>
+
+      <!-- 3. +30d ML Forecast -->
+      <div class="glass-card stat-glow-amber rounded-2xl p-4">
+        <div class="flex items-center justify-between gap-1">
+          <span class="text-[11px] font-medium uppercase tracking-wider text-gray-400">+30d ML Target</span>
+          <span id="kpiForecastDeltaBadge" class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30">--%</span>
+        </div>
+        <div class="mt-1.5 flex items-baseline gap-1.5">
+          <span id="kpiForecast30d" class="text-2xl font-bold font-mono text-amber-400">₹--</span>
+          <span class="text-[11px] text-gray-400">/Qtl</span>
+        </div>
+        <div class="mt-2 flex items-center justify-between text-[11px] font-mono">
+          <span id="kpiForecastPerKg" class="text-amber-300/90">₹--/kg</span>
+          <span id="kpiForecastCI" class="text-gray-400">±₹--</span>
+        </div>
+      </div>
+
+      <!-- 4. Technical Regime (RSI & BB) -->
+      <div class="glass-card rounded-2xl p-4">
+        <div class="flex items-center justify-between gap-1">
+          <span class="text-[11px] font-medium uppercase tracking-wider text-gray-400">RSI (14) &amp; Regime</span>
+          <span id="kpiRsiBadge" class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-gray-800 text-gray-300">--</span>
+        </div>
+        <div class="mt-1.5 flex items-baseline gap-1.5">
+          <span id="kpiRsiVal" class="text-2xl font-bold font-mono text-purple-400">--</span>
+          <span class="text-[11px] text-gray-400">/ 100</span>
+        </div>
+        <div class="mt-2 flex items-center justify-between text-[11px] font-mono">
+          <span id="kpiBbPos" class="text-gray-300">BB %B: --</span>
+          <span id="kpiTrendTag" class="text-emerald-400">--</span>
+        </div>
+      </div>
+
+      <!-- 5. Volatility & Drawdown -->
+      <div class="glass-card rounded-2xl p-4">
+        <div class="flex items-center justify-between gap-1">
+          <span class="text-[11px] font-medium uppercase tracking-wider text-gray-400">30d Vol &amp; Risk</span>
+          <span id="kpiBackErrorBadge" class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-sky-500/15 text-sky-300 border border-sky-500/30">BT: --%</span>
+        </div>
+        <div class="mt-1.5 flex items-baseline gap-1.5">
+          <span id="kpiAnnVol" class="text-2xl font-bold font-mono text-white">--%</span>
+          <span class="text-[11px] text-gray-400">ann.</span>
+        </div>
+        <div class="mt-2 flex items-center justify-between text-[11px] font-mono">
+          <span id="kpiDrawdown" class="text-rose-400">DD: --%</span>
+          <span id="kpiArrivalsBadge" class="text-gray-400">Arr: --</span>
+        </div>
+      </div>
+
+      <!-- 6. Action Signal -->
+      <div class="glass-card rounded-2xl p-4 flex flex-col justify-between">
+        <div class="flex items-center justify-between gap-1">
+          <span class="text-[11px] font-medium uppercase tracking-wider text-gray-400">Action Signal</span>
+          <span id="kpiConfidence" class="text-[10px] font-mono text-gray-400">Conf: --%</span>
+        </div>
+        <div class="my-1">
+          <span id="kpiActionSignal" class="text-base font-bold tracking-tight text-emerald-400 leading-tight block">ANALYZING...</span>
+        </div>
+        <p id="kpiActionSubtext" class="text-[11px] text-gray-400 leading-snug line-clamp-2">--</p>
+      </div>
+    </section>
+
+    <!-- Main Multi-Overlay Interactive Chart -->
     <section class="glass-card rounded-2xl p-5">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 mb-3">
         <div>
-          <h3 class="text-base font-semibold text-white">Tiptur Ball Copra Price Trajectory &amp; 30-Day Forecast</h3>
+          <h3 class="text-base font-semibold text-white">Tiptur Ball Copra Price Trajectory, Technical Overlays &amp; 30-Day ML Forecast</h3>
           <p class="text-xs text-gray-400">
-            Context window around <span id="chartAnchorLabel" class="font-mono text-emerald-400">--</span> + 30-day projected trajectory with 95% confidence band.
+            Anchor Date: <span id="chartAnchorLabel" class="font-mono text-emerald-400">--</span> &bull; Toggle technical overlays below to inspect trend structure and volatility bands.
           </p>
         </div>
-        <div class="flex items-center gap-2 text-xs">
+        <div class="flex flex-wrap items-center gap-2 text-xs no-print">
           <button onclick="setWindowDays(90)" id="win90" class="win-btn px-2.5 py-1 rounded bg-gray-800 text-gray-300 border border-gray-700 cursor-pointer">90D</button>
           <button onclick="setWindowDays(180)" id="win180" class="win-btn px-2.5 py-1 rounded bg-gray-800 text-gray-300 border border-gray-700 cursor-pointer">180D</button>
           <button onclick="setWindowDays(365)" id="win365" class="win-btn px-2.5 py-1 rounded bg-emerald-600/20 text-emerald-300 border border-emerald-500/40 cursor-pointer">1Y</button>
+          <button onclick="setWindowDays(730)" id="win730" class="win-btn px-2.5 py-1 rounded bg-gray-800 text-gray-300 border border-gray-700 cursor-pointer">2Y</button>
           <button onclick="setWindowDays(9999)" id="winAll" class="win-btn px-2.5 py-1 rounded bg-gray-800 text-gray-300 border border-gray-700 cursor-pointer">ALL (5Y)</button>
         </div>
       </div>
 
-      <div class="relative h-[360px] w-full">
+      <!-- Overlay Toggles -->
+      <div class="flex flex-wrap items-center gap-3 mb-4 pb-3 border-b border-gray-800/80 text-xs no-print">
+        <span class="text-gray-400 font-medium">Overlays:</span>
+        <label class="inline-flex items-center gap-1.5 cursor-pointer text-gray-300">
+          <input type="checkbox" id="ovSma30" checked onchange="rerenderMainChartOnly()" class="accent-sky-400 rounded" />
+          <span class="text-sky-300">SMA 30</span>
+        </label>
+        <label class="inline-flex items-center gap-1.5 cursor-pointer text-gray-300">
+          <input type="checkbox" id="ovSma90" checked onchange="rerenderMainChartOnly()" class="accent-purple-400 rounded" />
+          <span class="text-purple-300">SMA 90</span>
+        </label>
+        <label class="inline-flex items-center gap-1.5 cursor-pointer text-gray-300">
+          <input type="checkbox" id="ovBollinger" onchange="rerenderMainChartOnly()" class="accent-indigo-400 rounded" />
+          <span class="text-indigo-300">Bollinger Bands (20, 2σ)</span>
+        </label>
+        <label class="inline-flex items-center gap-1.5 cursor-pointer text-gray-300">
+          <input type="checkbox" id="ovBacktest" checked onchange="rerenderMainChartOnly()" class="accent-cyan-400 rounded" />
+          <span class="text-cyan-300">OOS Back-Prediction</span>
+        </label>
+        <label class="inline-flex items-center gap-1.5 cursor-pointer text-gray-300">
+          <input type="checkbox" id="ovForecast" checked onchange="rerenderMainChartOnly()" class="accent-amber-400 rounded" />
+          <span class="text-amber-300">30d ML Forecast + 95% CI</span>
+        </label>
+      </div>
+
+      <div class="relative h-[370px] w-full">
         <canvas id="mainPriceChart"></canvas>
       </div>
     </section>
 
-    <!-- Evidence & Feature Importance Grid -->
-    <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-      <div class="lg:col-span-7 glass-card rounded-2xl p-5 space-y-4">
-        <div class="flex items-center justify-between border-b border-gray-800 pb-3">
-          <div>
-            <h3 class="text-base font-semibold text-white">Tiptur Market Evidence &amp; Model Reasoning</h3>
-            <p class="text-xs text-gray-400">Drivers behind the 30-day projection from the selected date</p>
+    <!-- Comprehensive Tabbed Deep-Dive Analytics Suite -->
+    <section class="glass-card rounded-2xl p-5 space-y-5">
+      <div class="flex flex-wrap items-center gap-2 border-b border-gray-800 pb-3 no-print">
+        <button onclick="switchAnalyticsTab('technical')" id="atab-technical" class="atab-btn px-3.5 py-2 rounded-lg text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 cursor-pointer">
+          1. Technical &amp; Momentum Lab
+        </button>
+        <button onclick="switchAnalyticsTab('seasonal')" id="atab-seasonal" class="atab-btn px-3.5 py-2 rounded-lg text-xs font-semibold bg-gray-800/80 text-gray-300 border border-gray-700 hover:bg-gray-700 cursor-pointer">
+          2. Seasonality &amp; YoY Heatmap
+        </button>
+        <button onclick="switchAnalyticsTab('supply')" id="atab-supply" class="atab-btn px-3.5 py-2 rounded-lg text-xs font-semibold bg-gray-800/80 text-gray-300 border border-gray-700 hover:bg-gray-700 cursor-pointer">
+          3. Supply, Arrivals &amp; Spreads
+        </button>
+        <button onclick="switchAnalyticsTab('ml')" id="atab-ml" class="atab-btn px-3.5 py-2 rounded-lg text-xs font-semibold bg-gray-800/80 text-gray-300 border border-gray-700 hover:bg-gray-700 cursor-pointer">
+          4. ML Scenarios &amp; Explainability
+        </button>
+        <button onclick="switchAnalyticsTab('farm')" id="atab-farm" class="atab-btn px-3.5 py-2 rounded-lg text-xs font-semibold bg-gray-800/80 text-gray-300 border border-gray-700 hover:bg-gray-700 cursor-pointer">
+          5. Farm Curing ROI Simulator
+        </button>
+      </div>
+
+      <!-- TAB 1: Technical & Momentum Lab -->
+      <div id="panel-technical" class="analytics-panel space-y-5">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <div class="bg-gray-900/60 border border-gray-800 rounded-xl p-4">
+            <div class="flex items-center justify-between mb-2">
+              <h4 class="text-sm font-semibold text-white">14-Day Relative Strength Index (RSI)</h4>
+              <span class="text-[11px] font-mono text-gray-400">Overbought &gt;70 | Oversold &lt;30</span>
+            </div>
+            <div class="relative h-[220px] w-full">
+              <canvas id="rsiChart"></canvas>
+            </div>
           </div>
-          <span class="px-2.5 py-1 text-[11px] font-mono rounded bg-purple-500/15 text-purple-300 border border-purple-500/30">
-            Ridge ARX + Fourier
-          </span>
+
+          <div class="bg-gray-900/60 border border-gray-800 rounded-xl p-4">
+            <div class="flex items-center justify-between mb-2">
+              <h4 class="text-sm font-semibold text-white">MACD (12, 26, 9) Trend Momentum</h4>
+              <span id="macdStatusBadge" class="text-[11px] font-mono px-2 py-0.5 rounded bg-gray-800 text-gray-300">--</span>
+            </div>
+            <div class="relative h-[220px] w-full">
+              <canvas id="macdChart"></canvas>
+            </div>
+          </div>
         </div>
 
-        <div id="evidenceContainer" class="space-y-3 text-sm"></div>
+        <!-- Technical Scorecard Matrix -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3 text-xs font-mono" id="techMatrixContainer"></div>
+      </div>
 
-        <div class="pt-3 border-t border-gray-800 grid grid-cols-3 gap-3 text-center">
-          <div class="bg-gray-900/80 rounded-xl p-2.5 border border-gray-800">
-            <div class="text-[11px] text-gray-400 uppercase">Backtest MAPE</div>
-            <div id="metricMape" class="text-sm font-mono font-bold text-emerald-400 mt-0.5">--%</div>
+      <!-- TAB 2: Seasonality & YoY Heatmap -->
+      <div id="panel-seasonal" class="analytics-panel hidden space-y-5">
+        <div class="bg-gray-900/60 border border-gray-800 rounded-xl p-4">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
+            <div>
+              <h4 class="text-sm font-semibold text-white">Year-over-Year (YoY) Seasonal Price Overlay (2022–2026)</h4>
+              <p class="text-xs text-gray-400">Compare monthly Tiptur Ball Copra price cycles across all 5 calendar years.</p>
+            </div>
+            <span id="yoyBestMonthsBadge" class="text-[11px] font-mono px-2.5 py-1 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+              Best Months: --
+            </span>
           </div>
-          <div class="bg-gray-900/80 rounded-xl p-2.5 border border-gray-800">
-            <div class="text-[11px] text-gray-400 uppercase">Backtest RMSE</div>
-            <div id="metricRmse" class="text-sm font-mono font-bold text-sky-400 mt-0.5">₹--</div>
+          <div class="relative h-[280px] w-full">
+            <canvas id="yoyChart"></canvas>
           </div>
-          <div class="bg-gray-900/80 rounded-xl p-2.5 border border-gray-800">
-            <div class="text-[11px] text-gray-400 uppercase">R&sup2; Fit Score</div>
-            <div id="metricR2" class="text-sm font-mono font-bold text-amber-400 mt-0.5">--</div>
+        </div>
+
+        <!-- Monthly Heatmap Table -->
+        <div class="bg-gray-900/60 border border-gray-800 rounded-xl p-4">
+          <div class="flex items-center justify-between mb-3">
+            <h4 class="text-sm font-semibold text-white">Monthly Average Price Heatmap (₹/Quintal &amp; MoM % Change)</h4>
+            <span class="text-[11px] text-gray-400">Green = Stronger MoM Gain | Rose = MoM Decline</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-center border-collapse text-[11px] font-mono" id="seasonalHeatmapTable"></table>
           </div>
         </div>
       </div>
 
-      <div class="lg:col-span-5 glass-card rounded-2xl p-5 flex flex-col justify-between space-y-4">
-        <div>
-          <h3 class="text-base font-semibold text-white">Model Feature Drivers (Standardized Weights)</h3>
-          <p class="text-xs text-gray-400 mt-0.5">
-            Trained live in-browser via L2-Regularized Ridge Regression on records up to the chosen date.
-          </p>
+      <!-- TAB 3: Supply, Arrivals & Spreads -->
+      <div id="panel-supply" class="analytics-panel hidden space-y-5">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <div class="bg-gray-900/60 border border-gray-800 rounded-xl p-4">
+            <div class="flex items-center justify-between mb-2">
+              <h4 class="text-sm font-semibold text-white">Daily APMC Arrivals (Qtl) vs. Modal Price</h4>
+              <span id="corrArrBadge" class="text-[11px] font-mono px-2 py-0.5 rounded bg-sky-500/15 text-sky-300 border border-sky-500/30">r = --</span>
+            </div>
+            <div class="relative h-[250px] w-full">
+              <canvas id="arrivalsChart"></canvas>
+            </div>
+          </div>
+
+          <div class="bg-gray-900/60 border border-gray-800 rounded-xl p-4">
+            <div class="flex items-center justify-between mb-2">
+              <h4 class="text-sm font-semibold text-white">Ball Copra vs. Raw Reference Spread &amp; Intraday Band</h4>
+              <span id="spreadRatioBadge" class="text-[11px] font-mono px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30">Ratio: --x</span>
+            </div>
+            <div class="relative h-[250px] w-full">
+              <canvas id="spreadChart"></canvas>
+            </div>
+          </div>
         </div>
 
-        <div class="relative h-[220px] w-full">
-          <canvas id="featureChart"></canvas>
-        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs" id="supplyStatsCards"></div>
+      </div>
 
-        <div class="bg-gray-900/90 border border-gray-800 rounded-xl p-3.5 text-xs text-gray-300 space-y-1.5">
-          <div class="font-semibold text-emerald-400">Tiptur Ball Copra Curing Benchmark:</div>
-          <p class="text-gray-400 leading-relaxed">
-            In Tiptur, Arsikere, and Tumakuru APMCs, farmers cure mature coconuts into <strong class="text-gray-200">Ball Copra (ಉಂಡೆ ಕೊಬ್ಬರಿ)</strong> for 9–10 months. At ~700 nuts per Quintal (100 kg), a modal price of <span class="font-mono text-emerald-300">₹31,720/Qtl</span> yields <span class="font-mono text-amber-300">₹45.31/nut</span> gross (~₹43.72/nut net after APMC charges).
-          </p>
+      <!-- TAB 4: ML Scenarios & Explainability -->
+      <div id="panel-ml" class="analytics-panel hidden space-y-5">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+          <!-- Left 7: Evidence + Multi-Horizon Scenario Table -->
+          <div class="lg:col-span-7 space-y-4">
+            <div class="bg-gray-900/60 border border-gray-800 rounded-xl p-4">
+              <h4 class="text-sm font-semibold text-white mb-2">Multi-Horizon ML Scenario Matrix (Bear / Base / Bull)</h4>
+              <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-xs font-mono">
+                  <thead class="text-gray-400 border-b border-gray-800 uppercase text-[11px]">
+                    <tr>
+                      <th class="py-2 px-2">Horizon</th>
+                      <th class="py-2 px-2">Target Date</th>
+                      <th class="py-2 px-2 text-rose-300">Bear (-1σ)</th>
+                      <th class="py-2 px-2 text-amber-300">Base ML</th>
+                      <th class="py-2 px-2 text-emerald-300">Bull (+1σ)</th>
+                      <th class="py-2 px-2">Implied /Nut</th>
+                    </tr>
+                  </thead>
+                  <tbody id="scenarioTableBody" class="divide-y divide-gray-800/70"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div id="evidenceContainer" class="space-y-2.5"></div>
+          </div>
+
+          <!-- Right 5: Feature Weights + Diagnostics -->
+          <div class="lg:col-span-5 space-y-4">
+            <div class="bg-gray-900/60 border border-gray-800 rounded-xl p-4">
+              <h4 class="text-sm font-semibold text-white">Ridge Regression Standardized Feature Drivers</h4>
+              <p class="text-[11px] text-gray-400 mb-3">Impact (₹/Qtl) per 1σ move in each input feature for the 30-day model.</p>
+              <div class="relative h-[230px] w-full">
+                <canvas id="featureChart"></canvas>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 text-center font-mono">
+              <div class="bg-gray-900/80 rounded-xl p-3 border border-gray-800">
+                <div class="text-[10px] text-gray-400 uppercase">Backtest MAPE</div>
+                <div id="metricMape" class="text-base font-bold text-emerald-400 mt-0.5">--%</div>
+              </div>
+              <div class="bg-gray-900/80 rounded-xl p-3 border border-gray-800">
+                <div class="text-[10px] text-gray-400 uppercase">Backtest RMSE</div>
+                <div id="metricRmse" class="text-base font-bold text-sky-400 mt-0.5">₹--</div>
+              </div>
+              <div class="bg-gray-900/80 rounded-xl p-3 border border-gray-800">
+                <div class="text-[10px] text-gray-400 uppercase">R&sup2; Fit Score</div>
+                <div id="metricR2" class="text-base font-bold text-amber-400 mt-0.5">--</div>
+              </div>
+              <div class="bg-gray-900/80 rounded-xl p-3 border border-gray-800">
+                <div class="text-[10px] text-gray-400 uppercase">Dir. Accuracy</div>
+                <div id="metricDirAcc" class="text-base font-bold text-purple-400 mt-0.5">--%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 5: Farm Curing ROI & Hold Simulator -->
+      <div id="panel-farm" class="analytics-panel hidden space-y-5">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+          <!-- Inputs -->
+          <div class="lg:col-span-5 bg-gray-900/60 border border-gray-800 rounded-xl p-4 space-y-3.5 text-xs">
+            <h4 class="text-sm font-semibold text-white border-b border-gray-800 pb-2">Farm Harvest &amp; Curing Parameters</h4>
+
+            <div class="grid grid-cols-2 gap-3">
+              <label class="block">
+                <span class="text-gray-400 block mb-1">Copra Quantity (Quintals)</span>
+                <input id="simQuintals" type="number" min="0.1" step="0.5" value="10" oninput="updateFarmSimulator('qtl')"
+                  class="w-full bg-gray-950 border border-gray-700 focus:border-emerald-400 focus:outline-none rounded-lg px-3 py-2 font-mono text-white" />
+              </label>
+              <label class="block">
+                <span class="text-gray-400 block mb-1">Equivalent Raw Nuts</span>
+                <input id="simNuts" type="number" min="100" step="100" value="7000" oninput="updateFarmSimulator('nuts')"
+                  class="w-full bg-gray-950 border border-gray-700 focus:border-emerald-400 focus:outline-none rounded-lg px-3 py-2 font-mono text-white" />
+              </label>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <label class="block">
+                <span class="text-gray-400 block mb-1">Nuts per Quintal Copra</span>
+                <select id="simNutsPerQtl" onchange="updateFarmSimulator('qtl')"
+                  class="w-full bg-gray-950 border border-gray-700 focus:border-emerald-400 focus:outline-none rounded-lg px-3 py-2 font-mono text-white">
+                  <option value="650">650 (Large Grade-A)</option>
+                  <option value="700" selected>700 (Tiptur Standard)</option>
+                  <option value="780">780 (Small / Dry)</option>
+                </select>
+              </label>
+              <label class="block">
+                <span class="text-gray-400 block mb-1">Raw Nut Offer (₹/Nut)</span>
+                <input id="simRawOffer" type="number" min="5" step="0.5" value="23" oninput="updateFarmSimulator('sync')"
+                  class="w-full bg-gray-950 border border-gray-700 focus:border-emerald-400 focus:outline-none rounded-lg px-3 py-2 font-mono text-white" />
+              </label>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <label class="block">
+                <span class="text-gray-400 block mb-1">Curing &amp; Labor (₹/Qtl)</span>
+                <input id="simCureCost" type="number" min="0" step="100" value="1800" oninput="updateFarmSimulator('sync')"
+                  class="w-full bg-gray-950 border border-gray-700 focus:border-emerald-400 focus:outline-none rounded-lg px-3 py-2 font-mono text-white" />
+              </label>
+              <label class="block">
+                <span class="text-gray-400 block mb-1">APMC Fees / Cess (%)</span>
+                <input id="simApmcFee" type="number" min="0" max="15" step="0.5" value="3.5" oninput="updateFarmSimulator('sync')"
+                  class="w-full bg-gray-950 border border-gray-700 focus:border-emerald-400 focus:outline-none rounded-lg px-3 py-2 font-mono text-white" />
+              </label>
+            </div>
+          </div>
+
+          <!-- Outputs -->
+          <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="bg-gray-900/70 border border-emerald-500/30 rounded-xl p-4 flex flex-col justify-between">
+              <div>
+                <span class="text-[11px] font-mono uppercase text-emerald-400">Option A: Sell Cured Copra Today</span>
+                <div id="simCopraNetToday" class="text-2xl font-bold font-mono text-white mt-1.5">₹--</div>
+                <div class="text-xs text-gray-400 mt-1" id="simCopraBreakdown">Gross: ₹-- | Fees &amp; Curing: -₹--</div>
+              </div>
+              <div class="mt-3 pt-2.5 border-t border-gray-800 text-xs font-mono flex justify-between">
+                <span class="text-gray-400">Net Realization / Nut:</span>
+                <span id="simCopraPerNut" class="text-emerald-300 font-bold">₹--</span>
+              </div>
+            </div>
+
+            <div class="bg-gray-900/70 border border-amber-500/30 rounded-xl p-4 flex flex-col justify-between">
+              <div>
+                <span class="text-[11px] font-mono uppercase text-amber-400">Option B: Hold +30d (ML Target)</span>
+                <div id="simCopraNet30d" class="text-2xl font-bold font-mono text-amber-300 mt-1.5">₹--</div>
+                <div class="text-xs text-gray-400 mt-1" id="simHoldDeltaText">Expected 30d Hold Delta: --</div>
+              </div>
+              <div class="mt-3 pt-2.5 border-t border-gray-800 text-xs font-mono flex justify-between">
+                <span class="text-gray-400">Projected / Nut:</span>
+                <span id="simCopra30dPerNut" class="text-amber-300 font-bold">₹--</span>
+              </div>
+            </div>
+
+            <div class="bg-gray-900/70 border border-sky-500/30 rounded-xl p-4 flex flex-col justify-between">
+              <div>
+                <span class="text-[11px] font-mono uppercase text-sky-400">Option C: Sell Raw Coconuts Now</span>
+                <div id="simRawTotal" class="text-2xl font-bold font-mono text-sky-300 mt-1.5">₹--</div>
+                <div class="text-xs text-gray-400 mt-1">Immediate cash flow, zero 9-month drying wait.</div>
+              </div>
+              <div class="mt-3 pt-2.5 border-t border-gray-800 text-xs font-mono flex justify-between">
+                <span class="text-gray-400">Curing Extra Profit:</span>
+                <span id="simCuringAdvantage" class="text-emerald-400 font-bold">+₹--</span>
+              </div>
+            </div>
+
+            <div class="bg-gray-900/70 border border-purple-500/30 rounded-xl p-4 flex flex-col justify-between">
+              <div>
+                <span class="text-[11px] font-mono uppercase text-purple-400">Break-Even Copra Rate</span>
+                <div id="simBreakeven" class="text-2xl font-bold font-mono text-purple-300 mt-1.5">₹--/Qtl</div>
+                <div class="text-xs text-gray-400 mt-1">Minimum Tiptur APMC rate needed to beat selling raw nuts today.</div>
+              </div>
+              <div class="mt-3 pt-2.5 border-t border-gray-800 text-xs font-mono flex justify-between">
+                <span class="text-gray-400">Safety Margin:</span>
+                <span id="simSafetyMargin" class="text-emerald-400 font-bold">--%</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- Forecast & Back-Prediction Ledger Table -->
+    <!-- Full Ledger & Annual Summary Table -->
     <section class="glass-card rounded-2xl p-5">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
         <div>
-          <h3 class="text-base font-semibold text-white">Walk-Forward Back-Prediction Audit &amp; 30-Day Forecast Ledger</h3>
-          <p class="text-xs text-gray-400">Inspect daily predicted Quintal rates or click any past backtest row to jump to that date.</p>
+          <h3 class="text-base font-semibold text-white">Forecast, Back-Test Audit &amp; Multi-Year Summary Ledger</h3>
+          <p class="text-xs text-gray-400">Switch views or click any historical back-test row to inspect that exact trading session.</p>
         </div>
-        <div class="flex gap-2 text-xs">
+        <div class="flex flex-wrap gap-2 text-xs no-print">
           <button onclick="switchLedgerTab('forecast')" id="tabForecast" class="px-3 py-1.5 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40 font-medium cursor-pointer">
             Next 30 Days Forecast
           </button>
           <button onclick="switchLedgerTab('backtest')" id="tabBacktest" class="px-3 py-1.5 rounded-lg bg-gray-800 text-gray-300 border border-gray-700 font-medium cursor-pointer">
-            Recent Back-Predictions (Real vs ML)
+            Back-Predictions (Real vs ML)
+          </button>
+          <button onclick="switchLedgerTab('annual')" id="tabAnnual" class="px-3 py-1.5 rounded-lg bg-gray-800 text-gray-300 border border-gray-700 font-medium cursor-pointer">
+            Annual Summary (2022–2026)
           </button>
         </div>
       </div>
 
-      <div class="overflow-x-auto max-h-[340px]">
+      <div class="overflow-x-auto max-h-[360px]">
         <table class="w-full text-left border-collapse text-xs font-mono">
           <thead class="sticky top-0 bg-gray-900 text-gray-400 uppercase border-b border-gray-800">
             <tr id="ledgerTableHead"></tr>
@@ -364,9 +609,9 @@
 
   </main>
 
-  <footer class="border-t border-gray-800/80 mt-10 py-6 text-center text-xs text-gray-500">
+  <footer class="border-t border-gray-800/80 mt-8 py-5 text-center text-xs text-gray-500">
     <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-      <span>Tiptur APMC Ball Copra Intelligence &bull; GitHub Pages</span>
+      <span>Tiptur APMC Ball Copra Intelligence Suite &bull; GitHub Pages</span>
       <span>Automated GitHub Actions Sync: Daily at 20:30 IST (15:00 UTC)</span>
     </div>
   </footer>
@@ -377,12 +622,21 @@
     // =========================================================================
     let fullDataset = [];
     let selectedDateStr = null;
-    let currentModalPrice = 31720;
     let windowDays = 365;
+    let currentAnalyticsTab = 'technical';
     let currentLedgerTab = 'forecast';
-    let mainChartInstance = null;
-    let featureChartInstance = null;
     let pickerBound = false;
+    let lastAnalysisCache = null;
+
+    const charts = {
+      main: null,
+      rsi: null,
+      macd: null,
+      yoy: null,
+      arrivals: null,
+      spread: null,
+      feature: null
+    };
 
     const OFFICIAL_ANCHORS = [
       ['2022-01-15', 17131], ['2022-02-15', 17439], ['2022-03-15', 17068],
@@ -422,6 +676,13 @@
       return '₹' + Math.round(num).toLocaleString('en-IN');
     }
 
+    function destroyChart(key) {
+      if (charts[key]) {
+        charts[key].destroy();
+        charts[key] = null;
+      }
+    }
+
     function normalizeRow(row) {
       const modal = Number(row.modal_price);
       return {
@@ -436,7 +697,6 @@
       };
     }
 
-    // Smoothly expands compact/sparse JSON into continuous daily series while preserving exact JSON values
     function ensureDailySeries(rawRows) {
       const cleaned = rawRows
         .filter((r) => r && r.date && !isNaN(Number(r.modal_price)))
@@ -474,8 +734,7 @@
           const r1 = uniqueSorted[Math.min(segIdx + 1, uniqueSorted.length - 1)];
           const t0 = parseUTC(r0.date).getTime();
           const t1 = parseUTC(r1.date).getTime();
-          const t = cur.getTime();
-          const u = t1 > t0 ? (t - t0) / (t1 - t0) : 0;
+          const u = t1 > t0 ? (cur.getTime() - t0) / (t1 - t0) : 0;
           const w = (1 - Math.cos(u * Math.PI)) / 2;
           const lerp = (a, b) => a + (b - a) * w;
           const modal = Math.round(lerp(r0.modal_price, r1.modal_price));
@@ -566,6 +825,9 @@
       return rows;
     }
 
+    // =========================================================================
+    // 2. DATA LOADING & NAVIGATION CONTROLS
+    // =========================================================================
     function applyDataset(dataset) {
       fullDataset = dataset;
       const minDate = fullDataset[0].date;
@@ -583,7 +845,6 @@
         });
         pickerBound = true;
       }
-
       runAnalysisForDate(selectedDateStr);
     }
 
@@ -592,7 +853,7 @@
       try {
         urls.push(new URL('coconut_prices.json', window.location.href).href);
       } catch (e) {
-        // Ignore invalid base URL
+        // ignore
       }
       urls.push('./coconut_prices.json', 'coconut_prices.json', '/coconut_prices.json');
       return [...new Set(urls)];
@@ -620,15 +881,13 @@
 
       for (const baseUrl of candidates) {
         const sep = baseUrl.includes('?') ? '&' : '?';
-        const requestUrl = `${baseUrl}${sep}v=${Date.now()}`;
         try {
-          const resp = await fetchWithTimeout(requestUrl, 5000);
+          const resp = await fetchWithTimeout(`${baseUrl}${sep}v=${Date.now()}`, 5000);
           if (!resp.ok) {
             errors.push(`${baseUrl} (HTTP ${resp.status})`);
             continue;
           }
-          const rawText = await resp.text();
-          const json = JSON.parse(rawText);
+          const json = JSON.parse(await resp.text());
           const rawArr = Array.isArray(json) ? json : (json && Array.isArray(json.data) ? json.data : null);
 
           if (rawArr && rawArr.length > 0) {
@@ -636,14 +895,12 @@
             const latestDate = daily[daily.length - 1].date;
             dotEl.className = 'h-2 w-2 rounded-full bg-emerald-400 animate-pulse';
             textEl.textContent = rawArr.length === daily.length
-              ? `Live JSON (${daily.length} days • Latest: ${latestDate})`
-              : `Live JSON (${rawArr.length} pts → ${daily.length} daily • Latest: ${latestDate})`;
+              ? `Live JSON (${daily.length}d • ${latestDate})`
+              : `Live JSON (${rawArr.length}→${daily.length}d • ${latestDate})`;
             badgeEl.title = `Loaded live from ${baseUrl}`;
             bannerEl.classList.add('hidden');
             applyDataset(daily);
             return;
-          } else {
-            errors.push(`${baseUrl} (JSON missing data array)`);
           }
         } catch (err) {
           errors.push(`${baseUrl} (${err.name === 'AbortError' ? 'Timeout' : err.message})`);
@@ -652,16 +909,15 @@
 
       const latestDate = fullDataset[fullDataset.length - 1].date;
       dotEl.className = 'h-2 w-2 rounded-full bg-amber-400';
-      textEl.textContent = `Built-in Archive (${fullDataset.length} days • Latest: ${latestDate})`;
+      textEl.textContent = `Built-in Archive (${fullDataset.length}d • ${latestDate})`;
       badgeEl.title = errors.join(' | ');
-      bannerMsg.innerHTML = `<strong>Live coconut_prices.json unavailable:</strong> Displaying built-in 5-year Tiptur APMC archive. Detail: <span class="font-mono">${errors[0] || 'Check file path'}</span>`;
+      bannerMsg.innerHTML = `<strong>Live coconut_prices.json unavailable:</strong> Running on built-in 5-year Tiptur APMC archive. (<span class="font-mono">${errors[0] || 'Check path'}</span>)`;
       bannerEl.classList.remove('hidden');
     }
 
     function initApp() {
       const fallback = buildFallbackDataset();
-      const latest = fallback[fallback.length - 1].date;
-      document.getElementById('dataSourceText').textContent = `Syncing JSON... (Archive: ${latest})`;
+      document.getElementById('dataSourceText').textContent = `Syncing JSON...`;
       applyDataset(fallback);
       loadLiveJson();
     }
@@ -669,14 +925,8 @@
     function selectClosestDate(targetStr) {
       let bestIdx = fullDataset.length - 1;
       for (let i = 0; i < fullDataset.length; i++) {
-        if (fullDataset[i].date === targetStr) {
-          bestIdx = i;
-          break;
-        }
-        if (fullDataset[i].date > targetStr) {
-          bestIdx = Math.max(0, i - 1);
-          break;
-        }
+        if (fullDataset[i].date === targetStr) { bestIdx = i; break; }
+        if (fullDataset[i].date > targetStr) { bestIdx = Math.max(0, i - 1); break; }
       }
       const minAnchor = Math.min(45, Math.max(5, fullDataset.length - 1));
       bestIdx = Math.max(minAnchor, bestIdx);
@@ -707,46 +957,132 @@
       document.querySelectorAll('.win-btn').forEach((btn) => {
         btn.className = 'win-btn px-2.5 py-1 rounded bg-gray-800 text-gray-300 border border-gray-700 cursor-pointer';
       });
-      const activeId = days === 90 ? 'win90' : days === 180 ? 'win180' : days === 365 ? 'win365' : 'winAll';
-      document.getElementById(activeId).className =
+      const idMap = { 90: 'win90', 180: 'win180', 365: 'win365', 730: 'win730', 9999: 'winAll' };
+      document.getElementById(idMap[days] || 'winAll').className =
         'win-btn px-2.5 py-1 rounded bg-emerald-600/20 text-emerald-300 border border-emerald-500/40 cursor-pointer';
-      runAnalysisForDate(selectedDateStr);
+      if (lastAnalysisCache) renderActiveCharts();
+    }
+
+    function switchAnalyticsTab(tab) {
+      currentAnalyticsTab = tab;
+      document.querySelectorAll('.analytics-panel').forEach((el) => el.classList.add('hidden'));
+      document.getElementById(`panel-${tab}`).classList.remove('hidden');
+
+      document.querySelectorAll('.atab-btn').forEach((btn) => {
+        btn.className = 'atab-btn px-3.5 py-2 rounded-lg text-xs font-semibold bg-gray-800/80 text-gray-300 border border-gray-700 hover:bg-gray-700 cursor-pointer';
+      });
+      document.getElementById(`atab-${tab}`).className =
+        'atab-btn px-3.5 py-2 rounded-lg text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 cursor-pointer';
+
+      if (lastAnalysisCache) renderTabCharts(tab);
     }
 
     function switchLedgerTab(tab) {
       currentLedgerTab = tab;
-      document.getElementById('tabForecast').className = tab === 'forecast'
-        ? 'px-3 py-1.5 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40 font-medium cursor-pointer'
-        : 'px-3 py-1.5 rounded-lg bg-gray-800 text-gray-300 border border-gray-700 font-medium cursor-pointer';
-      document.getElementById('tabBacktest').className = tab === 'backtest'
-        ? 'px-3 py-1.5 rounded-lg bg-sky-500/20 text-sky-300 border border-sky-500/40 font-medium cursor-pointer'
-        : 'px-3 py-1.5 rounded-lg bg-gray-800 text-gray-300 border border-gray-700 font-medium cursor-pointer';
-      runAnalysisForDate(selectedDateStr);
+      const styles = {
+        forecast: 'px-3 py-1.5 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40 font-medium cursor-pointer',
+        backtest: 'px-3 py-1.5 rounded-lg bg-sky-500/20 text-sky-300 border border-sky-500/40 font-medium cursor-pointer',
+        annual: 'px-3 py-1.5 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-medium cursor-pointer',
+        inactive: 'px-3 py-1.5 rounded-lg bg-gray-800 text-gray-300 border border-gray-700 font-medium cursor-pointer'
+      };
+      document.getElementById('tabForecast').className = tab === 'forecast' ? styles.forecast : styles.inactive;
+      document.getElementById('tabBacktest').className = tab === 'backtest' ? styles.backtest : styles.inactive;
+      document.getElementById('tabAnnual').className = tab === 'annual' ? styles.annual : styles.inactive;
+      if (lastAnalysisCache) renderLedgerTable(lastAnalysisCache.backtestSeries, lastAnalysisCache.forecastSeries);
     }
 
-    function updateFarmCalculator(changedField) {
-      const qtlEl = document.getElementById('calcQuintals');
-      const nutsEl = document.getElementById('calcNuts');
-      let qtls = parseFloat(qtlEl.value) || 0;
-      let nuts = parseFloat(nutsEl.value) || 0;
-
-      if (changedField === 'qtl') {
-        nuts = Math.round(qtls * 700);
-        nutsEl.value = nuts;
-      } else if (changedField === 'nuts') {
-        qtls = +(nuts / 700).toFixed(2);
-        qtlEl.value = qtls;
+    // =========================================================================
+    // 3. TECHNICAL, STATISTICAL & ML ENGINES
+    // =========================================================================
+    function computeSMA(values, period) {
+      const out = new Array(values.length).fill(null);
+      let sum = 0;
+      for (let i = 0; i < values.length; i++) {
+        sum += values[i];
+        if (i >= period) sum -= values[i - period];
+        if (i >= period - 1) out[i] = sum / period;
       }
-
-      const gross = qtls * currentModalPrice;
-      const net = gross * 0.965;
-      document.getElementById('calcGross').textContent = formatINR(gross);
-      document.getElementById('calcNet').textContent = formatINR(net);
+      return out;
     }
 
-    // =========================================================================
-    // 2. CLIENT-SIDE ML ENGINE: RIDGE REGRESSION (ARX + FOURIER HARMONICS)
-    // =========================================================================
+    function computeEMA(values, period) {
+      const out = new Array(values.length).fill(null);
+      const k = 2 / (period + 1);
+      let ema = values[0];
+      out[0] = ema;
+      for (let i = 1; i < values.length; i++) {
+        ema = values[i] * k + ema * (1 - k);
+        out[i] = ema;
+      }
+      return out;
+    }
+
+    function computeBollinger(values, period = 20, mult = 2) {
+      const upper = new Array(values.length).fill(null);
+      const lower = new Array(values.length).fill(null);
+      const mid = computeSMA(values, period);
+      for (let i = period - 1; i < values.length; i++) {
+        let sq = 0;
+        for (let j = i - period + 1; j <= i; j++) {
+          sq += Math.pow(values[j] - mid[i], 2);
+        }
+        const sd = Math.sqrt(sq / period);
+        upper[i] = mid[i] + mult * sd;
+        lower[i] = mid[i] - mult * sd;
+      }
+      return { mid, upper, lower };
+    }
+
+    function computeRSI(values, period = 14) {
+      const rsi = new Array(values.length).fill(null);
+      if (values.length <= period) return rsi;
+      let gain = 0;
+      let loss = 0;
+      for (let i = 1; i <= period; i++) {
+        const diff = values[i] - values[i - 1];
+        if (diff >= 0) gain += diff;
+        else loss -= diff;
+      }
+      let avgGain = gain / period;
+      let avgLoss = loss / period;
+      rsi[period] = avgLoss === 0 ? 100 : 100 - (100 / (1 + avgGain / avgLoss));
+
+      for (let i = period + 1; i < values.length; i++) {
+        const diff = values[i] - values[i - 1];
+        const g = diff > 0 ? diff : 0;
+        const l = diff < 0 ? -diff : 0;
+        avgGain = (avgGain * (period - 1) + g) / period;
+        avgLoss = (avgLoss * (period - 1) + l) / period;
+        rsi[i] = avgLoss === 0 ? 100 : 100 - (100 / (1 + avgGain / avgLoss));
+      }
+      return rsi;
+    }
+
+    function computeMACD(values) {
+      const ema12 = computeEMA(values, 12);
+      const ema26 = computeEMA(values, 26);
+      const macdLine = values.map((_, i) => ema12[i] - ema26[i]);
+      const signalLine = computeEMA(macdLine, 9);
+      const histogram = macdLine.map((v, i) => v - signalLine[i]);
+      return { macdLine, signalLine, histogram };
+    }
+
+    function pearsonCorrelation(x, y) {
+      const n = Math.min(x.length, y.length);
+      if (n < 3) return 0;
+      let sx = 0, sy = 0, sxx = 0, syy = 0, sxy = 0;
+      for (let i = 0; i < n; i++) {
+        sx += x[i];
+        sy += y[i];
+        sxx += x[i] * x[i];
+        syy += y[i] * y[i];
+        sxy += x[i] * y[i];
+      }
+      const num = n * sxy - sx * sy;
+      const den = Math.sqrt((n * sxx - sx * sx) * (n * syy - sy * sy));
+      return den === 0 ? 0 : num / den;
+    }
+
     function getDayOfYear(dateStr) {
       const dt = parseUTC(dateStr);
       const start = new Date(Date.UTC(dt.getUTCFullYear(), 0, 0));
@@ -755,21 +1091,12 @@
 
     function extractFeatures(series, idx) {
       const p0 = series[idx].modal_price;
-
-      let sum7 = 0;
-      let c7 = 0;
-      for (let k = Math.max(0, idx - 6); k <= idx; k++) {
-        sum7 += series[k].modal_price;
-        c7++;
-      }
+      let sum7 = 0, c7 = 0;
+      for (let k = Math.max(0, idx - 6); k <= idx; k++) { sum7 += series[k].modal_price; c7++; }
       const ma7 = sum7 / c7;
 
-      let sum30 = 0;
-      let c30 = 0;
-      for (let k = Math.max(0, idx - 29); k <= idx; k++) {
-        sum30 += series[k].modal_price;
-        c30++;
-      }
+      let sum30 = 0, c30 = 0;
+      for (let k = Math.max(0, idx - 29); k <= idx; k++) { sum30 += series[k].modal_price; c30++; }
       const ma30 = sum30 / c30;
 
       const p14 = series[Math.max(0, idx - 14)].modal_price;
@@ -778,12 +1105,8 @@
       const copra = series[idx].copra_ref_qtl || p0 * 0.75;
       const copraSpread = copra - 0.75 * p0;
 
-      let arr7 = 0;
-      let ac7 = 0;
-      for (let k = Math.max(0, idx - 6); k <= idx; k++) {
-        arr7 += (series[k].arrivals_qtl || 400);
-        ac7++;
-      }
+      let arr7 = 0, ac7 = 0;
+      for (let k = Math.max(0, idx - 6); k <= idx; k++) { arr7 += (series[k].arrivals_qtl || 400); ac7++; }
       const arrNorm = (arr7 / ac7) - 420;
 
       const doy = getDayOfYear(series[idx].date);
@@ -794,10 +1117,7 @@
     }
 
     function solveRidgeRegression(X, y, lambda = 18.0) {
-      if (!X.length) {
-        return { weightsStd: new Array(11).fill(0), predict: (f) => f[1] };
-      }
-
+      if (!X.length) return { weightsStd: new Array(11).fill(0), predict: (f) => f[1] };
       const n = X.length;
       const m = X[0].length;
       const means = new Array(m).fill(0);
@@ -807,7 +1127,6 @@
         let s = 0;
         for (let i = 0; i < n; i++) s += X[i][j];
         means[j] = s / n;
-
         let sq = 0;
         for (let i = 0; i < n; i++) sq += Math.pow(X[i][j] - means[j], 2);
         stds[j] = Math.sqrt(sq / n) || 1.0;
@@ -818,16 +1137,12 @@
       const b = new Array(m).fill(0);
 
       for (let i = 0; i < n; i++) {
-        const xi = Xs[i];
-        const yi = y[i];
+        const xi = Xs[i], yi = y[i];
         for (let r = 0; r < m; r++) {
           b[r] += xi[r] * yi;
-          for (let c = r; c < m; c++) {
-            A[r][c] += xi[r] * xi[c];
-          }
+          for (let c = r; c < m; c++) A[r][c] += xi[r] * xi[c];
         }
       }
-
       for (let r = 0; r < m; r++) {
         for (let c = 0; c < r; c++) A[r][c] = A[c][r];
         A[r][r] += (r === 0 ? 1e-6 : lambda);
@@ -855,17 +1170,14 @@
         weightsStd,
         predict(rawFeatures) {
           let pred = weightsStd[0];
-          for (let j = 1; j < m; j++) {
-            pred += weightsStd[j] * ((rawFeatures[j] - means[j]) / stds[j]);
-          }
+          for (let j = 1; j < m; j++) pred += weightsStd[j] * ((rawFeatures[j] - means[j]) / stds[j]);
           return pred;
         }
       };
     }
 
     function trainHorizonModel(series, trainEndIdx, horizonDays) {
-      const X = [];
-      const y = [];
+      const X = [], y = [];
       const startIdx = Math.max(Math.min(30, Math.floor(trainEndIdx / 3)), trainEndIdx - 730);
       for (let t = startIdx; t + horizonDays <= trainEndIdx; t++) {
         X.push(extractFeatures(series, t));
@@ -875,16 +1187,42 @@
     }
 
     // =========================================================================
-    // 3. ORCHESTRATE ANALYSIS, BACK-PREDICTION & 30-DAY FORECAST
+    // 4. MASTER ANALYSIS ORCHESTRATOR
     // =========================================================================
     function runAnalysisForDate(anchorDateStr) {
       const anchorIdx = fullDataset.findIndex((d) => d.date === anchorDateStr);
       if (anchorIdx < 2) return;
 
+      const histUpToAnchor = fullDataset.slice(0, anchorIdx + 1);
+      const prices = histUpToAnchor.map((d) => d.modal_price);
       const anchorRow = fullDataset[anchorIdx];
-      currentModalPrice = anchorRow.modal_price;
-      updateFarmCalculator('sync');
 
+      // Technical indicators
+      const sma7 = computeSMA(prices, 7);
+      const sma30 = computeSMA(prices, 30);
+      const sma90 = computeSMA(prices, 90);
+      const sma200 = computeSMA(prices, 200);
+      const bb = computeBollinger(prices, 20, 2);
+      const rsi14 = computeRSI(prices, 14);
+      const macd = computeMACD(prices);
+
+      // 52-week stats
+      const slice52 = histUpToAnchor.slice(Math.max(0, histUpToAnchor.length - 365));
+      const high52 = Math.max(...slice52.map((d) => d.modal_price));
+      const low52 = Math.min(...slice52.map((d) => d.modal_price));
+      const range52Pos = high52 > low52 ? ((anchorRow.modal_price - low52) / (high52 - low52)) * 100 : 50;
+      const drawdown52 = ((anchorRow.modal_price - high52) / high52) * 100;
+
+      // 30-day annualized volatility
+      const rets = [];
+      for (let i = Math.max(1, prices.length - 30); i < prices.length; i++) {
+        rets.push((prices[i] - prices[i - 1]) / prices[i - 1]);
+      }
+      const meanRet = rets.reduce((a, b) => a + b, 0) / (rets.length || 1);
+      const varRet = rets.reduce((a, r) => a + Math.pow(r - meanRet, 2), 0) / (rets.length || 1);
+      const annVolPct = Math.sqrt(varRet) * Math.sqrt(252) * 100;
+
+      // Out-of-Sample Back-Prediction
       const backModel1d = trainHorizonModel(fullDataset, anchorIdx - 1, 1);
       const backPredAnchor = Math.round(backModel1d.predict(extractFeatures(fullDataset, anchorIdx - 1)));
       const backErrPct = ((backPredAnchor - anchorRow.modal_price) / anchorRow.modal_price) * 100;
@@ -893,13 +1231,14 @@
       const oosModel1d = trainHorizonModel(fullDataset, btSplitIdx, 1);
 
       const backtestSeries = [];
-      let sumAbsPctErr = 0;
-      let sumSqErr = 0;
-      let sumActual = 0;
+      let sumAbsPctErr = 0, sumSqErr = 0, sumActual = 0, dirCorrect = 0;
 
       for (let i = btSplitIdx + 1; i <= anchorIdx; i++) {
         const pred = Math.round(oosModel1d.predict(extractFeatures(fullDataset, i - 1)));
         const actual = fullDataset[i].modal_price;
+        const prev = fullDataset[i - 1].modal_price;
+        if ((pred - prev) * (actual - prev) >= 0) dirCorrect++;
+
         const err = pred - actual;
         const ape = Math.abs(err / actual) * 100;
         sumAbsPctErr += ape;
@@ -911,12 +1250,14 @@
       const btLen = Math.max(1, backtestSeries.length);
       const mape = sumAbsPctErr / btLen;
       const rmse = Math.sqrt(sumSqErr / btLen);
+      const dirAccPct = (dirCorrect / btLen) * 100;
       const meanAct = sumActual / btLen;
       const ssTot = backtestSeries.reduce((acc, r) => acc + Math.pow(r.actual - meanAct, 2), 0);
       const r2 = Math.max(0, 1 - (sumSqErr / (ssTot || 1)));
 
+      // Direct Multi-Horizon Forecast (up to 60 days for scenario matrix, 30 days for chart)
       const anchorFeatures = extractFeatures(fullDataset, anchorIdx);
-      const keyHorizons = [1, 5, 10, 15, 20, 25, 30];
+      const keyHorizons = [1, 5, 10, 15, 20, 25, 30, 45, 60];
       const anchorForecasts = {};
       let model30d = null;
 
@@ -929,8 +1270,7 @@
       const forecastSeries = [];
       const baseAnchorDate = parseUTC(anchorRow.date);
       for (let h = 1; h <= 30; h++) {
-        let hLow = 1;
-        let hHigh = 30;
+        let hLow = 1, hHigh = 30;
         for (let k = 0; k < keyHorizons.length - 1; k++) {
           if (h >= keyHorizons[k] && h <= keyHorizons[k + 1]) {
             hLow = keyHorizons[k];
@@ -958,231 +1298,850 @@
       const target30 = forecastSeries[29];
       const delta30Pct = ((target30.predicted - anchorRow.modal_price) / anchorRow.modal_price) * 100;
 
-      updateKPICards(anchorRow, backPredAnchor, backErrPct, target30, delta30Pct);
-      updateDiagnostics(mape, rmse, r2);
-      renderEvidenceExplanation(anchorIdx, anchorRow, target30, delta30Pct, backErrPct);
-      renderLedgerTable(backtestSeries, forecastSeries);
+      lastAnalysisCache = {
+        anchorIdx,
+        anchorRow,
+        histUpToAnchor,
+        prices,
+        sma7,
+        sma30,
+        sma90,
+        sma200,
+        bb,
+        rsi14,
+        macd,
+        high52,
+        low52,
+        range52Pos,
+        drawdown52,
+        annVolPct,
+        backPredAnchor,
+        backErrPct,
+        backtestSeries,
+        mape,
+        rmse,
+        r2,
+        dirAccPct,
+        model30d,
+        anchorForecasts,
+        forecastSeries,
+        target30,
+        delta30Pct
+      };
 
-      if (typeof Chart !== 'undefined') {
-        try {
-          renderMainChart(anchorIdx, backtestSeries, forecastSeries);
-          renderFeatureChart(model30d);
-        } catch (err) {
-          console.error('Chart render warning:', err);
-        }
-      }
+      updateExecutiveKPIs(lastAnalysisCache);
+      renderTechMatrix(lastAnalysisCache);
+      renderSeasonalHeatmap(histUpToAnchor);
+      renderSupplyStats(histUpToAnchor);
+      renderScenarioMatrix(lastAnalysisCache);
+      renderEvidenceExplanation(lastAnalysisCache);
+      updateFarmSimulator('sync');
+      renderLedgerTable(backtestSeries, forecastSeries);
+      renderActiveCharts();
     }
 
-    function updateKPICards(anchorRow, backPred, backErrPct, target30, delta30Pct) {
+    // =========================================================================
+    // 5. UI UPDATERS (KPIs, TABLES, HEATMAPS, SIMULATOR)
+    // =========================================================================
+    function updateExecutiveKPIs(c) {
+      const { anchorIdx, anchorRow, high52, low52, range52Pos, drawdown52, annVolPct, rsi14, bb, sma30, sma90, target30, delta30Pct, backErrPct } = c;
+
+      document.getElementById('range52Low').textContent = formatINR(low52);
+      document.getElementById('range52High').textContent = formatINR(high52);
+      document.getElementById('range52Bar').style.width = `${Math.max(4, Math.min(100, range52Pos)).toFixed(0)}%`;
+
+      const prev7 = fullDataset[Math.max(0, anchorIdx - 7)].modal_price;
+      const delta7Pct = ((anchorRow.modal_price - prev7) / prev7) * 100;
+      const spreadPct = ((anchorRow.max_price - anchorRow.min_price) / anchorRow.modal_price) * 100;
+
       document.getElementById('kpiDateBadge').textContent = anchorRow.date;
       document.getElementById('kpiActualPrice').textContent = formatINR(anchorRow.modal_price);
-      document.getElementById('kpiPerKg').textContent = `₹${anchorRow.per_kg_inr.toFixed(2)} / kg`;
-      document.getElementById('kpiSpread').textContent = `Min ${formatINR(anchorRow.min_price)} – Max ${formatINR(anchorRow.max_price)}`;
+      document.getElementById('kpiPerKg').textContent = `₹${anchorRow.per_kg_inr.toFixed(2)}/kg`;
+      const d7El = document.getElementById('kpiDelta7d');
+      d7El.textContent = `7d: ${delta7Pct >= 0 ? '+' : ''}${delta7Pct.toFixed(1)}%`;
+      d7El.className = delta7Pct >= 0 ? 'text-emerald-400' : 'text-rose-400';
 
       document.getElementById('kpiPerNutPrice').textContent = `₹${anchorRow.per_nut_inr.toFixed(2)}`;
-      document.getElementById('kpiBackPred').textContent = `ML Back-Pred: ${formatINR(backPred)}`;
-      document.getElementById('kpiBackErrorBadge').textContent = `Err: ${backErrPct >= 0 ? '+' : ''}${backErrPct.toFixed(2)}%`;
+      document.getElementById('kpiSpreadPct').textContent = `Spr: ${spreadPct.toFixed(1)}%`;
+      document.getElementById('kpiSpread').textContent = `${formatINR(anchorRow.min_price)} – ${formatINR(anchorRow.max_price)}`;
 
       document.getElementById('kpiForecast30d').textContent = formatINR(target30.predicted);
-      document.getElementById('kpiForecastPerKg').textContent = `₹${target30.perKg} / kg`;
+      document.getElementById('kpiForecastPerKg').textContent = `₹${target30.perKg}/kg`;
       document.getElementById('kpiForecastCI').textContent = `±${formatINR(target30.upper95 - target30.predicted)}`;
-
       const dBadge = document.getElementById('kpiForecastDeltaBadge');
       const sign30 = delta30Pct >= 0 ? '+' : '';
-      dBadge.textContent = `${sign30}${delta30Pct.toFixed(1)}% in 30d`;
-      dBadge.className = delta30Pct >= 2.0
-        ? 'text-[11px] font-mono px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
-        : delta30Pct <= -2.0
-          ? 'text-[11px] font-mono px-2 py-0.5 rounded bg-rose-500/15 text-rose-300 border border-rose-500/30'
-          : 'text-[11px] font-mono px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30';
+      dBadge.textContent = `${sign30}${delta30Pct.toFixed(1)}%`;
+      dBadge.className = delta30Pct >= 2
+        ? 'text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
+        : delta30Pct <= -2
+          ? 'text-[10px] font-mono px-1.5 py-0.5 rounded bg-rose-500/15 text-rose-300 border border-rose-500/30'
+          : 'text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30';
 
-      document.getElementById('kpiArrivalsBadge').textContent = `Arr: ${anchorRow.arrivals_qtl} Qtl`;
+      const curRsi = rsi14[rsi14.length - 1] ?? 50;
+      const curBbUpper = bb.upper[bb.upper.length - 1];
+      const curBbLower = bb.lower[bb.lower.length - 1];
+      const bbPctB = (curBbUpper && curBbLower && curBbUpper > curBbLower)
+        ? ((anchorRow.modal_price - curBbLower) / (curBbUpper - curBbLower)) * 100
+        : 50;
+
+      document.getElementById('kpiRsiVal').textContent = curRsi.toFixed(1);
+      const rsiBadge = document.getElementById('kpiRsiBadge');
+      if (curRsi >= 70) {
+        rsiBadge.textContent = 'OVERBOUGHT';
+        rsiBadge.className = 'text-[10px] font-mono px-1.5 py-0.5 rounded bg-rose-500/15 text-rose-300 border border-rose-500/30';
+      } else if (curRsi <= 30) {
+        rsiBadge.textContent = 'OVERSOLD';
+        rsiBadge.className = 'text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30';
+      } else {
+        rsiBadge.textContent = 'NEUTRAL';
+        rsiBadge.className = 'text-[10px] font-mono px-1.5 py-0.5 rounded bg-gray-800 text-gray-300';
+      }
+      document.getElementById('kpiBbPos').textContent = `BB %B: ${bbPctB.toFixed(0)}%`;
+
+      const curSma30 = sma30[sma30.length - 1] || anchorRow.modal_price;
+      const curSma90 = sma90[sma90.length - 1] || anchorRow.modal_price;
+      const trendEl = document.getElementById('kpiTrendTag');
+      if (curSma30 > curSma90) {
+        trendEl.textContent = 'BULLISH';
+        trendEl.className = 'text-emerald-400';
+      } else {
+        trendEl.textContent = 'BEARISH';
+        trendEl.className = 'text-rose-400';
+      }
+
+      document.getElementById('kpiAnnVol').textContent = `${annVolPct.toFixed(1)}%`;
+      document.getElementById('kpiDrawdown').textContent = `DD: ${drawdown52.toFixed(1)}%`;
+      document.getElementById('kpiArrivalsBadge').textContent = `Arr: ${anchorRow.arrivals_qtl}`;
+      document.getElementById('kpiBackErrorBadge').textContent = `BT: ${Math.abs(backErrPct).toFixed(1)}%`;
+
+      const conf = Math.max(55, Math.min(96, Math.round(100 - c.mape * 6)));
+      document.getElementById('kpiConfidence').textContent = `Conf: ${conf}%`;
       const sigEl = document.getElementById('kpiActionSignal');
       const subEl = document.getElementById('kpiActionSubtext');
 
       if (delta30Pct >= 3.0) {
-        sigEl.textContent = 'HOLD / CURE BALL COPRA';
-        sigEl.className = 'inline-block text-lg font-bold tracking-tight text-emerald-400';
-        subEl.textContent = `Model projects +${delta30Pct.toFixed(1)}% appreciation over next 30 days. Staggering sales and curing maximizes realization.`;
+        sigEl.textContent = 'HOLD / CURE COPRA';
+        sigEl.className = 'text-base font-bold tracking-tight text-emerald-400 leading-tight block';
+        subEl.textContent = `ML projects +${delta30Pct.toFixed(1)}% upside in 30d. Stagger sales.`;
       } else if (delta30Pct <= -3.0) {
-        sigEl.textContent = 'SELL CURRENT LOT NOW';
-        sigEl.className = 'inline-block text-lg font-bold tracking-tight text-rose-400';
-        subEl.textContent = `Model detects ${delta30Pct.toFixed(1)}% downward pressure over next month. Lock in prevailing Tiptur APMC spot rates.`;
+        sigEl.textContent = 'SELL LOT NOW';
+        sigEl.className = 'text-base font-bold tracking-tight text-rose-400 leading-tight block';
+        subEl.textContent = `ML flags ${delta30Pct.toFixed(1)}% pullback risk. Lock spot rate.`;
       } else {
-        sigEl.textContent = 'STEADY CURING CYCLE';
-        sigEl.className = 'inline-block text-lg font-bold tracking-tight text-amber-400';
-        subEl.textContent = `Range-bound market (${sign30}${delta30Pct.toFixed(1)}%). Maintain regular 45-day curing batches at Grade-A modal rates.`;
+        sigEl.textContent = 'STEADY BATCH SELL';
+        sigEl.className = 'text-base font-bold tracking-tight text-amber-400 leading-tight block';
+        subEl.textContent = `Range-bound (${sign30}${delta30Pct.toFixed(1)}%). Follow normal curing cycle.`;
       }
+
+      document.getElementById('metricMape').textContent = `${c.mape.toFixed(2)}%`;
+      document.getElementById('metricRmse').textContent = formatINR(c.rmse);
+      document.getElementById('metricR2').textContent = c.r2.toFixed(3);
+      document.getElementById('metricDirAcc').textContent = `${c.dirAccPct.toFixed(1)}%`;
     }
 
-    function updateDiagnostics(mape, rmse, r2) {
-      document.getElementById('metricMape').textContent = mape.toFixed(2) + '%';
-      document.getElementById('metricRmse').textContent = formatINR(rmse);
-      document.getElementById('metricR2').textContent = r2.toFixed(3);
+    function renderTechMatrix(c) {
+      const p = c.anchorRow.modal_price;
+      const last = (arr) => arr[arr.length - 1];
+      const s7 = last(c.sma7) || p;
+      const s30 = last(c.sma30) || p;
+      const s90 = last(c.sma90) || p;
+      const s200 = last(c.sma200) || p;
+      const mVal = last(c.macd.macdLine) || 0;
+      const mSig = last(c.macd.signalLine) || 0;
+
+      const macdBadge = document.getElementById('macdStatusBadge');
+      macdBadge.textContent = mVal >= mSig ? 'BULLISH CROSS' : 'BEARISH CROSS';
+      macdBadge.className = mVal >= mSig
+        ? 'text-[11px] font-mono px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
+        : 'text-[11px] font-mono px-2 py-0.5 rounded bg-rose-500/15 text-rose-300 border border-rose-500/30';
+
+      // Z-Score vs 90d Mean
+      const slice90 = c.prices.slice(Math.max(0, c.prices.length - 90));
+      const mean90 = slice90.reduce((a, b) => a + b, 0) / slice90.length;
+      const sd90 = Math.sqrt(slice90.reduce((a, v) => a + Math.pow(v - mean90, 2), 0) / slice90.length) || 1;
+      const z90 = (p - mean90) / sd90;
+
+      const items = [
+        { label: 'SMA 7-Day', val: formatINR(s7), diff: ((p - s7) / s7) * 100 },
+        { label: 'SMA 30-Day', val: formatINR(s30), diff: ((p - s30) / s30) * 100 },
+        { label: 'SMA 90-Day', val: formatINR(s90), diff: ((p - s90) / s90) * 100 },
+        { label: 'SMA 200-Day', val: formatINR(s200), diff: ((p - s200) / s200) * 100 },
+        { label: '90d Z-Score', val: `${z90 >= 0 ? '+' : ''}${z90.toFixed(2)}σ`, custom: Math.abs(z90) > 1.8 ? 'EXTREME' : 'NORMAL' },
+        { label: 'Cross Regime', val: s30 >= s90 ? 'GOLDEN' : 'DEATH', custom: s30 >= s90 ? 'UPTREND' : 'DOWNTREND' }
+      ];
+
+      document.getElementById('techMatrixContainer').innerHTML = items.map((it) => {
+        const sub = it.custom
+          ? `<span class="${it.val === 'GOLDEN' || it.custom === 'NORMAL' ? 'text-emerald-400' : 'text-amber-400'}">${it.custom}</span>`
+          : `<span class="${it.diff >= 0 ? 'text-emerald-400' : 'text-rose-400'}">Spot ${it.diff >= 0 ? '+' : ''}${it.diff.toFixed(1)}%</span>`;
+        return `
+          <div class="bg-gray-900/75 border border-gray-800 rounded-xl p-3">
+            <div class="text-[10px] text-gray-400 uppercase">${it.label}</div>
+            <div class="text-sm font-bold text-white mt-0.5">${it.val}</div>
+            <div class="text-[10px] mt-0.5">${sub}</div>
+          </div>
+        `;
+      }).join('');
     }
 
-    function renderEvidenceExplanation(anchorIdx, anchorRow, target30, delta30Pct, backErrPct) {
+    function renderSeasonalHeatmap(hist) {
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const map = {};
+      const monthTotals = Array.from({ length: 12 }, () => []);
+
+      hist.forEach((row) => {
+        const yr = row.date.slice(0, 4);
+        const mo = parseInt(row.date.slice(5, 7), 10) - 1;
+        if (!map[yr]) map[yr] = Array.from({ length: 12 }, () => []);
+        map[yr][mo].push(row.modal_price);
+        monthTotals[mo].push(row.modal_price);
+      });
+
+      const years = Object.keys(map).sort();
+      const monthAvgs = monthTotals.map((arr, idx) => ({
+        month: months[idx],
+        avg: arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0
+      }));
+      const topMonths = [...monthAvgs].sort((a, b) => b.avg - a.avg).slice(0, 3).map((m) => m.month).join(', ');
+      document.getElementById('yoyBestMonthsBadge').textContent = `Historically Strongest: ${topMonths}`;
+
+      let html = `
+        <thead class="bg-gray-900 text-gray-400 border-b border-gray-800">
+          <tr>
+            <th class="py-2 px-2 text-left">Year</th>
+            ${months.map((m) => `<th class="py-2 px-1.5">${m}</th>`).join('')}
+            <th class="py-2 px-2 text-right">Avg</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-800/60">
+      `;
+
+      let prevMonthVal = null;
+      years.forEach((yr) => {
+        let yrSum = 0, yrCount = 0;
+        html += `<tr><td class="py-2 px-2 text-left font-bold text-white">${yr}</td>`;
+        for (let m = 0; m < 12; m++) {
+          const arr = map[yr][m];
+          if (!arr.length) {
+            html += `<td class="py-2 px-1 text-gray-600">—</td>`;
+          } else {
+            const avg = arr.reduce((a, b) => a + b, 0) / arr.length;
+            yrSum += avg;
+            yrCount++;
+            const mom = prevMonthVal ? ((avg - prevMonthVal) / prevMonthVal) * 100 : 0;
+            prevMonthVal = avg;
+            const bg = mom >= 4
+              ? 'bg-emerald-500/25 text-emerald-200'
+              : mom > 0
+                ? 'bg-emerald-500/10 text-emerald-300'
+                : mom <= -4
+                  ? 'bg-rose-500/25 text-rose-200'
+                  : 'bg-rose-500/10 text-rose-300';
+            html += `<td class="py-1.5 px-1 ${bg} border border-gray-900/50">
+              <div class="font-semibold">${(avg / 1000).toFixed(1)}k</div>
+              <div class="text-[9px] opacity-80">${mom >= 0 ? '+' : ''}${mom.toFixed(1)}%</div>
+            </td>`;
+          }
+        }
+        const yrAvg = yrCount ? yrSum / yrCount : 0;
+        html += `<td class="py-2 px-2 text-right font-bold text-amber-300">${formatINR(yrAvg)}</td></tr>`;
+      });
+
+      html += '</tbody>';
+      document.getElementById('seasonalHeatmapTable').innerHTML = html;
+    }
+
+    function renderSupplyStats(hist) {
+      const recent = hist.slice(Math.max(0, hist.length - 180));
+      const arrs = recent.map((d) => d.arrivals_qtl);
+      const prices = recent.map((d) => d.modal_price);
+      const r = pearsonCorrelation(arrs, prices);
+
+      const latest = recent[recent.length - 1];
+      const avgArr30 = recent.slice(-30).reduce((a, d) => a + d.arrivals_qtl, 0) / Math.min(30, recent.length);
+      const ratio = latest.modal_price / (latest.copra_ref_qtl || latest.modal_price * 0.75);
+      const intradaySpread = latest.max_price - latest.min_price;
+
+      document.getElementById('corrArrBadge').textContent = `180d Corr r = ${r.toFixed(2)}`;
+      document.getElementById('spreadRatioBadge').textContent = `Copra/Raw Ratio: ${ratio.toFixed(2)}x`;
+
+      document.getElementById('supplyStatsCards').innerHTML = `
+        <div class="bg-gray-900/75 border border-gray-800 rounded-xl p-3.5">
+          <div class="text-[11px] text-gray-400 uppercase">30-Day Avg APMC Arrivals</div>
+          <div class="text-lg font-mono font-bold text-sky-400 mt-1">${avgArr30.toFixed(1)} Qtl / day</div>
+          <p class="text-[11px] text-gray-400 mt-1">Current session (${latest.arrivals_qtl} Qtl) is ${latest.arrivals_qtl >= avgArr30 ? 'above' : 'below'} 30d supply norm.</p>
+        </div>
+        <div class="bg-gray-900/75 border border-gray-800 rounded-xl p-3.5">
+          <div class="text-[11px] text-gray-400 uppercase">Intraday Auction Spread</div>
+          <div class="text-lg font-mono font-bold text-amber-400 mt-1">${formatINR(intradaySpread)} / Qtl</div>
+          <p class="text-[11px] text-gray-400 mt-1">Grade-A Max (${formatINR(latest.max_price)}) vs Min (${formatINR(latest.min_price)}) rewards superior sun-drying.</p>
+        </div>
+        <div class="bg-gray-900/75 border border-gray-800 rounded-xl p-3.5">
+          <div class="text-[11px] text-gray-400 uppercase">Supply-Price Elasticity</div>
+          <div class="text-lg font-mono font-bold ${r < 0 ? 'text-emerald-400' : 'text-purple-400'} mt-1">r = ${r.toFixed(2)}</div>
+          <p class="text-[11px] text-gray-400 mt-1">${r < -0.15 ? 'Negative correlation confirms higher arrivals cap spot rates.' : 'Demand-led market: prices holding firm despite arrival swings.'}</p>
+        </div>
+      `;
+    }
+
+    function renderScenarioMatrix(c) {
+      const horizons = [7, 15, 30, 45, 60];
+      const baseDt = parseUTC(c.anchorRow.date);
+      const rowsHtml = horizons.map((h) => {
+        let basePred;
+        if (c.anchorForecasts[h] != null) {
+          basePred = Math.round(c.anchorForecasts[h]);
+        } else {
+          // Interpolate for h=7 between 5 and 10
+          basePred = Math.round(c.anchorForecasts[5] + ((h - 5) / 5) * (c.anchorForecasts[10] - c.anchorForecasts[5]));
+        }
+        const sigma = Math.round(c.rmse * 0.85 * Math.sqrt(h / 4));
+        const bear = Math.max(6000, basePred - sigma);
+        const bull = basePred + sigma;
+        const dt = new Date(baseDt.getTime());
+        dt.setUTCDate(dt.getUTCDate() + h);
+
+        return `
+          <tr class="hover:bg-gray-800/40">
+            <td class="py-2 px-2 font-semibold text-white">+${h} Days</td>
+            <td class="py-2 px-2 text-gray-400">${formatUTC(dt)}</td>
+            <td class="py-2 px-2 text-rose-300">${formatINR(bear)}</td>
+            <td class="py-2 px-2 text-amber-300 font-bold">${formatINR(basePred)}</td>
+            <td class="py-2 px-2 text-emerald-300">${formatINR(bull)}</td>
+            <td class="py-2 px-2 text-sky-300">₹${(basePred / 700).toFixed(2)}</td>
+          </tr>
+        `;
+      }).join('');
+      document.getElementById('scenarioTableBody').innerHTML = rowsHtml;
+    }
+
+    function renderEvidenceExplanation(c) {
+      const { anchorIdx, anchorRow, target30, delta30Pct, backErrPct } = c;
       const prev14 = fullDataset[Math.max(0, anchorIdx - 14)];
       const prev30 = fullDataset[Math.max(0, anchorIdx - 30)];
       const mom14Pct = ((anchorRow.modal_price - prev14.modal_price) / prev14.modal_price) * 100;
       const mom30Pct = ((anchorRow.modal_price - prev30.modal_price) / prev30.modal_price) * 100;
 
-      const monthNames = [
-        'January', 'February', 'March', 'April', 'May', 'June',
-        'July', 'August', 'September', 'October', 'November', 'December'
-      ];
-      const curMonthIdx = parseUTC(anchorRow.date).getUTCMonth();
-      const nextMonthIdx = (curMonthIdx + 1) % 12;
-      const seasonalNote = [1, 2, 3, 8, 9, 10].includes(nextMonthIdx)
-        ? `Entering ${monthNames[nextMonthIdx]} — historically firmer demand in Karnataka APMCs due to temple/festive procurement and moderate winter arrivals.`
-        : `Entering ${monthNames[nextMonthIdx]} — Fourier seasonal harmonics capture higher market arrivals and balanced oil mill demand.`;
+      const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+      const nextMonth = monthNames[(parseUTC(anchorRow.date).getUTCMonth() + 1) % 12];
 
-      const evidenceItems = [
+      const items = [
         {
-          title: '1. Tiptur Short-Term Momentum & Mean-Reversion',
+          title: '1. Short-Term Momentum & Mean-Reversion',
           badge: `${mom14Pct >= 0 ? '+' : ''}${mom14Pct.toFixed(1)}% (14d)`,
-          text: `Tiptur modal price on ${anchorRow.date} is ${formatINR(anchorRow.modal_price)}/Qtl (${mom30Pct >= 0 ? '+' : ''}${mom30Pct.toFixed(1)}% vs 30 days ago). The ridge autoregressive layer projects ${formatINR(target30.predicted)}/Qtl by ${target30.date} (${delta30Pct >= 0 ? '+' : ''}${delta30Pct.toFixed(1)}%).`
+          text: `Spot modal price is ${formatINR(anchorRow.modal_price)}/Qtl (${mom30Pct >= 0 ? '+' : ''}${mom30Pct.toFixed(1)}% vs 30d ago). Ridge ARX projects ${formatINR(target30.predicted)}/Qtl by ${target30.date} (${delta30Pct >= 0 ? '+' : ''}${delta30Pct.toFixed(1)}%).`
         },
         {
-          title: '2. APMC Arrival Volume & Seasonal Harmonics',
-          badge: `${anchorRow.arrivals_qtl} Qtl/day`,
-          text: `${seasonalNote} Current Tiptur APMC daily arrivals stand at ${anchorRow.arrivals_qtl} quintals.`
+          title: '2. Fourier Seasonality & Upcoming Month',
+          badge: `Next: ${nextMonth}`,
+          text: `Harmonic seasonal terms weigh historical 5-year Tiptur APMC behavior entering ${nextMonth} alongside daily arrivals of ${anchorRow.arrivals_qtl} quintals.`
         },
         {
-          title: '3. Implied Nut Realization & Curing Margin',
-          badge: `₹${anchorRow.per_nut_inr.toFixed(2)} / nut`,
-          text: `At ~700 nuts per Quintal of dry ball copra, the modal price yields ₹${anchorRow.per_nut_inr.toFixed(2)} per single nut, rewarding quality sun-drying.`
-        },
-        {
-          title: '4. Out-of-Sample Back-Test Verification',
-          badge: `Error: ${Math.abs(backErrPct).toFixed(2)}%`,
-          text: `Trained strictly on records prior to ${anchorRow.date}, the model's blind out-of-sample prediction was within ${Math.abs(backErrPct).toFixed(2)}% of the actual Tiptur APMC close.`
+          title: '3. Strict Out-of-Sample Audit',
+          badge: `Err: ${Math.abs(backErrPct).toFixed(2)}%`,
+          text: `Trained only on dates strictly before ${anchorRow.date}, the model's blind prediction was within ${Math.abs(backErrPct).toFixed(2)}% of the realized Tiptur auction close.`
         }
       ];
 
-      document.getElementById('evidenceContainer').innerHTML = evidenceItems.map((item) => `
-        <div class="p-3.5 rounded-xl bg-gray-900/75 border border-gray-800/90 hover:border-gray-700 transition">
+      document.getElementById('evidenceContainer').innerHTML = items.map((item) => `
+        <div class="p-3 rounded-xl bg-gray-900/75 border border-gray-800">
           <div class="flex items-center justify-between gap-2 mb-1">
-            <span class="font-semibold text-gray-100 text-xs sm:text-sm">${item.title}</span>
-            <span class="font-mono text-[11px] px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shrink-0">
-              ${item.badge}
-            </span>
+            <span class="font-semibold text-gray-100 text-xs">${item.title}</span>
+            <span class="font-mono text-[10px] px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">${item.badge}</span>
           </div>
           <p class="text-xs text-gray-400 leading-relaxed">${item.text}</p>
         </div>
       `).join('');
     }
 
-    function renderMainChart(anchorIdx, backtestSeries, forecastSeries) {
-      document.getElementById('chartAnchorLabel').textContent = fullDataset[anchorIdx].date;
+    function updateFarmSimulator(source) {
+      if (!lastAnalysisCache) return;
+      const qtlEl = document.getElementById('simQuintals');
+      const nutsEl = document.getElementById('simNuts');
+      const nutsPerQtl = parseFloat(document.getElementById('simNutsPerQtl').value) || 700;
+      const rawOffer = parseFloat(document.getElementById('simRawOffer').value) || 23;
+      const cureCostPerQtl = parseFloat(document.getElementById('simCureCost').value) || 1800;
+      const apmcFeePct = parseFloat(document.getElementById('simApmcFee').value) || 3.5;
 
-      const startSlice = windowDays >= 9999 ? 0 : Math.max(0, anchorIdx - windowDays);
-      const histSlice = fullDataset.slice(startSlice, anchorIdx + 1);
-      const backMap = new Map(backtestSeries.map((b) => [b.date, b.predicted]));
+      let qtls = parseFloat(qtlEl.value) || 0;
+      let nuts = parseFloat(nutsEl.value) || 0;
 
-      const labels = histSlice.map((d) => d.date).concat(forecastSeries.map((f) => f.date));
-      const actualData = histSlice.map((d) => d.modal_price).concat(new Array(forecastSeries.length).fill(null));
-      const backPredData = histSlice
-        .map((d) => (backMap.has(d.date) ? backMap.get(d.date) : null))
-        .concat(new Array(forecastSeries.length).fill(null));
+      if (source === 'qtl') {
+        nuts = Math.round(qtls * nutsPerQtl);
+        nutsEl.value = nuts;
+      } else if (source === 'nuts') {
+        qtls = +(nuts / nutsPerQtl).toFixed(2);
+        qtlEl.value = qtls;
+      }
 
-      const forecastPad = new Array(Math.max(0, histSlice.length - 1)).fill(null);
-      const lastActual = histSlice[histSlice.length - 1].modal_price;
-      const forecastLine = forecastPad.concat([lastActual]).concat(forecastSeries.map((f) => f.predicted));
-      const upperBand = forecastPad.concat([lastActual]).concat(forecastSeries.map((f) => f.upper95));
-      const lowerBand = forecastPad.concat([lastActual]).concat(forecastSeries.map((f) => f.lower95));
+      const spotModal = lastAnalysisCache.anchorRow.modal_price;
+      const target30Modal = lastAnalysisCache.target30.predicted;
+      const feeMult = 1 - apmcFeePct / 100;
 
-      const ctx = document.getElementById('mainPriceChart').getContext('2d');
-      if (mainChartInstance) mainChartInstance.destroy();
+      const grossToday = qtls * spotModal;
+      const totalCuring = qtls * cureCostPerQtl;
+      const feesToday = grossToday * (apmcFeePct / 100);
+      const netToday = grossToday - feesToday - totalCuring;
 
-      mainChartInstance = new Chart(ctx, {
+      const gross30d = qtls * target30Modal;
+      const net30d = gross30d * feeMult - totalCuring;
+      const holdDelta = net30d - netToday;
+
+      const rawTotal = nuts * rawOffer;
+      const curingAdv = netToday - rawTotal;
+
+      // Break-even copra modal rate per quintal to match raw nut sale
+      const breakevenQtl = ((nutsPerQtl * rawOffer) + cureCostPerQtl) / (feeMult || 1);
+      const safetyMarginPct = ((spotModal - breakevenQtl) / breakevenQtl) * 100;
+
+      document.getElementById('simCopraNetToday').textContent = formatINR(netToday);
+      document.getElementById('simCopraBreakdown').textContent = `Gross: ${formatINR(grossToday)} | Fees & Curing: -${formatINR(feesToday + totalCuring)}`;
+      document.getElementById('simCopraPerNut').textContent = nuts > 0 ? `₹${(netToday / nuts).toFixed(2)}/nut` : '₹0';
+
+      document.getElementById('simCopraNet30d').textContent = formatINR(net30d);
+      document.getElementById('simHoldDeltaText').textContent = `Expected 30d Hold Delta: ${holdDelta >= 0 ? '+' : ''}${formatINR(holdDelta)}`;
+      document.getElementById('simCopra30dPerNut').textContent = nuts > 0 ? `₹${(net30d / nuts).toFixed(2)}/nut` : '₹0';
+
+      document.getElementById('simRawTotal').textContent = formatINR(rawTotal);
+      const advEl = document.getElementById('simCuringAdvantage');
+      advEl.textContent = `${curingAdv >= 0 ? '+' : ''}${formatINR(curingAdv)}`;
+      advEl.className = curingAdv >= 0 ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold';
+
+      document.getElementById('simBreakeven').textContent = `${formatINR(breakevenQtl)}/Qtl`;
+      const smEl = document.getElementById('simSafetyMargin');
+      smEl.textContent = `${safetyMarginPct >= 0 ? '+' : ''}${safetyMarginPct.toFixed(1)}%`;
+      smEl.className = safetyMarginPct >= 0 ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold';
+    }
+
+    function renderLedgerTable(backtestSeries, forecastSeries) {
+      const thead = document.getElementById('ledgerTableHead');
+      const tbody = document.getElementById('ledgerTableBody');
+
+      if (currentLedgerTab === 'forecast') {
+        thead.innerHTML = `
+          <th class="py-2.5 px-3">Horizon</th>
+          <th class="py-2.5 px-3">Target Date</th>
+          <th class="py-2.5 px-3">Predicted Modal (₹/Qtl)</th>
+          <th class="py-2.5 px-3">Per Kg</th>
+          <th class="py-2.5 px-3">Implied /Nut</th>
+          <th class="py-2.5 px-3">95% Confidence Band</th>
+        `;
+        tbody.innerHTML = forecastSeries.map((row) => `
+          <tr class="hover:bg-gray-800/40">
+            <td class="py-2 px-3 text-amber-400">+${row.horizon}d</td>
+            <td class="py-2 px-3">${row.date}</td>
+            <td class="py-2 px-3 font-semibold text-white">${formatINR(row.predicted)}</td>
+            <td class="py-2 px-3 text-emerald-400">₹${row.perKg}</td>
+            <td class="py-2 px-3 text-sky-300">₹${(row.predicted / 700).toFixed(2)}</td>
+            <td class="py-2 px-3 text-gray-400">${formatINR(row.lower95)} – ${formatINR(row.upper95)}</td>
+          </tr>
+        `).join('');
+      } else if (currentLedgerTab === 'backtest') {
+        thead.innerHTML = `
+          <th class="py-2.5 px-3">Date</th>
+          <th class="py-2.5 px-3">Actual Tiptur</th>
+          <th class="py-2.5 px-3">ML Back-Pred</th>
+          <th class="py-2.5 px-3">Residual (₹)</th>
+          <th class="py-2.5 px-3">Abs Error %</th>
+        `;
+        const recentBT = [...backtestSeries].reverse().slice(0, 60);
+        tbody.innerHTML = recentBT.map((row) => {
+          const errClass = row.ape <= 1.5 ? 'text-emerald-400' : row.ape <= 3.0 ? 'text-amber-400' : 'text-rose-400';
+          return `
+            <tr class="hover:bg-gray-800/40 cursor-pointer" onclick="selectClosestDate('${row.date}')">
+              <td class="py-2 px-3 text-sky-300 underline decoration-sky-500/30">${row.date}</td>
+              <td class="py-2 px-3 font-semibold text-white">${formatINR(row.actual)}</td>
+              <td class="py-2 px-3 text-sky-400">${formatINR(row.predicted)}</td>
+              <td class="py-2 px-3 ${row.error >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${row.error >= 0 ? '+' : ''}${formatINR(row.error)}</td>
+              <td class="py-2 px-3 ${errClass}">${row.ape.toFixed(2)}%</td>
+            </tr>
+          `;
+        }).join('');
+      } else {
+        thead.innerHTML = `
+          <th class="py-2.5 px-3">Year</th>
+          <th class="py-2.5 px-3">Sessions</th>
+          <th class="py-2.5 px-3">Avg Modal (₹/Qtl)</th>
+          <th class="py-2.5 px-3">Year Low</th>
+          <th class="py-2.5 px-3">Year High</th>
+          <th class="py-2.5 px-3">YoY Change</th>
+        `;
+        const byYear = {};
+        fullDataset.forEach((r) => {
+          const y = r.date.slice(0, 4);
+          if (!byYear[y]) byYear[y] = [];
+          byYear[y].push(r.modal_price);
+        });
+        const years = Object.keys(byYear).sort();
+        let prevAvg = null;
+        tbody.innerHTML = years.map((y) => {
+          const arr = byYear[y];
+          const avg = arr.reduce((a, b) => a + b, 0) / arr.length;
+          const lo = Math.min(...arr);
+          const hi = Math.max(...arr);
+          const yoy = prevAvg ? ((avg - prevAvg) / prevAvg) * 100 : null;
+          prevAvg = avg;
+          return `
+            <tr class="hover:bg-gray-800/40">
+              <td class="py-2 px-3 font-bold text-white">${y}</td>
+              <td class="py-2 px-3 text-gray-400">${arr.length}</td>
+              <td class="py-2 px-3 font-semibold text-amber-300">${formatINR(avg)}</td>
+              <td class="py-2 px-3 text-rose-300">${formatINR(lo)}</td>
+              <td class="py-2 px-3 text-emerald-300">${formatINR(hi)}</td>
+              <td class="py-2 px-3 ${yoy == null ? 'text-gray-500' : yoy >= 0 ? 'text-emerald-400' : 'text-rose-400'}">
+                ${yoy == null ? '—' : `${yoy >= 0 ? '+' : ''}${yoy.toFixed(1)}%`}
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+    }
+
+    // =========================================================================
+    // 6. CHART RENDERERS
+    // =========================================================================
+    function renderActiveCharts() {
+      if (typeof Chart === 'undefined' || !lastAnalysisCache) return;
+      renderMainChart(lastAnalysisCache);
+      renderTabCharts(currentAnalyticsTab);
+    }
+
+    function rerenderMainChartOnly() {
+      if (typeof Chart === 'undefined' || !lastAnalysisCache) return;
+      renderMainChart(lastAnalysisCache);
+    }
+
+    function renderTabCharts(tab) {
+      if (typeof Chart === 'undefined' || !lastAnalysisCache) return;
+      if (tab === 'technical') {
+        renderRsiChart(lastAnalysisCache);
+        renderMacdChart(lastAnalysisCache);
+      } else if (tab === 'seasonal') {
+        renderYoyChart(lastAnalysisCache.histUpToAnchor);
+      } else if (tab === 'supply') {
+        renderArrivalsChart(lastAnalysisCache.histUpToAnchor);
+        renderSpreadChart(lastAnalysisCache.histUpToAnchor);
+      } else if (tab === 'ml') {
+        renderFeatureChart(lastAnalysisCache.model30d);
+      }
+    }
+
+    function renderMainChart(c) {
+      document.getElementById('chartAnchorLabel').textContent = c.anchorRow.date;
+      const startSlice = windowDays >= 9999 ? 0 : Math.max(0, c.anchorIdx - windowDays);
+      const histSlice = fullDataset.slice(startSlice, c.anchorIdx + 1);
+      const fLen = c.forecastSeries.length;
+      const padNull = new Array(fLen).fill(null);
+
+      const labels = histSlice.map((d) => d.date).concat(c.forecastSeries.map((f) => f.date));
+      const actualData = histSlice.map((d) => d.modal_price).concat(padNull);
+
+      const datasets = [
+        {
+          label: 'Actual Tiptur Modal (₹/Qtl)',
+          data: actualData,
+          borderColor: '#10b981',
+          backgroundColor: 'rgba(16, 185, 129, 0.08)',
+          borderWidth: 2,
+          pointRadius: 0,
+          pointHoverRadius: 4,
+          tension: 0.2,
+          fill: true
+        }
+      ];
+
+      if (document.getElementById('ovSma30').checked) {
+        datasets.push({
+          label: 'SMA 30',
+          data: c.sma30.slice(startSlice, c.anchorIdx + 1).concat(padNull),
+          borderColor: '#38bdf8',
+          borderWidth: 1.4,
+          pointRadius: 0,
+          tension: 0.25
+        });
+      }
+
+      if (document.getElementById('ovSma90').checked) {
+        datasets.push({
+          label: 'SMA 90',
+          data: c.sma90.slice(startSlice, c.anchorIdx + 1).concat(padNull),
+          borderColor: '#c084fc',
+          borderWidth: 1.4,
+          pointRadius: 0,
+          tension: 0.25
+        });
+      }
+
+      if (document.getElementById('ovBollinger').checked) {
+        datasets.push({
+          label: 'BB Upper (20,2σ)',
+          data: c.bb.upper.slice(startSlice, c.anchorIdx + 1).concat(padNull),
+          borderColor: 'rgba(129, 140, 248, 0.45)',
+          borderDash: [3, 3],
+          borderWidth: 1,
+          pointRadius: 0,
+          fill: false
+        });
+        datasets.push({
+          label: 'BB Lower (20,2σ)',
+          data: c.bb.lower.slice(startSlice, c.anchorIdx + 1).concat(padNull),
+          borderColor: 'rgba(129, 140, 248, 0.45)',
+          backgroundColor: 'rgba(129, 140, 248, 0.07)',
+          borderDash: [3, 3],
+          borderWidth: 1,
+          pointRadius: 0,
+          fill: '-1'
+        });
+      }
+
+      if (document.getElementById('ovBacktest').checked) {
+        const backMap = new Map(c.backtestSeries.map((b) => [b.date, b.predicted]));
+        datasets.push({
+          label: 'OOS Back-Prediction',
+          data: histSlice.map((d) => (backMap.has(d.date) ? backMap.get(d.date) : null)).concat(padNull),
+          borderColor: '#22d3ee',
+          borderDash: [4, 3],
+          borderWidth: 1.5,
+          pointRadius: 0,
+          tension: 0.2
+        });
+      }
+
+      if (document.getElementById('ovForecast').checked) {
+        const forecastPad = new Array(Math.max(0, histSlice.length - 1)).fill(null);
+        const lastActual = histSlice[histSlice.length - 1].modal_price;
+        datasets.push({
+          label: '30-Day ML Forecast',
+          data: forecastPad.concat([lastActual]).concat(c.forecastSeries.map((f) => f.predicted)),
+          borderColor: '#f59e0b',
+          borderWidth: 2.5,
+          pointRadius: 1.5,
+          pointHoverRadius: 5,
+          tension: 0.3
+        });
+        datasets.push({
+          label: '95% Upper CI',
+          data: forecastPad.concat([lastActual]).concat(c.forecastSeries.map((f) => f.upper95)),
+          borderColor: 'rgba(245, 158, 11, 0.25)',
+          backgroundColor: 'rgba(245, 158, 11, 0.12)',
+          borderWidth: 1,
+          pointRadius: 0,
+          fill: '+1',
+          tension: 0.3
+        });
+        datasets.push({
+          label: '95% Lower CI',
+          data: forecastPad.concat([lastActual]).concat(c.forecastSeries.map((f) => f.lower95)),
+          borderColor: 'rgba(245, 158, 11, 0.25)',
+          borderWidth: 1,
+          pointRadius: 0,
+          fill: false,
+          tension: 0.3
+        });
+      }
+
+      destroyChart('main');
+      charts.main = new Chart(document.getElementById('mainPriceChart').getContext('2d'), {
+        type: 'line',
+        data: { labels, datasets },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: { labels: { color: '#9ca3af', font: { family: 'Inter', size: 11 }, usePointStyle: true } },
+            tooltip: {
+              backgroundColor: '#111827',
+              borderColor: '#374151',
+              borderWidth: 1,
+              callbacks: {
+                label: (ctx) => (ctx.parsed.y == null ? null : `${ctx.dataset.label}: ₹${Math.round(ctx.parsed.y).toLocaleString('en-IN')}`)
+              }
+            }
+          },
+          scales: {
+            x: { ticks: { color: '#6b7280', maxTicksLimit: 10, font: { family: 'JetBrains Mono', size: 10 } }, grid: { color: 'rgba(31,41,55,0.45)' } },
+            y: {
+              ticks: { color: '#9ca3af', font: { family: 'JetBrains Mono', size: 10 }, callback: (v) => '₹' + (v / 1000).toFixed(1) + 'k' },
+              grid: { color: 'rgba(31,41,55,0.45)' }
+            }
+          }
+        }
+      });
+    }
+
+    function renderRsiChart(c) {
+      const start = Math.max(0, c.anchorIdx - 120);
+      const labels = c.histUpToAnchor.slice(start).map((d) => d.date);
+      const rsiSlice = c.rsi14.slice(start);
+      destroyChart('rsi');
+      charts.rsi = new Chart(document.getElementById('rsiChart').getContext('2d'), {
         type: 'line',
         data: {
           labels,
           datasets: [
+            { label: 'RSI (14)', data: rsiSlice, borderColor: '#c084fc', backgroundColor: 'rgba(192,132,252,0.1)', borderWidth: 2, pointRadius: 0, fill: true, tension: 0.2 },
+            { label: 'Overbought (70)', data: labels.map(() => 70), borderColor: 'rgba(244,63,94,0.5)', borderDash: [4, 4], borderWidth: 1, pointRadius: 0 },
+            { label: 'Oversold (30)', data: labels.map(() => 30), borderColor: 'rgba(16,185,129,0.5)', borderDash: [4, 4], borderWidth: 1, pointRadius: 0 }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { color: '#6b7280', maxTicksLimit: 6, font: { family: 'JetBrains Mono', size: 10 } }, grid: { display: false } },
+            y: { min: 0, max: 100, ticks: { color: '#9ca3af', font: { family: 'JetBrains Mono', size: 10 } }, grid: { color: 'rgba(31,41,55,0.4)' } }
+          }
+        }
+      });
+    }
+
+    function renderMacdChart(c) {
+      const start = Math.max(0, c.anchorIdx - 120);
+      const labels = c.histUpToAnchor.slice(start).map((d) => d.date);
+      const histData = c.macd.histogram.slice(start);
+      destroyChart('macd');
+      charts.macd = new Chart(document.getElementById('macdChart').getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [
             {
-              label: 'Actual Tiptur Modal (₹/Quintal)',
-              data: actualData,
-              borderColor: '#10b981',
-              backgroundColor: 'rgba(16, 185, 129, 0.08)',
-              borderWidth: 2,
-              pointRadius: 0,
-              pointHoverRadius: 4,
-              tension: 0.25,
-              fill: true
-            },
-            {
-              label: 'Out-of-Sample Back-Prediction',
-              data: backPredData,
+              type: 'line',
+              label: 'MACD',
+              data: c.macd.macdLine.slice(start),
               borderColor: '#38bdf8',
-              borderDash: [4, 3],
               borderWidth: 1.75,
-              pointRadius: 0,
-              pointHoverRadius: 4,
-              tension: 0.25
+              pointRadius: 0
             },
             {
-              label: '30-Day ML Forecast (₹/Quintal)',
-              data: forecastLine,
+              type: 'line',
+              label: 'Signal (9)',
+              data: c.macd.signalLine.slice(start),
               borderColor: '#f59e0b',
-              borderWidth: 2.5,
-              pointRadius: 1.5,
-              pointHoverRadius: 5,
-              tension: 0.3
+              borderWidth: 1.5,
+              pointRadius: 0
             },
             {
-              label: '95% Upper Confidence',
-              data: upperBand,
-              borderColor: 'rgba(245, 158, 11, 0.25)',
-              backgroundColor: 'rgba(245, 158, 11, 0.12)',
-              borderWidth: 1,
-              pointRadius: 0,
-              fill: '+1',
-              tension: 0.3
-            },
-            {
-              label: '95% Lower Confidence',
-              data: lowerBand,
-              borderColor: 'rgba(245, 158, 11, 0.25)',
-              borderWidth: 1,
-              pointRadius: 0,
-              fill: false,
-              tension: 0.3
+              type: 'bar',
+              label: 'Histogram',
+              data: histData,
+              backgroundColor: histData.map((v) => (v >= 0 ? 'rgba(16,185,129,0.45)' : 'rgba(244,63,94,0.45)'))
             }
           ]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          interaction: { mode: 'index', intersect: false },
-          plugins: {
-            legend: {
-              labels: { color: '#9ca3af', font: { family: 'Inter', size: 11 }, usePointStyle: true }
-            },
-            tooltip: {
-              backgroundColor: '#111827',
-              titleColor: '#f9fafb',
-              bodyColor: '#e5e7eb',
-              borderColor: '#374151',
-              borderWidth: 1,
-              callbacks: {
-                label: (c) => (c.parsed.y == null ? null : `${c.dataset.label}: ₹${Math.round(c.parsed.y).toLocaleString('en-IN')}/Qtl`)
-              }
-            }
-          },
+          plugins: { legend: { labels: { color: '#9ca3af', font: { size: 10 } } } },
           scales: {
-            x: {
-              ticks: { color: '#6b7280', maxTicksLimit: 10, font: { family: 'JetBrains Mono', size: 10 } },
-              grid: { color: 'rgba(31, 41, 55, 0.45)' }
-            },
+            x: { ticks: { color: '#6b7280', maxTicksLimit: 6, font: { family: 'JetBrains Mono', size: 10 } }, grid: { display: false } },
+            y: { ticks: { color: '#9ca3af', font: { family: 'JetBrains Mono', size: 10 } }, grid: { color: 'rgba(31,41,55,0.4)' } }
+          }
+        }
+      });
+    }
+
+    function renderYoyChart(hist) {
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const grouped = {};
+      hist.forEach((r) => {
+        const y = r.date.slice(0, 4);
+        const m = parseInt(r.date.slice(5, 7), 10) - 1;
+        if (!grouped[y]) grouped[y] = Array.from({ length: 12 }, () => []);
+        grouped[y][m].push(r.modal_price);
+      });
+
+      const palette = { '2022': '#64748b', '2023': '#f43f5e', '2024': '#38bdf8', '2025': '#c084fc', '2026': '#10b981' };
+      const datasets = Object.keys(grouped).sort().map((y) => ({
+        label: y,
+        data: grouped[y].map((arr) => (arr.length ? Math.round(arr.reduce((a, b) => a + b, 0) / arr.length) : null)),
+        borderColor: palette[y] || '#f59e0b',
+        borderWidth: y === '2026' ? 3 : 1.75,
+        pointRadius: y === '2026' ? 3 : 1.5,
+        tension: 0.3
+      }));
+
+      destroyChart('yoy');
+      charts.yoy = new Chart(document.getElementById('yoyChart').getContext('2d'), {
+        type: 'line',
+        data: { labels: months, datasets },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: { legend: { labels: { color: '#d1d5db', font: { size: 11 }, usePointStyle: true } } },
+          scales: {
+            x: { ticks: { color: '#9ca3af', font: { family: 'JetBrains Mono', size: 11 } }, grid: { color: 'rgba(31,41,55,0.4)' } },
             y: {
-              ticks: {
-                color: '#9ca3af',
-                font: { family: 'JetBrains Mono', size: 10 },
-                callback: (v) => '₹' + (v / 1000).toFixed(1) + 'k'
-              },
-              grid: { color: 'rgba(31, 41, 55, 0.45)' }
+              ticks: { color: '#9ca3af', font: { family: 'JetBrains Mono', size: 10 }, callback: (v) => '₹' + (v / 1000).toFixed(0) + 'k' },
+              grid: { color: 'rgba(31,41,55,0.4)' }
             }
+          }
+        }
+      });
+    }
+
+    function renderArrivalsChart(hist) {
+      const slice = hist.slice(Math.max(0, hist.length - 120));
+      destroyChart('arrivals');
+      charts.arrivals = new Chart(document.getElementById('arrivalsChart').getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: slice.map((d) => d.date),
+          datasets: [
+            {
+              type: 'line',
+              label: 'Modal Price (₹/Qtl)',
+              data: slice.map((d) => d.modal_price),
+              borderColor: '#10b981',
+              borderWidth: 2,
+              pointRadius: 0,
+              yAxisID: 'yPrice'
+            },
+            {
+              type: 'bar',
+              label: 'Arrivals (Qtl)',
+              data: slice.map((d) => d.arrivals_qtl),
+              backgroundColor: 'rgba(56, 189, 248, 0.35)',
+              yAxisID: 'yArr'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { labels: { color: '#9ca3af', font: { size: 10 } } } },
+          scales: {
+            x: { ticks: { color: '#6b7280', maxTicksLimit: 6, font: { family: 'JetBrains Mono', size: 10 } }, grid: { display: false } },
+            yPrice: { position: 'left', ticks: { color: '#10b981', font: { size: 10 }, callback: (v) => '₹' + (v / 1000).toFixed(1) + 'k' }, grid: { color: 'rgba(31,41,55,0.4)' } },
+            yArr: { position: 'right', ticks: { color: '#38bdf8', font: { size: 10 } }, grid: { display: false } }
+          }
+        }
+      });
+    }
+
+    function renderSpreadChart(hist) {
+      const slice = hist.slice(Math.max(0, hist.length - 120));
+      destroyChart('spread');
+      charts.spread = new Chart(document.getElementById('spreadChart').getContext('2d'), {
+        type: 'line',
+        data: {
+          labels: slice.map((d) => d.date),
+          datasets: [
+            { label: 'Max Grade-A', data: slice.map((d) => d.max_price), borderColor: 'rgba(16,185,129,0.55)', borderWidth: 1.2, pointRadius: 0, fill: false },
+            { label: 'Min Grade', data: slice.map((d) => d.min_price), borderColor: 'rgba(244,63,94,0.55)', backgroundColor: 'rgba(16,185,129,0.08)', borderWidth: 1.2, pointRadius: 0, fill: '-1' },
+            { label: 'Raw Ref (₹/Qtl)', data: slice.map((d) => d.copra_ref_qtl), borderColor: '#f59e0b', borderDash: [4, 3], borderWidth: 1.75, pointRadius: 0 }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { labels: { color: '#9ca3af', font: { size: 10 } } } },
+          scales: {
+            x: { ticks: { color: '#6b7280', maxTicksLimit: 6, font: { family: 'JetBrains Mono', size: 10 } }, grid: { display: false } },
+            y: { ticks: { color: '#9ca3af', font: { size: 10 }, callback: (v) => '₹' + (v / 1000).toFixed(1) + 'k' }, grid: { color: 'rgba(31,41,55,0.4)' } }
           }
         }
       });
@@ -1196,18 +2155,14 @@
         'Annual Season (Cos)', 'Harvest Cycle (Sin)', 'Harvest Cycle (Cos)'
       ];
       const vals = model30d.weightsStd.slice(1).map((v) => Math.round(v));
-
-      const ctx = document.getElementById('featureChart').getContext('2d');
-      if (featureChartInstance) featureChartInstance.destroy();
-
-      featureChartInstance = new Chart(ctx, {
+      destroyChart('feature');
+      charts.feature = new Chart(document.getElementById('featureChart').getContext('2d'), {
         type: 'bar',
         data: {
           labels: featNames,
           datasets: [{
-            label: 'Standardized Impact (₹/Qtl)',
             data: vals,
-            backgroundColor: vals.map((v) => (v >= 0 ? 'rgba(16, 185, 129, 0.7)' : 'rgba(244, 63, 94, 0.7)')),
+            backgroundColor: vals.map((v) => (v >= 0 ? 'rgba(16,185,129,0.7)' : 'rgba(244,63,94,0.7)')),
             borderColor: vals.map((v) => (v >= 0 ? '#10b981' : '#f43f5e')),
             borderWidth: 1,
             borderRadius: 4
@@ -1219,72 +2174,45 @@
           maintainAspectRatio: false,
           plugins: {
             legend: { display: false },
-            tooltip: {
-              backgroundColor: '#111827',
-              borderColor: '#374151',
-              borderWidth: 1,
-              callbacks: {
-                label: (c) => `Weight: ${c.parsed.x >= 0 ? '+' : ''}₹${c.parsed.x} / 1σ`
-              }
-            }
+            tooltip: { callbacks: { label: (ctx) => `Weight: ${ctx.parsed.x >= 0 ? '+' : ''}₹${ctx.parsed.x} / 1σ` } }
           },
           scales: {
-            x: {
-              ticks: { color: '#6b7280', font: { family: 'JetBrains Mono', size: 10 } },
-              grid: { color: 'rgba(31, 41, 55, 0.4)' }
-            },
-            y: {
-              ticks: { color: '#d1d5db', font: { family: 'Inter', size: 10 } },
-              grid: { display: false }
-            }
+            x: { ticks: { color: '#6b7280', font: { family: 'JetBrains Mono', size: 10 } }, grid: { color: 'rgba(31,41,55,0.4)' } },
+            y: { ticks: { color: '#d1d5db', font: { family: 'Inter', size: 10 } }, grid: { display: false } }
           }
         }
       });
     }
 
-    function renderLedgerTable(backtestSeries, forecastSeries) {
-      const thead = document.getElementById('ledgerTableHead');
-      const tbody = document.getElementById('ledgerTableBody');
+    // =========================================================================
+    // 7. CSV EXPORT UTILITY
+    // =========================================================================
+    function exportActiveCSV() {
+      if (!lastAnalysisCache) return;
+      let csv = '';
+      let filename = `tiptur_copra_${selectedDateStr}.csv`;
 
       if (currentLedgerTab === 'forecast') {
-        thead.innerHTML = `
-          <th class="py-2.5 px-3">Horizon</th>
-          <th class="py-2.5 px-3">Target Date</th>
-          <th class="py-2.5 px-3">Predicted Modal (₹/Quintal)</th>
-          <th class="py-2.5 px-3">Per Kg Rate</th>
-          <th class="py-2.5 px-3">95% Confidence Band</th>
-        `;
-        tbody.innerHTML = forecastSeries.map((row) => `
-          <tr class="hover:bg-gray-800/40">
-            <td class="py-2 px-3 text-amber-400">+${row.horizon}d</td>
-            <td class="py-2 px-3">${row.date}</td>
-            <td class="py-2 px-3 font-semibold text-white">${formatINR(row.predicted)}/Qtl</td>
-            <td class="py-2 px-3 text-emerald-400">₹${row.perKg}/kg</td>
-            <td class="py-2 px-3 text-gray-400">${formatINR(row.lower95)} – ${formatINR(row.upper95)}</td>
-          </tr>
-        `).join('');
+        csv = 'Horizon,Target_Date,Predicted_Modal_INR_Qtl,Per_Kg_INR,Lower_95_CI,Upper_95_CI\n';
+        csv += lastAnalysisCache.forecastSeries
+          .map((r) => `+${r.horizon}d,${r.date},${r.predicted},${r.perKg},${r.lower95},${r.upper95}`)
+          .join('\n');
+        filename = `tiptur_copra_forecast_${selectedDateStr}.csv`;
       } else {
-        thead.innerHTML = `
-          <th class="py-2.5 px-3">Date</th>
-          <th class="py-2.5 px-3">Actual Tiptur Price</th>
-          <th class="py-2.5 px-3">ML Back-Prediction</th>
-          <th class="py-2.5 px-3">Residual (₹)</th>
-          <th class="py-2.5 px-3">Abs Error %</th>
-        `;
-        const recentBT = [...backtestSeries].reverse().slice(0, 45);
-        tbody.innerHTML = recentBT.map((row) => {
-          const errClass = row.ape <= 1.5 ? 'text-emerald-400' : row.ape <= 3.0 ? 'text-amber-400' : 'text-rose-400';
-          return `
-            <tr class="hover:bg-gray-800/40 cursor-pointer" onclick="selectClosestDate('${row.date}')">
-              <td class="py-2 px-3 text-sky-300 underline decoration-sky-500/30">${row.date}</td>
-              <td class="py-2 px-3 font-semibold text-white">${formatINR(row.actual)}/Qtl</td>
-              <td class="py-2 px-3 text-sky-400">${formatINR(row.predicted)}/Qtl</td>
-              <td class="py-2 px-3 ${row.error >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${row.error >= 0 ? '+' : ''}${formatINR(row.error)}</td>
-              <td class="py-2 px-3 ${errClass}">${row.ape.toFixed(2)}%</td>
-            </tr>
-          `;
-        }).join('');
+        csv = 'Date,Min_Price,Max_Price,Modal_Price_Qtl,Per_Kg_INR,Per_Nut_INR,Arrivals_Qtl\n';
+        csv += fullDataset
+          .map((r) => `${r.date},${r.min_price},${r.max_price},${r.modal_price},${r.per_kg_inr},${r.per_nut_inr},${r.arrivals_qtl}`)
+          .join('\n');
+        filename = `tiptur_copra_history_${selectedDateStr}.csv`;
       }
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
     }
 
     if (document.readyState === 'loading') {
