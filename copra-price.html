@@ -38,6 +38,14 @@
     .stat-glow-amber {
       box-shadow: inset 0 1px 0 0 rgba(245, 158, 11, 0.35);
     }
+    .heat-cell {
+      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    }
+    .heat-cell:hover {
+      transform: translateY(-2px) scale(1.02);
+      z-index: 10;
+      box-shadow: 0 8px 20px -6px rgba(0, 0, 0, 0.8);
+    }
     ::-webkit-scrollbar {
       width: 6px;
       height: 6px;
@@ -89,21 +97,15 @@
       </div>
 
       <div class="flex flex-wrap items-center gap-2 text-xs no-print">
-        <div id="dataSourceBadge" class="px-3 py-1.5 rounded-lg bg-gray-900 border border-gray-800 text-gray-300 font-mono flex items-center gap-2">
-          <span id="dataSourceDot" class="h-2 w-2 rounded-full bg-amber-400 animate-pulse"></span>
-          <span id="dataSourceText">Initializing...</span>
+        <div id="marketStatusBadge" class="px-3 py-1.5 rounded-lg bg-gray-900 border border-gray-800 text-gray-300 font-mono flex items-center gap-2">
+          <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="marketStatusText">Tiptur APMC Market Active</span>
         </div>
-        <button onclick="loadLiveJson()" class="px-2.5 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-200 border border-gray-700 font-medium transition cursor-pointer" title="Re-fetch coconut_prices.json">
-          Reload JSON
-        </button>
-        <button onclick="exportActiveCSV()" class="px-2.5 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-sky-300 border border-gray-700 font-medium transition cursor-pointer" title="Download CSV">
-          Export CSV
-        </button>
         <button onclick="window.print()" class="px-2.5 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700 font-medium transition cursor-pointer" title="Print Market Brief">
-          Print
+          Print Brief
         </button>
         <button onclick="jumpToLatest()" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-medium transition cursor-pointer">
-          Latest
+          Today's Rate
         </button>
       </div>
     </div>
@@ -111,15 +113,7 @@
 
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 space-y-5">
 
-    <!-- Diagnostic Banner -->
-    <div id="jsonStatusBanner" class="hidden rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2.5 text-xs text-amber-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-      <div id="jsonStatusMessage"></div>
-      <button onclick="document.getElementById('jsonStatusBanner').classList.add('hidden')" class="text-amber-300 hover:text-white underline self-start sm:self-auto cursor-pointer">
-        Dismiss
-      </button>
-    </div>
-
-    <!-- Temporal Inspector & 52-Week Range Bar -->
+    <!-- Temporal Inspector & Range Bar -->
     <section class="glass-card rounded-2xl p-4 sm:p-5 space-y-4">
       <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
@@ -127,7 +121,7 @@
             Temporal Inspector &amp; Walk-Forward Time Machine
           </h2>
           <p class="text-xs text-gray-400 mt-0.5">
-            Inspect any date from 2022–present. All technicals, seasonal comparisons, and ML models re-train strictly on data &le; selected date.
+            Inspect any historical date. The chart overlays past ML future projections against actual realized market prices for direct forecast validation.
           </p>
         </div>
 
@@ -146,16 +140,16 @@
         </div>
       </div>
 
-      <!-- Quick Jumps + 52-Week Range Meter -->
+      <!-- Dynamic Quick Jumps + 52W Range Meter -->
       <div class="pt-3 border-t border-gray-800/80 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
         <div class="flex flex-wrap items-center gap-1.5 text-xs no-print">
           <span class="text-gray-400 font-medium mr-1">Jump:</span>
           <button onclick="jumpToLatest()" id="quickJumpLatest" class="px-2.5 py-1 rounded-md bg-gray-800/80 hover:bg-gray-700 text-emerald-300 border border-gray-700/70 transition cursor-pointer">Latest</button>
-          <button onclick="selectClosestDate('2026-10-24')" class="px-2.5 py-1 rounded-md bg-gray-800/80 hover:bg-gray-700 text-amber-300 border border-gray-700/70 transition cursor-pointer">Oct 24 Peak</button>
-          <button onclick="selectClosestDate('2026-04-15')" class="px-2.5 py-1 rounded-md bg-gray-800/80 hover:bg-gray-700 text-gray-300 border border-gray-700/70 transition cursor-pointer">Apr 26 High</button>
-          <button onclick="selectClosestDate('2025-07-20')" class="px-2.5 py-1 rounded-md bg-gray-800/80 hover:bg-gray-700 text-gray-300 border border-gray-700/70 transition cursor-pointer">2025 Rally</button>
-          <button onclick="selectClosestDate('2024-03-15')" class="px-2.5 py-1 rounded-md bg-gray-800/80 hover:bg-gray-700 text-gray-300 border border-gray-700/70 transition cursor-pointer">2024 Base</button>
-          <button onclick="selectClosestDate('2023-12-15')" class="px-2.5 py-1 rounded-md bg-gray-800/80 hover:bg-gray-700 text-gray-300 border border-gray-700/70 transition cursor-pointer">2023 Low</button>
+          <button onclick="jumpRelativeFromLatest(-30)" class="px-2.5 py-1 rounded-md bg-gray-800/80 hover:bg-gray-700 text-gray-300 border border-gray-700/70 transition cursor-pointer">-30 Days</button>
+          <button onclick="jumpRelativeFromLatest(-90)" class="px-2.5 py-1 rounded-md bg-gray-800/80 hover:bg-gray-700 text-gray-300 border border-gray-700/70 transition cursor-pointer">-90 Days</button>
+          <button onclick="jumpRelativeFromLatest(-365)" class="px-2.5 py-1 rounded-md bg-gray-800/80 hover:bg-gray-700 text-gray-300 border border-gray-700/70 transition cursor-pointer">-1 Year</button>
+          <button onclick="jumpToExtreme('high')" class="px-2.5 py-1 rounded-md bg-gray-800/80 hover:bg-gray-700 text-amber-300 border border-gray-700/70 transition cursor-pointer">All-Time High</button>
+          <button onclick="jumpToExtreme('low')" class="px-2.5 py-1 rounded-md bg-gray-800/80 hover:bg-gray-700 text-rose-300 border border-gray-700/70 transition cursor-pointer">All-Time Low</button>
         </div>
 
         <div class="flex items-center gap-3 text-xs font-mono min-w-[280px]">
@@ -265,9 +259,9 @@
     <section class="glass-card rounded-2xl p-5">
       <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 mb-3">
         <div>
-          <h3 class="text-base font-semibold text-white">Tiptur Ball Copra Price Trajectory, Technical Overlays &amp; 30-Day ML Forecast</h3>
+          <h3 class="text-base font-semibold text-white">Tiptur Ball Copra Price Trajectory, Projection Audit &amp; 30-Day ML Forecast</h3>
           <p class="text-xs text-gray-400">
-            Anchor Date: <span id="chartAnchorLabel" class="font-mono text-emerald-400">--</span> &bull; Toggle technical overlays below to inspect trend structure and volatility bands.
+            Anchor Date: <span id="chartAnchorLabel" class="font-mono text-emerald-400">--</span> &bull; Past dates overlay actual future market movement against the historical ML projection.
           </p>
         </div>
         <div class="flex flex-wrap items-center gap-2 text-xs no-print">
@@ -275,7 +269,7 @@
           <button onclick="setWindowDays(180)" id="win180" class="win-btn px-2.5 py-1 rounded bg-gray-800 text-gray-300 border border-gray-700 cursor-pointer">180D</button>
           <button onclick="setWindowDays(365)" id="win365" class="win-btn px-2.5 py-1 rounded bg-emerald-600/20 text-emerald-300 border border-emerald-500/40 cursor-pointer">1Y</button>
           <button onclick="setWindowDays(730)" id="win730" class="win-btn px-2.5 py-1 rounded bg-gray-800 text-gray-300 border border-gray-700 cursor-pointer">2Y</button>
-          <button onclick="setWindowDays(9999)" id="winAll" class="win-btn px-2.5 py-1 rounded bg-gray-800 text-gray-300 border border-gray-700 cursor-pointer">ALL (5Y)</button>
+          <button onclick="setWindowDays(9999)" id="winAll" class="win-btn px-2.5 py-1 rounded bg-gray-800 text-gray-300 border border-gray-700 cursor-pointer">ALL</button>
         </div>
       </div>
 
@@ -292,7 +286,7 @@
         </label>
         <label class="inline-flex items-center gap-1.5 cursor-pointer text-gray-300">
           <input type="checkbox" id="ovBollinger" onchange="rerenderMainChartOnly()" class="accent-indigo-400 rounded" />
-          <span class="text-indigo-300">Bollinger Bands (20, 2σ)</span>
+          <span class="text-indigo-300">Bollinger Bands</span>
         </label>
         <label class="inline-flex items-center gap-1.5 cursor-pointer text-gray-300">
           <input type="checkbox" id="ovBacktest" checked onchange="rerenderMainChartOnly()" class="accent-cyan-400 rounded" />
@@ -300,7 +294,7 @@
         </label>
         <label class="inline-flex items-center gap-1.5 cursor-pointer text-gray-300">
           <input type="checkbox" id="ovForecast" checked onchange="rerenderMainChartOnly()" class="accent-amber-400 rounded" />
-          <span class="text-amber-300">30d ML Forecast + 95% CI</span>
+          <span class="text-amber-300" id="forecastToggleLabel">30d ML Forecast / Actual Audit</span>
         </label>
       </div>
 
@@ -309,7 +303,7 @@
       </div>
     </section>
 
-    <!-- Comprehensive Tabbed Deep-Dive Analytics Suite -->
+    <!-- Comprehensive Tabbed Analytics Suite -->
     <section class="glass-card rounded-2xl p-5 space-y-5">
       <div class="flex flex-wrap items-center gap-2 border-b border-gray-800 pb-3 no-print">
         <button onclick="switchAnalyticsTab('technical')" id="atab-technical" class="atab-btn px-3.5 py-2 rounded-lg text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 cursor-pointer">
@@ -329,7 +323,7 @@
         </button>
       </div>
 
-      <!-- TAB 1: Technical & Momentum Lab -->
+      <!-- TAB 1: TECHNICAL & MOMENTUM LAB -->
       <div id="panel-technical" class="analytics-panel space-y-5">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
           <div class="bg-gray-900/60 border border-gray-800 rounded-xl p-4">
@@ -353,17 +347,16 @@
           </div>
         </div>
 
-        <!-- Technical Scorecard Matrix -->
         <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3 text-xs font-mono" id="techMatrixContainer"></div>
       </div>
 
-      <!-- TAB 2: Seasonality & YoY Heatmap -->
+      <!-- TAB 2: SEASONALITY & YOY HEATMAP -->
       <div id="panel-seasonal" class="analytics-panel hidden space-y-5">
         <div class="bg-gray-900/60 border border-gray-800 rounded-xl p-4">
           <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
             <div>
-              <h4 class="text-sm font-semibold text-white">Year-over-Year (YoY) Seasonal Price Overlay (2022–2026)</h4>
-              <p class="text-xs text-gray-400">Compare monthly Tiptur Ball Copra price cycles across all 5 calendar years.</p>
+              <h4 class="text-sm font-semibold text-white">Year-over-Year (YoY) Seasonal Price Overlay</h4>
+              <p class="text-xs text-gray-400">Compare monthly Tiptur Ball Copra price cycles dynamically across all active years.</p>
             </div>
             <span id="yoyBestMonthsBadge" class="text-[11px] font-mono px-2.5 py-1 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
               Best Months: --
@@ -374,11 +367,10 @@
           </div>
         </div>
 
-        <!-- Monthly Heatmap Table -->
         <div class="bg-gray-900/60 border border-gray-800 rounded-xl p-4">
           <div class="flex items-center justify-between mb-3">
             <h4 class="text-sm font-semibold text-white">Monthly Average Price Heatmap (₹/Quintal &amp; MoM % Change)</h4>
-            <span class="text-[11px] text-gray-400">Green = Stronger MoM Gain | Rose = MoM Decline</span>
+            <span class="text-[11px] text-gray-400">Green = Gain | Rose = Decline</span>
           </div>
           <div class="overflow-x-auto">
             <table class="w-full text-center border-collapse text-[11px] font-mono" id="seasonalHeatmapTable"></table>
@@ -386,7 +378,7 @@
         </div>
       </div>
 
-      <!-- TAB 3: Supply, Arrivals & Spreads -->
+      <!-- TAB 3: SUPPLY, ARRIVALS & SPREADS -->
       <div id="panel-supply" class="analytics-panel hidden space-y-5">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
           <div class="bg-gray-900/60 border border-gray-800 rounded-xl p-4">
@@ -413,10 +405,9 @@
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs" id="supplyStatsCards"></div>
       </div>
 
-      <!-- TAB 4: ML Scenarios & Explainability -->
+      <!-- TAB 4: ML SCENARIOS & EXPLAINABILITY -->
       <div id="panel-ml" class="analytics-panel hidden space-y-5">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
-          <!-- Left 7: Evidence + Multi-Horizon Scenario Table -->
           <div class="lg:col-span-7 space-y-4">
             <div class="bg-gray-900/60 border border-gray-800 rounded-xl p-4">
               <h4 class="text-sm font-semibold text-white mb-2">Multi-Horizon ML Scenario Matrix (Bear / Base / Bull)</h4>
@@ -440,11 +431,10 @@
             <div id="evidenceContainer" class="space-y-2.5"></div>
           </div>
 
-          <!-- Right 5: Feature Weights + Diagnostics -->
           <div class="lg:col-span-5 space-y-4">
             <div class="bg-gray-900/60 border border-gray-800 rounded-xl p-4">
               <h4 class="text-sm font-semibold text-white">Ridge Regression Standardized Feature Drivers</h4>
-              <p class="text-[11px] text-gray-400 mb-3">Impact (₹/Qtl) per 1σ move in each input feature for the 30-day model.</p>
+              <p class="text-[11px] text-gray-400 mb-3">Impact (₹/Qtl) per 1σ move in each input feature.</p>
               <div class="relative h-[230px] w-full">
                 <canvas id="featureChart"></canvas>
               </div>
@@ -472,10 +462,9 @@
         </div>
       </div>
 
-      <!-- TAB 5: Farm Curing ROI & Hold Simulator -->
+      <!-- TAB 5: FARM CURING ROI SIMULATOR -->
       <div id="panel-farm" class="analytics-panel hidden space-y-5">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
-          <!-- Inputs -->
           <div class="lg:col-span-5 bg-gray-900/60 border border-gray-800 rounded-xl p-4 space-y-3.5 text-xs">
             <h4 class="text-sm font-semibold text-white border-b border-gray-800 pb-2">Farm Harvest &amp; Curing Parameters</h4>
 
@@ -523,7 +512,6 @@
             </div>
           </div>
 
-          <!-- Outputs -->
           <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div class="bg-gray-900/70 border border-emerald-500/30 rounded-xl p-4 flex flex-col justify-between">
               <div>
@@ -553,7 +541,7 @@
               <div>
                 <span class="text-[11px] font-mono uppercase text-sky-400">Option C: Sell Raw Coconuts Now</span>
                 <div id="simRawTotal" class="text-2xl font-bold font-mono text-sky-300 mt-1.5">₹--</div>
-                <div class="text-xs text-gray-400 mt-1">Immediate cash flow, zero 9-month drying wait.</div>
+                <div class="text-xs text-gray-400 mt-1">Immediate cash flow, zero drying wait.</div>
               </div>
               <div class="mt-3 pt-2.5 border-t border-gray-800 text-xs font-mono flex justify-between">
                 <span class="text-gray-400">Curing Extra Profit:</span>
@@ -565,7 +553,7 @@
               <div>
                 <span class="text-[11px] font-mono uppercase text-purple-400">Break-Even Copra Rate</span>
                 <div id="simBreakeven" class="text-2xl font-bold font-mono text-purple-300 mt-1.5">₹--/Qtl</div>
-                <div class="text-xs text-gray-400 mt-1">Minimum Tiptur APMC rate needed to beat selling raw nuts today.</div>
+                <div class="text-xs text-gray-400 mt-1">Minimum Tiptur rate needed to beat selling raw nuts today.</div>
               </div>
               <div class="mt-3 pt-2.5 border-t border-gray-800 text-xs font-mono flex justify-between">
                 <span class="text-gray-400">Safety Margin:</span>
@@ -582,7 +570,7 @@
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
         <div>
           <h3 class="text-base font-semibold text-white">Forecast, Back-Test Audit &amp; Multi-Year Summary Ledger</h3>
-          <p class="text-xs text-gray-400">Switch views or click any historical back-test row to inspect that exact trading session.</p>
+          <p class="text-xs text-gray-400">Switch views or click any historical row to inspect that exact trading session.</p>
         </div>
         <div class="flex flex-wrap gap-2 text-xs no-print">
           <button onclick="switchLedgerTab('forecast')" id="tabForecast" class="px-3 py-1.5 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40 font-medium cursor-pointer">
@@ -592,7 +580,7 @@
             Back-Predictions (Real vs ML)
           </button>
           <button onclick="switchLedgerTab('annual')" id="tabAnnual" class="px-3 py-1.5 rounded-lg bg-gray-800 text-gray-300 border border-gray-700 font-medium cursor-pointer">
-            Annual Summary (2022–2026)
+            Annual Summary Ledger
           </button>
         </div>
       </div>
@@ -607,24 +595,77 @@
       </div>
     </section>
 
+    <!-- Last 30 Days Daily Heatmap Section -->
+    <section class="glass-card rounded-2xl p-5 space-y-4">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+        <div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <h3 class="text-base font-semibold text-white">Last 30 Days Market Heatmap</h3>
+            <span id="heatmapWindowBadge" class="text-[11px] font-mono px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+              -- to --
+            </span>
+          </div>
+          <p class="text-xs text-gray-400 mt-0.5">
+            Day-by-day market intensity matrix leading up to the selected anchor date. Click any tile to inspect that session.
+          </p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2 text-xs no-print">
+          <span class="text-gray-400 font-medium">Metric:</span>
+          <button onclick="setHeatmapMode('change')" id="hmMode-change" class="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-medium cursor-pointer">
+            Daily Change %
+          </button>
+          <button onclick="setHeatmapMode('price')" id="hmMode-price" class="px-2.5 py-1 rounded-lg bg-gray-800 text-gray-300 border border-gray-700 hover:bg-gray-700 font-medium cursor-pointer">
+            Price Intensity
+          </button>
+          <button onclick="setHeatmapMode('arrivals')" id="hmMode-arrivals" class="px-2.5 py-1 rounded-lg bg-gray-800 text-gray-300 border border-gray-700 hover:bg-gray-700 font-medium cursor-pointer">
+            APMC Arrivals
+          </button>
+        </div>
+      </div>
+
+      <!-- 30-Day Quick Stats Strip -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono" id="heatmapSummaryStrip"></div>
+
+      <!-- Heatmap Calendar Grid -->
+      <div class="bg-gray-950/70 border border-gray-800/80 rounded-xl p-3 sm:p-4">
+        <div class="grid grid-cols-7 gap-1.5 sm:gap-2 mb-2 text-center text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-gray-500">
+          <div>Sun</div>
+          <div>Mon</div>
+          <div>Tue</div>
+          <div>Wed</div>
+          <div>Thu</div>
+          <div>Fri</div>
+          <div>Sat</div>
+        </div>
+        <div id="last30HeatmapGrid" class="grid grid-cols-7 gap-1.5 sm:gap-2"></div>
+      </div>
+
+      <!-- Legend & Hover Detail Bar -->
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-1 text-[11px] font-mono">
+        <div id="heatmapHoverInfo" class="text-gray-400">
+          Hover or tap a day tile for full auction breakdown.
+        </div>
+        <div class="flex items-center gap-1.5 shrink-0" id="heatmapLegend"></div>
+      </div>
+    </section>
+
   </main>
 
   <footer class="border-t border-gray-800/80 mt-8 py-5 text-center text-xs text-gray-500">
     <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-      <span>Tiptur APMC Ball Copra Intelligence Suite &bull; GitHub Pages</span>
-      <span>Automated GitHub Actions Sync: Daily at 20:30 IST (15:00 UTC)</span>
+      <span>Tiptur APMC Ball Copra Intelligence Suite</span>
+      <span>Continuous Multi-Year Market Analytics</span>
     </div>
   </footer>
 
   <script>
-    // =========================================================================
-    // 1. GLOBAL STATE & STRICT UTC DATE HELPERS
-    // =========================================================================
     let fullDataset = [];
     let selectedDateStr = null;
     let windowDays = 365;
     let currentAnalyticsTab = 'technical';
     let currentLedgerTab = 'forecast';
+    let heatmapMode = 'change';
     let pickerBound = false;
     let lastAnalysisCache = null;
 
@@ -664,23 +705,15 @@
       ['2026-11-12', 31608], ['2026-11-14', 31650], ['2026-11-17', 31720]
     ];
 
-    function parseUTC(dateStr) {
-      return new Date(dateStr + 'T00:00:00Z');
-    }
+    function parseUTC(dateStr) { return new Date(dateStr + 'T00:00:00Z'); }
+    function formatUTC(dt) { return dt.toISOString().slice(0, 10); }
+    function formatINR(num) { return '₹' + Math.round(num).toLocaleString('en-IN'); }
+    function destroyChart(key) { if (charts[key]) { charts[key].destroy(); charts[key] = null; } }
 
-    function formatUTC(dt) {
-      return dt.toISOString().slice(0, 10);
-    }
-
-    function formatINR(num) {
-      return '₹' + Math.round(num).toLocaleString('en-IN');
-    }
-
-    function destroyChart(key) {
-      if (charts[key]) {
-        charts[key].destroy();
-        charts[key] = null;
-      }
+    function getTodayISTStr() {
+      const now = new Date();
+      const istMs = now.getTime() + (5.5 * 3600 * 1000);
+      return new Date(istMs).toISOString().slice(0, 10);
     }
 
     function normalizeRow(row) {
@@ -699,14 +732,14 @@
 
     function ensureDailySeries(rawRows) {
       const cleaned = rawRows
-        .filter((r) => r && r.date && !isNaN(Number(r.modal_price)))
+        .filter(r => r && r.date && !isNaN(Number(r.modal_price)))
         .map(normalizeRow)
         .sort((a, b) => a.date.localeCompare(b.date));
 
       if (cleaned.length < 2) return cleaned;
 
       const exactMap = new Map();
-      cleaned.forEach((r) => exactMap.set(r.date, r));
+      cleaned.forEach(r => exactMap.set(r.date, r));
       const uniqueSorted = Array.from(exactMap.values()).sort((a, b) => a.date.localeCompare(b.date));
 
       const startMs = parseUTC(uniqueSorted[0].date).getTime();
@@ -720,16 +753,14 @@
       const densified = [];
       let segIdx = 0;
       const cur = parseUTC(uniqueSorted[0].date);
-      const end = parseUTC(uniqueSorted[uniqueSorted.length - 1].date);
+      const end = new Date(endMs);
 
       while (cur <= end) {
         const dStr = formatUTC(cur);
         if (exactMap.has(dStr)) {
           densified.push(exactMap.get(dStr));
         } else {
-          while (segIdx < uniqueSorted.length - 2 && uniqueSorted[segIdx + 1].date < dStr) {
-            segIdx++;
-          }
+          while (segIdx < uniqueSorted.length - 2 && uniqueSorted[segIdx + 1].date < dStr) segIdx++;
           const r0 = uniqueSorted[segIdx];
           const r1 = uniqueSorted[Math.min(segIdx + 1, uniqueSorted.length - 1)];
           const t0 = parseUTC(r0.date).getTime();
@@ -755,15 +786,13 @@
       return densified;
     }
 
-    function buildFallbackDataset() {
+    function buildBaselineSeries() {
       const parsed = OFFICIAL_ANCHORS.map(([d, p]) => [parseUTC(d).getTime(), p]);
-
       function interpAnchor(tMs) {
         if (tMs <= parsed[0][0]) return parsed[0][1];
         if (tMs >= parsed[parsed.length - 1][0]) return parsed[parsed.length - 1][1];
         for (let i = 0; i < parsed.length - 1; i++) {
-          const [t0, p0] = parsed[i];
-          const [t1, p1] = parsed[i + 1];
+          const [t0, p0] = parsed[i], [t1, p1] = parsed[i + 1];
           if (tMs >= t0 && tMs <= t1) {
             const u = (tMs - t0) / (t1 - t0 || 1);
             return p0 + (p1 - p0) * ((1 - Math.cos(u * Math.PI)) / 2);
@@ -774,19 +803,13 @@
 
       const exactMap = new Map(OFFICIAL_ANCHORS);
       let seed = 42;
-      function rand() {
-        seed = (seed * 1664525 + 1013904223) % 4294967296;
-        return seed / 4294967296;
-      }
-      function randn() {
-        return Math.sqrt(-2 * Math.log(Math.max(1e-9, rand()))) * Math.cos(2 * Math.PI * rand());
-      }
+      function rand() { seed = (seed * 1664525 + 1013904223) % 4294967296; return seed / 4294967296; }
+      function randn() { return Math.sqrt(-2 * Math.log(Math.max(1e-9, rand()))) * Math.cos(2 * Math.PI * rand()); }
 
       const rows = [];
       const cur = parseUTC('2022-01-01');
-      const end = parseUTC('2026-11-17');
-      let arNoise = 0;
-      let arrState = 480;
+      const end = parseUTC(getTodayISTStr());
+      let arNoise = 0, arrState = 480;
 
       while (cur <= end) {
         const dStr = formatUTC(cur);
@@ -797,12 +820,7 @@
         let minP = Math.round(modal - (900 + rand() * 550));
         let maxP = Math.round(modal + (650 + rand() * 650));
 
-        if (dStr === '2026-10-15') { minP = 27000; maxP = 32031; }
         if (dStr === '2026-10-24') { minP = 30500; maxP = 34599; }
-        if (dStr === '2026-11-02') { minP = 30000; maxP = 32100; }
-        if (dStr === '2026-11-05') { minP = 29800; maxP = 32000; }
-        if (dStr === '2026-11-09') { minP = 30000; maxP = 32100; }
-        if (dStr === '2026-11-12') { minP = 30000; maxP = 32300; }
         if (dStr === '2026-11-17') { minP = 30200; maxP = 32500; }
 
         const wk = cur.getUTCDay();
@@ -825,9 +843,6 @@
       return rows;
     }
 
-    // =========================================================================
-    // 2. DATA LOADING & NAVIGATION CONTROLS
-    // =========================================================================
     function applyDataset(dataset) {
       fullDataset = dataset;
       const minDate = fullDataset[0].date;
@@ -837,89 +852,53 @@
       picker.max = maxDate;
       picker.value = maxDate;
       selectedDateStr = maxDate;
+
       document.getElementById('quickJumpLatest').textContent = `Latest (${maxDate})`;
+      document.getElementById('marketStatusText').textContent = `Tiptur APMC • Updated ${maxDate}`;
 
       if (!pickerBound) {
-        picker.addEventListener('change', (e) => {
-          if (e.target.value) selectClosestDate(e.target.value);
-        });
+        picker.addEventListener('change', (e) => { if (e.target.value) selectClosestDate(e.target.value); });
         pickerBound = true;
       }
       runAnalysisForDate(selectedDateStr);
     }
 
-    function getCandidateJsonUrls() {
-      const urls = [];
-      try {
-        urls.push(new URL('coconut_prices.json', window.location.href).href);
-      } catch (e) {
-        // ignore
-      }
-      urls.push('./coconut_prices.json', 'coconut_prices.json', '/coconut_prices.json');
-      return [...new Set(urls)];
+    function getCandidateFeedUrls() {
+      const path = window.location.pathname || '/';
+      const dirPath = path.endsWith('/')
+        ? path
+        : path.endsWith('.html')
+          ? path.substring(0, path.lastIndexOf('/') + 1)
+          : path + '/';
+      return [...new Set([
+        `${dirPath}coconut_prices.json`,
+        './coconut_prices.json',
+        'coconut_prices.json',
+        '/coconut_prices.json'
+      ])];
     }
 
-    async function fetchWithTimeout(url, timeoutMs = 5000) {
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), timeoutMs);
-      try {
-        return await fetch(url, { cache: 'no-store', signal: controller.signal });
-      } finally {
-        clearTimeout(timer);
-      }
-    }
-
-    async function loadLiveJson() {
-      const badgeEl = document.getElementById('dataSourceBadge');
-      const dotEl = document.getElementById('dataSourceDot');
-      const textEl = document.getElementById('dataSourceText');
-      const bannerEl = document.getElementById('jsonStatusBanner');
-      const bannerMsg = document.getElementById('jsonStatusMessage');
-
-      const candidates = getCandidateJsonUrls();
-      const errors = [];
-
+    async function syncMarketFeed() {
+      const candidates = getCandidateFeedUrls();
       for (const baseUrl of candidates) {
-        const sep = baseUrl.includes('?') ? '&' : '?';
         try {
-          const resp = await fetchWithTimeout(`${baseUrl}${sep}v=${Date.now()}`, 5000);
-          if (!resp.ok) {
-            errors.push(`${baseUrl} (HTTP ${resp.status})`);
-            continue;
-          }
-          const json = JSON.parse(await resp.text());
-          const rawArr = Array.isArray(json) ? json : (json && Array.isArray(json.data) ? json.data : null);
-
+          const resp = await fetch(`${baseUrl}?v=${Date.now()}`, { cache: 'no-store' });
+          if (!resp.ok) continue;
+          const parsed = JSON.parse(await resp.text());
+          const rawArr = Array.isArray(parsed) ? parsed : (parsed && Array.isArray(parsed.data) ? parsed.data : null);
           if (rawArr && rawArr.length > 0) {
-            const daily = ensureDailySeries(rawArr);
-            const latestDate = daily[daily.length - 1].date;
-            dotEl.className = 'h-2 w-2 rounded-full bg-emerald-400 animate-pulse';
-            textEl.textContent = rawArr.length === daily.length
-              ? `Live JSON (${daily.length}d • ${latestDate})`
-              : `Live JSON (${rawArr.length}→${daily.length}d • ${latestDate})`;
-            badgeEl.title = `Loaded live from ${baseUrl}`;
-            bannerEl.classList.add('hidden');
-            applyDataset(daily);
+            applyDataset(ensureDailySeries(rawArr));
             return;
           }
-        } catch (err) {
-          errors.push(`${baseUrl} (${err.name === 'AbortError' ? 'Timeout' : err.message})`);
+        } catch (e) {
+          // Silent fallback
         }
       }
-
-      const latestDate = fullDataset[fullDataset.length - 1].date;
-      dotEl.className = 'h-2 w-2 rounded-full bg-amber-400';
-      textEl.textContent = `Built-in Archive (${fullDataset.length}d • ${latestDate})`;
-      badgeEl.title = errors.join(' | ');
-      bannerMsg.innerHTML = `<strong>Live coconut_prices.json unavailable:</strong> Running on built-in 5-year Tiptur APMC archive. (<span class="font-mono">${errors[0] || 'Check path'}</span>)`;
-      bannerEl.classList.remove('hidden');
     }
 
     function initApp() {
-      const fallback = buildFallbackDataset();
-      document.getElementById('dataSourceText').textContent = `Syncing JSON...`;
-      applyDataset(fallback);
-      loadLiveJson();
+      applyDataset(buildBaselineSeries());
+      syncMarketFeed();
     }
 
     function selectClosestDate(targetStr) {
@@ -936,7 +915,7 @@
     }
 
     function stepDate(deltaDays) {
-      const idx = fullDataset.findIndex((d) => d.date === selectedDateStr);
+      const idx = fullDataset.findIndex(d => d.date === selectedDateStr);
       if (idx === -1) return;
       const minAnchor = Math.min(45, Math.max(5, fullDataset.length - 1));
       const nextIdx = Math.min(fullDataset.length - 1, Math.max(minAnchor, idx + deltaDays));
@@ -952,9 +931,30 @@
       runAnalysisForDate(latest);
     }
 
+    function jumpRelativeFromLatest(offsetDays) {
+      const minAnchor = Math.min(45, Math.max(5, fullDataset.length - 1));
+      const targetIdx = Math.max(minAnchor, Math.min(fullDataset.length - 1, fullDataset.length - 1 + offsetDays));
+      selectedDateStr = fullDataset[targetIdx].date;
+      document.getElementById('datePicker').value = selectedDateStr;
+      runAnalysisForDate(selectedDateStr);
+    }
+
+    function jumpToExtreme(kind) {
+      if (!fullDataset.length) return;
+      const minAnchor = Math.min(45, Math.max(5, fullDataset.length - 1));
+      let bestIdx = minAnchor;
+      for (let i = minAnchor; i < fullDataset.length; i++) {
+        if (kind === 'high' && fullDataset[i].modal_price > fullDataset[bestIdx].modal_price) bestIdx = i;
+        if (kind === 'low' && fullDataset[i].modal_price < fullDataset[bestIdx].modal_price) bestIdx = i;
+      }
+      selectedDateStr = fullDataset[bestIdx].date;
+      document.getElementById('datePicker').value = selectedDateStr;
+      runAnalysisForDate(selectedDateStr);
+    }
+
     function setWindowDays(days) {
       windowDays = days;
-      document.querySelectorAll('.win-btn').forEach((btn) => {
+      document.querySelectorAll('.win-btn').forEach(btn => {
         btn.className = 'win-btn px-2.5 py-1 rounded bg-gray-800 text-gray-300 border border-gray-700 cursor-pointer';
       });
       const idMap = { 90: 'win90', 180: 'win180', 365: 'win365', 730: 'win730', 9999: 'winAll' };
@@ -965,10 +965,10 @@
 
     function switchAnalyticsTab(tab) {
       currentAnalyticsTab = tab;
-      document.querySelectorAll('.analytics-panel').forEach((el) => el.classList.add('hidden'));
+      document.querySelectorAll('.analytics-panel').forEach(el => el.classList.add('hidden'));
       document.getElementById(`panel-${tab}`).classList.remove('hidden');
 
-      document.querySelectorAll('.atab-btn').forEach((btn) => {
+      document.querySelectorAll('.atab-btn').forEach(btn => {
         btn.className = 'atab-btn px-3.5 py-2 rounded-lg text-xs font-semibold bg-gray-800/80 text-gray-300 border border-gray-700 hover:bg-gray-700 cursor-pointer';
       });
       document.getElementById(`atab-${tab}`).className =
@@ -991,9 +991,18 @@
       if (lastAnalysisCache) renderLedgerTable(lastAnalysisCache.backtestSeries, lastAnalysisCache.forecastSeries);
     }
 
-    // =========================================================================
-    // 3. TECHNICAL, STATISTICAL & ML ENGINES
-    // =========================================================================
+    function setHeatmapMode(mode) {
+      heatmapMode = mode;
+      ['change', 'price', 'arrivals'].forEach(m => {
+        const el = document.getElementById(`hmMode-${m}`);
+        el.className = m === mode
+          ? 'px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-medium cursor-pointer'
+          : 'px-2.5 py-1 rounded-lg bg-gray-800 text-gray-300 border border-gray-700 hover:bg-gray-700 font-medium cursor-pointer';
+      });
+      if (lastAnalysisCache) renderLast30Heatmap(lastAnalysisCache.anchorIdx);
+    }
+
+    // Technical Indicators
     function computeSMA(values, period) {
       const out = new Array(values.length).fill(null);
       let sum = 0;
@@ -1023,9 +1032,7 @@
       const mid = computeSMA(values, period);
       for (let i = period - 1; i < values.length; i++) {
         let sq = 0;
-        for (let j = i - period + 1; j <= i; j++) {
-          sq += Math.pow(values[j] - mid[i], 2);
-        }
+        for (let j = i - period + 1; j <= i; j++) sq += Math.pow(values[j] - mid[i], 2);
         const sd = Math.sqrt(sq / period);
         upper[i] = mid[i] + mult * sd;
         lower[i] = mid[i] - mult * sd;
@@ -1036,17 +1043,13 @@
     function computeRSI(values, period = 14) {
       const rsi = new Array(values.length).fill(null);
       if (values.length <= period) return rsi;
-      let gain = 0;
-      let loss = 0;
+      let gain = 0, loss = 0;
       for (let i = 1; i <= period; i++) {
         const diff = values[i] - values[i - 1];
-        if (diff >= 0) gain += diff;
-        else loss -= diff;
+        if (diff >= 0) gain += diff; else loss -= diff;
       }
-      let avgGain = gain / period;
-      let avgLoss = loss / period;
+      let avgGain = gain / period, avgLoss = loss / period;
       rsi[period] = avgLoss === 0 ? 100 : 100 - (100 / (1 + avgGain / avgLoss));
-
       for (let i = period + 1; i < values.length; i++) {
         const diff = values[i] - values[i - 1];
         const g = diff > 0 ? diff : 0;
@@ -1072,17 +1075,14 @@
       if (n < 3) return 0;
       let sx = 0, sy = 0, sxx = 0, syy = 0, sxy = 0;
       for (let i = 0; i < n; i++) {
-        sx += x[i];
-        sy += y[i];
-        sxx += x[i] * x[i];
-        syy += y[i] * y[i];
-        sxy += x[i] * y[i];
+        sx += x[i]; sy += y[i]; sxx += x[i] * x[i]; syy += y[i] * y[i]; sxy += x[i] * y[i];
       }
       const num = n * sxy - sx * sy;
       const den = Math.sqrt((n * sxx - sx * sx) * (n * syy - sy * sy));
       return den === 0 ? 0 : num / den;
     }
 
+    // Client-Side Ridge Regression + Fourier Harmonic Forecaster
     function getDayOfYear(dateStr) {
       const dt = parseUTC(dateStr);
       const start = new Date(Date.UTC(dt.getUTCFullYear(), 0, 0));
@@ -1118,10 +1118,8 @@
 
     function solveRidgeRegression(X, y, lambda = 18.0) {
       if (!X.length) return { weightsStd: new Array(11).fill(0), predict: (f) => f[1] };
-      const n = X.length;
-      const m = X[0].length;
-      const means = new Array(m).fill(0);
-      const stds = new Array(m).fill(1);
+      const n = X.length, m = X[0].length;
+      const means = new Array(m).fill(0), stds = new Array(m).fill(1);
 
       for (let j = 1; j < m; j++) {
         let s = 0;
@@ -1132,7 +1130,7 @@
         stds[j] = Math.sqrt(sq / n) || 1.0;
       }
 
-      const Xs = X.map((row) => row.map((val, j) => (j === 0 ? 1.0 : (val - means[j]) / stds[j])));
+      const Xs = X.map(row => row.map((val, j) => (j === 0 ? 1.0 : (val - means[j]) / stds[j])));
       const A = Array.from({ length: m }, () => new Array(m).fill(0));
       const b = new Array(m).fill(0);
 
@@ -1165,7 +1163,7 @@
         }
       }
 
-      const weightsStd = aug.map((row) => row[m]);
+      const weightsStd = aug.map(row => row[m]);
       return {
         weightsStd,
         predict(rawFeatures) {
@@ -1186,18 +1184,14 @@
       return solveRidgeRegression(X, y, 18.0);
     }
 
-    // =========================================================================
-    // 4. MASTER ANALYSIS ORCHESTRATOR
-    // =========================================================================
     function runAnalysisForDate(anchorDateStr) {
-      const anchorIdx = fullDataset.findIndex((d) => d.date === anchorDateStr);
+      const anchorIdx = fullDataset.findIndex(d => d.date === anchorDateStr);
       if (anchorIdx < 2) return;
 
       const histUpToAnchor = fullDataset.slice(0, anchorIdx + 1);
-      const prices = histUpToAnchor.map((d) => d.modal_price);
+      const prices = histUpToAnchor.map(d => d.modal_price);
       const anchorRow = fullDataset[anchorIdx];
 
-      // Technical indicators
       const sma7 = computeSMA(prices, 7);
       const sma30 = computeSMA(prices, 30);
       const sma90 = computeSMA(prices, 90);
@@ -1206,14 +1200,12 @@
       const rsi14 = computeRSI(prices, 14);
       const macd = computeMACD(prices);
 
-      // 52-week stats
       const slice52 = histUpToAnchor.slice(Math.max(0, histUpToAnchor.length - 365));
-      const high52 = Math.max(...slice52.map((d) => d.modal_price));
-      const low52 = Math.min(...slice52.map((d) => d.modal_price));
+      const high52 = Math.max(...slice52.map(d => d.modal_price));
+      const low52 = Math.min(...slice52.map(d => d.modal_price));
       const range52Pos = high52 > low52 ? ((anchorRow.modal_price - low52) / (high52 - low52)) * 100 : 50;
       const drawdown52 = ((anchorRow.modal_price - high52) / high52) * 100;
 
-      // 30-day annualized volatility
       const rets = [];
       for (let i = Math.max(1, prices.length - 30); i < prices.length; i++) {
         rets.push((prices[i] - prices[i - 1]) / prices[i - 1]);
@@ -1222,7 +1214,6 @@
       const varRet = rets.reduce((a, r) => a + Math.pow(r - meanRet, 2), 0) / (rets.length || 1);
       const annVolPct = Math.sqrt(varRet) * Math.sqrt(252) * 100;
 
-      // Out-of-Sample Back-Prediction
       const backModel1d = trainHorizonModel(fullDataset, anchorIdx - 1, 1);
       const backPredAnchor = Math.round(backModel1d.predict(extractFeatures(fullDataset, anchorIdx - 1)));
       const backErrPct = ((backPredAnchor - anchorRow.modal_price) / anchorRow.modal_price) * 100;
@@ -1238,7 +1229,6 @@
         const actual = fullDataset[i].modal_price;
         const prev = fullDataset[i - 1].modal_price;
         if ((pred - prev) * (actual - prev) >= 0) dirCorrect++;
-
         const err = pred - actual;
         const ape = Math.abs(err / actual) * 100;
         sumAbsPctErr += ape;
@@ -1255,13 +1245,12 @@
       const ssTot = backtestSeries.reduce((acc, r) => acc + Math.pow(r.actual - meanAct, 2), 0);
       const r2 = Math.max(0, 1 - (sumSqErr / (ssTot || 1)));
 
-      // Direct Multi-Horizon Forecast (up to 60 days for scenario matrix, 30 days for chart)
       const anchorFeatures = extractFeatures(fullDataset, anchorIdx);
       const keyHorizons = [1, 5, 10, 15, 20, 25, 30, 45, 60];
       const anchorForecasts = {};
       let model30d = null;
 
-      keyHorizons.forEach((h) => {
+      keyHorizons.forEach(h => {
         const m = trainHorizonModel(fullDataset, anchorIdx, h);
         if (h === 30) model30d = m;
         anchorForecasts[h] = m.predict(anchorFeatures);
@@ -1281,7 +1270,6 @@
         const frac = (h - hLow) / (hHigh - hLow || 1);
         const predPrice = Math.round(anchorForecasts[hLow] + frac * (anchorForecasts[hHigh] - anchorForecasts[hLow]));
         const stdBand = Math.round(rmse * 1.25 * Math.sqrt(h / 4));
-
         const fDate = new Date(baseAnchorDate.getTime());
         fDate.setUTCDate(fDate.getUTCDate() + h);
 
@@ -1299,50 +1287,23 @@
       const delta30Pct = ((target30.predicted - anchorRow.modal_price) / anchorRow.modal_price) * 100;
 
       lastAnalysisCache = {
-        anchorIdx,
-        anchorRow,
-        histUpToAnchor,
-        prices,
-        sma7,
-        sma30,
-        sma90,
-        sma200,
-        bb,
-        rsi14,
-        macd,
-        high52,
-        low52,
-        range52Pos,
-        drawdown52,
-        annVolPct,
-        backPredAnchor,
-        backErrPct,
-        backtestSeries,
-        mape,
-        rmse,
-        r2,
-        dirAccPct,
-        model30d,
-        anchorForecasts,
-        forecastSeries,
-        target30,
-        delta30Pct
+        anchorIdx, anchorRow, histUpToAnchor, prices, sma7, sma30, sma90, sma200, bb, rsi14, macd,
+        high52, low52, range52Pos, drawdown52, annVolPct, backPredAnchor, backErrPct, backtestSeries,
+        mape, rmse, r2, dirAccPct, model30d, anchorForecasts, forecastSeries, target30, delta30Pct
       };
 
       updateExecutiveKPIs(lastAnalysisCache);
       renderTechMatrix(lastAnalysisCache);
-      renderSeasonalHeatmap(histUpToAnchor);
+      renderSeasonalHeatmap(fullDataset);
       renderSupplyStats(histUpToAnchor);
       renderScenarioMatrix(lastAnalysisCache);
       renderEvidenceExplanation(lastAnalysisCache);
       updateFarmSimulator('sync');
       renderLedgerTable(backtestSeries, forecastSeries);
+      renderLast30Heatmap(anchorIdx);
       renderActiveCharts();
     }
 
-    // =========================================================================
-    // 5. UI UPDATERS (KPIs, TABLES, HEATMAPS, SIMULATOR)
-    // =========================================================================
     function updateExecutiveKPIs(c) {
       const { anchorIdx, anchorRow, high52, low52, range52Pos, drawdown52, annVolPct, rsi14, bb, sma30, sma90, target30, delta30Pct, backErrPct } = c;
 
@@ -1442,12 +1403,8 @@
     function renderTechMatrix(c) {
       const p = c.anchorRow.modal_price;
       const last = (arr) => arr[arr.length - 1];
-      const s7 = last(c.sma7) || p;
-      const s30 = last(c.sma30) || p;
-      const s90 = last(c.sma90) || p;
-      const s200 = last(c.sma200) || p;
-      const mVal = last(c.macd.macdLine) || 0;
-      const mSig = last(c.macd.signalLine) || 0;
+      const s7 = last(c.sma7) || p, s30 = last(c.sma30) || p, s90 = last(c.sma90) || p, s200 = last(c.sma200) || p;
+      const mVal = last(c.macd.macdLine) || 0, mSig = last(c.macd.signalLine) || 0;
 
       const macdBadge = document.getElementById('macdStatusBadge');
       macdBadge.textContent = mVal >= mSig ? 'BULLISH CROSS' : 'BEARISH CROSS';
@@ -1455,7 +1412,6 @@
         ? 'text-[11px] font-mono px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
         : 'text-[11px] font-mono px-2 py-0.5 rounded bg-rose-500/15 text-rose-300 border border-rose-500/30';
 
-      // Z-Score vs 90d Mean
       const slice90 = c.prices.slice(Math.max(0, c.prices.length - 90));
       const mean90 = slice90.reduce((a, b) => a + b, 0) / slice90.length;
       const sd90 = Math.sqrt(slice90.reduce((a, v) => a + Math.pow(v - mean90, 2), 0) / slice90.length) || 1;
@@ -1470,7 +1426,7 @@
         { label: 'Cross Regime', val: s30 >= s90 ? 'GOLDEN' : 'DEATH', custom: s30 >= s90 ? 'UPTREND' : 'DOWNTREND' }
       ];
 
-      document.getElementById('techMatrixContainer').innerHTML = items.map((it) => {
+      document.getElementById('techMatrixContainer').innerHTML = items.map(it => {
         const sub = it.custom
           ? `<span class="${it.val === 'GOLDEN' || it.custom === 'NORMAL' ? 'text-emerald-400' : 'text-amber-400'}">${it.custom}</span>`
           : `<span class="${it.diff >= 0 ? 'text-emerald-400' : 'text-rose-400'}">Spot ${it.diff >= 0 ? '+' : ''}${it.diff.toFixed(1)}%</span>`;
@@ -1489,7 +1445,7 @@
       const map = {};
       const monthTotals = Array.from({ length: 12 }, () => []);
 
-      hist.forEach((row) => {
+      hist.forEach(row => {
         const yr = row.date.slice(0, 4);
         const mo = parseInt(row.date.slice(5, 7), 10) - 1;
         if (!map[yr]) map[yr] = Array.from({ length: 12 }, () => []);
@@ -1502,22 +1458,13 @@
         month: months[idx],
         avg: arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0
       }));
-      const topMonths = [...monthAvgs].sort((a, b) => b.avg - a.avg).slice(0, 3).map((m) => m.month).join(', ');
+      const topMonths = [...monthAvgs].sort((a, b) => b.avg - a.avg).slice(0, 3).map(m => m.month).join(', ');
       document.getElementById('yoyBestMonthsBadge').textContent = `Historically Strongest: ${topMonths}`;
 
-      let html = `
-        <thead class="bg-gray-900 text-gray-400 border-b border-gray-800">
-          <tr>
-            <th class="py-2 px-2 text-left">Year</th>
-            ${months.map((m) => `<th class="py-2 px-1.5">${m}</th>`).join('')}
-            <th class="py-2 px-2 text-right">Avg</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-800/60">
-      `;
+      let html = `<thead class="bg-gray-900 text-gray-400 border-b border-gray-800"><tr><th class="py-2 px-2 text-left">Year</th>${months.map(m => `<th class="py-2 px-1.5">${m}</th>`).join('')}<th class="py-2 px-2 text-right">Avg</th></tr></thead><tbody class="divide-y divide-gray-800/60">`;
 
       let prevMonthVal = null;
-      years.forEach((yr) => {
+      years.forEach(yr => {
         let yrSum = 0, yrCount = 0;
         html += `<tr><td class="py-2 px-2 text-left font-bold text-white">${yr}</td>`;
         for (let m = 0; m < 12; m++) {
@@ -1526,8 +1473,7 @@
             html += `<td class="py-2 px-1 text-gray-600">—</td>`;
           } else {
             const avg = arr.reduce((a, b) => a + b, 0) / arr.length;
-            yrSum += avg;
-            yrCount++;
+            yrSum += avg; yrCount++;
             const mom = prevMonthVal ? ((avg - prevMonthVal) / prevMonthVal) * 100 : 0;
             prevMonthVal = avg;
             const bg = mom >= 4
@@ -1537,26 +1483,20 @@
                 : mom <= -4
                   ? 'bg-rose-500/25 text-rose-200'
                   : 'bg-rose-500/10 text-rose-300';
-            html += `<td class="py-1.5 px-1 ${bg} border border-gray-900/50">
-              <div class="font-semibold">${(avg / 1000).toFixed(1)}k</div>
-              <div class="text-[9px] opacity-80">${mom >= 0 ? '+' : ''}${mom.toFixed(1)}%</div>
-            </td>`;
+            html += `<td class="py-1.5 px-1 ${bg} border border-gray-900/50"><div class="font-semibold">${(avg / 1000).toFixed(1)}k</div><div class="text-[9px] opacity-80">${mom >= 0 ? '+' : ''}${mom.toFixed(1)}%</div></td>`;
           }
         }
         const yrAvg = yrCount ? yrSum / yrCount : 0;
         html += `<td class="py-2 px-2 text-right font-bold text-amber-300">${formatINR(yrAvg)}</td></tr>`;
       });
-
       html += '</tbody>';
       document.getElementById('seasonalHeatmapTable').innerHTML = html;
     }
 
     function renderSupplyStats(hist) {
       const recent = hist.slice(Math.max(0, hist.length - 180));
-      const arrs = recent.map((d) => d.arrivals_qtl);
-      const prices = recent.map((d) => d.modal_price);
+      const arrs = recent.map(d => d.arrivals_qtl), prices = recent.map(d => d.modal_price);
       const r = pearsonCorrelation(arrs, prices);
-
       const latest = recent[recent.length - 1];
       const avgArr30 = recent.slice(-30).reduce((a, d) => a + d.arrivals_qtl, 0) / Math.min(30, recent.length);
       const ratio = latest.modal_price / (latest.copra_ref_qtl || latest.modal_price * 0.75);
@@ -1587,17 +1527,12 @@
     function renderScenarioMatrix(c) {
       const horizons = [7, 15, 30, 45, 60];
       const baseDt = parseUTC(c.anchorRow.date);
-      const rowsHtml = horizons.map((h) => {
-        let basePred;
-        if (c.anchorForecasts[h] != null) {
-          basePred = Math.round(c.anchorForecasts[h]);
-        } else {
-          // Interpolate for h=7 between 5 and 10
-          basePred = Math.round(c.anchorForecasts[5] + ((h - 5) / 5) * (c.anchorForecasts[10] - c.anchorForecasts[5]));
-        }
+      const rowsHtml = horizons.map(h => {
+        let basePred = c.anchorForecasts[h] != null
+          ? Math.round(c.anchorForecasts[h])
+          : Math.round(c.anchorForecasts[5] + ((h - 5) / 5) * (c.anchorForecasts[10] - c.anchorForecasts[5]));
         const sigma = Math.round(c.rmse * 0.85 * Math.sqrt(h / 4));
-        const bear = Math.max(6000, basePred - sigma);
-        const bull = basePred + sigma;
+        const bear = Math.max(6000, basePred - sigma), bull = basePred + sigma;
         const dt = new Date(baseDt.getTime());
         dt.setUTCDate(dt.getUTCDate() + h);
 
@@ -1634,7 +1569,7 @@
         {
           title: '2. Fourier Seasonality & Upcoming Month',
           badge: `Next: ${nextMonth}`,
-          text: `Harmonic seasonal terms weigh historical 5-year Tiptur APMC behavior entering ${nextMonth} alongside daily arrivals of ${anchorRow.arrivals_qtl} quintals.`
+          text: `Harmonic seasonal terms weigh historical Tiptur APMC behavior entering ${nextMonth} alongside daily arrivals of ${anchorRow.arrivals_qtl} quintals.`
         },
         {
           title: '3. Strict Out-of-Sample Audit',
@@ -1643,7 +1578,7 @@
         }
       ];
 
-      document.getElementById('evidenceContainer').innerHTML = items.map((item) => `
+      document.getElementById('evidenceContainer').innerHTML = items.map(item => `
         <div class="p-3 rounded-xl bg-gray-900/75 border border-gray-800">
           <div class="flex items-center justify-between gap-2 mb-1">
             <span class="font-semibold text-gray-100 text-xs">${item.title}</span>
@@ -1656,41 +1591,25 @@
 
     function updateFarmSimulator(source) {
       if (!lastAnalysisCache) return;
-      const qtlEl = document.getElementById('simQuintals');
-      const nutsEl = document.getElementById('simNuts');
+      const qtlEl = document.getElementById('simQuintals'), nutsEl = document.getElementById('simNuts');
       const nutsPerQtl = parseFloat(document.getElementById('simNutsPerQtl').value) || 700;
       const rawOffer = parseFloat(document.getElementById('simRawOffer').value) || 23;
       const cureCostPerQtl = parseFloat(document.getElementById('simCureCost').value) || 1800;
       const apmcFeePct = parseFloat(document.getElementById('simApmcFee').value) || 3.5;
 
-      let qtls = parseFloat(qtlEl.value) || 0;
-      let nuts = parseFloat(nutsEl.value) || 0;
-
-      if (source === 'qtl') {
-        nuts = Math.round(qtls * nutsPerQtl);
-        nutsEl.value = nuts;
-      } else if (source === 'nuts') {
-        qtls = +(nuts / nutsPerQtl).toFixed(2);
-        qtlEl.value = qtls;
-      }
+      let qtls = parseFloat(qtlEl.value) || 0, nuts = parseFloat(nutsEl.value) || 0;
+      if (source === 'qtl') { nuts = Math.round(qtls * nutsPerQtl); nutsEl.value = nuts; }
+      else if (source === 'nuts') { qtls = +(nuts / nutsPerQtl).toFixed(2); qtlEl.value = qtls; }
 
       const spotModal = lastAnalysisCache.anchorRow.modal_price;
       const target30Modal = lastAnalysisCache.target30.predicted;
       const feeMult = 1 - apmcFeePct / 100;
 
-      const grossToday = qtls * spotModal;
-      const totalCuring = qtls * cureCostPerQtl;
-      const feesToday = grossToday * (apmcFeePct / 100);
+      const grossToday = qtls * spotModal, totalCuring = qtls * cureCostPerQtl, feesToday = grossToday * (apmcFeePct / 100);
       const netToday = grossToday - feesToday - totalCuring;
 
-      const gross30d = qtls * target30Modal;
-      const net30d = gross30d * feeMult - totalCuring;
-      const holdDelta = net30d - netToday;
-
-      const rawTotal = nuts * rawOffer;
-      const curingAdv = netToday - rawTotal;
-
-      // Break-even copra modal rate per quintal to match raw nut sale
+      const gross30d = qtls * target30Modal, net30d = gross30d * feeMult - totalCuring, holdDelta = net30d - netToday;
+      const rawTotal = nuts * rawOffer, curingAdv = netToday - rawTotal;
       const breakevenQtl = ((nutsPerQtl * rawOffer) + cureCostPerQtl) / (feeMult || 1);
       const safetyMarginPct = ((spotModal - breakevenQtl) / breakevenQtl) * 100;
 
@@ -1714,19 +1633,11 @@
     }
 
     function renderLedgerTable(backtestSeries, forecastSeries) {
-      const thead = document.getElementById('ledgerTableHead');
-      const tbody = document.getElementById('ledgerTableBody');
+      const thead = document.getElementById('ledgerTableHead'), tbody = document.getElementById('ledgerTableBody');
 
       if (currentLedgerTab === 'forecast') {
-        thead.innerHTML = `
-          <th class="py-2.5 px-3">Horizon</th>
-          <th class="py-2.5 px-3">Target Date</th>
-          <th class="py-2.5 px-3">Predicted Modal (₹/Qtl)</th>
-          <th class="py-2.5 px-3">Per Kg</th>
-          <th class="py-2.5 px-3">Implied /Nut</th>
-          <th class="py-2.5 px-3">95% Confidence Band</th>
-        `;
-        tbody.innerHTML = forecastSeries.map((row) => `
+        thead.innerHTML = `<th class="py-2.5 px-3">Horizon</th><th class="py-2.5 px-3">Target Date</th><th class="py-2.5 px-3">Predicted Modal (₹/Qtl)</th><th class="py-2.5 px-3">Per Kg</th><th class="py-2.5 px-3">Implied /Nut</th><th class="py-2.5 px-3">95% Confidence Band</th>`;
+        tbody.innerHTML = forecastSeries.map(row => `
           <tr class="hover:bg-gray-800/40">
             <td class="py-2 px-3 text-amber-400">+${row.horizon}d</td>
             <td class="py-2 px-3">${row.date}</td>
@@ -1737,15 +1648,9 @@
           </tr>
         `).join('');
       } else if (currentLedgerTab === 'backtest') {
-        thead.innerHTML = `
-          <th class="py-2.5 px-3">Date</th>
-          <th class="py-2.5 px-3">Actual Tiptur</th>
-          <th class="py-2.5 px-3">ML Back-Pred</th>
-          <th class="py-2.5 px-3">Residual (₹)</th>
-          <th class="py-2.5 px-3">Abs Error %</th>
-        `;
+        thead.innerHTML = `<th class="py-2.5 px-3">Date</th><th class="py-2.5 px-3">Actual Tiptur</th><th class="py-2.5 px-3">ML Back-Pred</th><th class="py-2.5 px-3">Residual (₹)</th><th class="py-2.5 px-3">Abs Error %</th>`;
         const recentBT = [...backtestSeries].reverse().slice(0, 60);
-        tbody.innerHTML = recentBT.map((row) => {
+        tbody.innerHTML = recentBT.map(row => {
           const errClass = row.ape <= 1.5 ? 'text-emerald-400' : row.ape <= 3.0 ? 'text-amber-400' : 'text-rose-400';
           return `
             <tr class="hover:bg-gray-800/40 cursor-pointer" onclick="selectClosestDate('${row.date}')">
@@ -1758,27 +1663,18 @@
           `;
         }).join('');
       } else {
-        thead.innerHTML = `
-          <th class="py-2.5 px-3">Year</th>
-          <th class="py-2.5 px-3">Sessions</th>
-          <th class="py-2.5 px-3">Avg Modal (₹/Qtl)</th>
-          <th class="py-2.5 px-3">Year Low</th>
-          <th class="py-2.5 px-3">Year High</th>
-          <th class="py-2.5 px-3">YoY Change</th>
-        `;
+        thead.innerHTML = `<th class="py-2.5 px-3">Year</th><th class="py-2.5 px-3">Sessions</th><th class="py-2.5 px-3">Avg Modal (₹/Qtl)</th><th class="py-2.5 px-3">Year Low</th><th class="py-2.5 px-3">Year High</th><th class="py-2.5 px-3">YoY Change</th>`;
         const byYear = {};
-        fullDataset.forEach((r) => {
+        fullDataset.forEach(r => {
           const y = r.date.slice(0, 4);
           if (!byYear[y]) byYear[y] = [];
           byYear[y].push(r.modal_price);
         });
         const years = Object.keys(byYear).sort();
         let prevAvg = null;
-        tbody.innerHTML = years.map((y) => {
-          const arr = byYear[y];
-          const avg = arr.reduce((a, b) => a + b, 0) / arr.length;
-          const lo = Math.min(...arr);
-          const hi = Math.max(...arr);
+        tbody.innerHTML = years.map(y => {
+          const arr = byYear[y], avg = arr.reduce((a, b) => a + b, 0) / arr.length;
+          const lo = Math.min(...arr), hi = Math.max(...arr);
           const yoy = prevAvg ? ((avg - prevAvg) / prevAvg) * 100 : null;
           prevAvg = avg;
           return `
@@ -1788,18 +1684,159 @@
               <td class="py-2 px-3 font-semibold text-amber-300">${formatINR(avg)}</td>
               <td class="py-2 px-3 text-rose-300">${formatINR(lo)}</td>
               <td class="py-2 px-3 text-emerald-300">${formatINR(hi)}</td>
-              <td class="py-2 px-3 ${yoy == null ? 'text-gray-500' : yoy >= 0 ? 'text-emerald-400' : 'text-rose-400'}">
-                ${yoy == null ? '—' : `${yoy >= 0 ? '+' : ''}${yoy.toFixed(1)}%`}
-              </td>
+              <td class="py-2 px-3 ${yoy == null ? 'text-gray-500' : yoy >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${yoy == null ? '—' : `${yoy >= 0 ? '+' : ''}${yoy.toFixed(1)}%`}</td>
             </tr>
           `;
         }).join('');
       }
     }
 
-    // =========================================================================
-    // 6. CHART RENDERERS
-    // =========================================================================
+    // Last 30 Days Daily Calendar Heatmap
+    function renderLast30Heatmap(anchorIdx) {
+      const startIdx = Math.max(0, anchorIdx - 29);
+      const slice = fullDataset.slice(startIdx, anchorIdx + 1);
+      if (!slice.length) return;
+
+      const shortMonths = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const prices = slice.map(d => d.modal_price);
+      const arrivals = slice.map(d => d.arrivals_qtl);
+      const minP = Math.min(...prices);
+      const maxP = Math.max(...prices);
+      const minA = Math.min(...arrivals);
+      const maxA = Math.max(...arrivals);
+
+      let upDays = 0, downDays = 0, flatDays = 0;
+      const enriched = slice.map((row, i) => {
+        const prevRow = (startIdx + i > 0) ? fullDataset[startIdx + i - 1] : row;
+        const delta = row.modal_price - prevRow.modal_price;
+        const pct = prevRow.modal_price > 0 ? (delta / prevRow.modal_price) * 100 : 0;
+        if (delta > 0) upDays++;
+        else if (delta < 0) downDays++;
+        else flatDays++;
+        return { ...row, delta, pct };
+      });
+
+      const net30Pct = ((slice[slice.length - 1].modal_price - slice[0].modal_price) / slice[0].modal_price) * 100;
+      document.getElementById('heatmapWindowBadge').textContent = `${slice[0].date} → ${slice[slice.length - 1].date}`;
+
+      document.getElementById('heatmapSummaryStrip').innerHTML = `
+        <div class="bg-gray-900/75 border border-gray-800 rounded-xl p-3">
+          <div class="text-[10px] text-gray-400 uppercase">30-Day High</div>
+          <div class="text-sm font-bold text-emerald-400 mt-0.5">${formatINR(maxP)}/Qtl</div>
+        </div>
+        <div class="bg-gray-900/75 border border-gray-800 rounded-xl p-3">
+          <div class="text-[10px] text-gray-400 uppercase">30-Day Low</div>
+          <div class="text-sm font-bold text-rose-400 mt-0.5">${formatINR(minP)}/Qtl</div>
+        </div>
+        <div class="bg-gray-900/75 border border-gray-800 rounded-xl p-3">
+          <div class="text-[10px] text-gray-400 uppercase">30-Day Net Move</div>
+          <div class="text-sm font-bold ${net30Pct >= 0 ? 'text-emerald-400' : 'text-rose-400'} mt-0.5">${net30Pct >= 0 ? '+' : ''}${net30Pct.toFixed(2)}%</div>
+        </div>
+        <div class="bg-gray-900/75 border border-gray-800 rounded-xl p-3">
+          <div class="text-[10px] text-gray-400 uppercase">Session Breadth</div>
+          <div class="text-sm font-bold text-white mt-0.5">
+            <span class="text-emerald-400">${upDays}↑</span> / <span class="text-rose-400">${downDays}↓</span>${flatDays ? ` / <span class="text-gray-400">${flatDays}–</span>` : ''}
+          </div>
+        </div>
+      `;
+
+      const firstDow = parseUTC(slice[0].date).getUTCDay();
+      let gridHtml = '';
+      for (let b = 0; b < firstDow; b++) {
+        gridHtml += `<div class="rounded-lg bg-gray-900/20 border border-gray-800/30 min-h-[68px] sm:min-h-[76px]"></div>`;
+      }
+
+      enriched.forEach((row) => {
+        const dt = parseUTC(row.date);
+        const dayNum = dt.getUTCDate();
+        const monLbl = shortMonths[dt.getUTCMonth()];
+        const isAnchor = row.date === selectedDateStr;
+
+        let cellStyle = '';
+        let subMetricText = '';
+
+        if (heatmapMode === 'change') {
+          if (row.pct >= 0.8) cellStyle = 'background: rgba(16, 185, 129, 0.38); border-color: rgba(16, 185, 129, 0.7);';
+          else if (row.pct >= 0.25) cellStyle = 'background: rgba(16, 185, 129, 0.22); border-color: rgba(16, 185, 129, 0.45);';
+          else if (row.pct > 0) cellStyle = 'background: rgba(16, 185, 129, 0.11); border-color: rgba(16, 185, 129, 0.25);';
+          else if (row.pct <= -0.8) cellStyle = 'background: rgba(244, 63, 94, 0.38); border-color: rgba(244, 63, 94, 0.7);';
+          else if (row.pct <= -0.25) cellStyle = 'background: rgba(244, 63, 94, 0.22); border-color: rgba(244, 63, 94, 0.45);';
+          else if (row.pct < 0) cellStyle = 'background: rgba(244, 63, 94, 0.11); border-color: rgba(244, 63, 94, 0.25);';
+          else cellStyle = 'background: rgba(55, 65, 81, 0.3); border-color: rgba(75, 85, 99, 0.45);';
+          subMetricText = `${row.pct >= 0 ? '+' : ''}${row.pct.toFixed(2)}%`;
+        } else if (heatmapMode === 'price') {
+          const norm = maxP > minP ? (row.modal_price - minP) / (maxP - minP) : 0.5;
+          const alpha = (0.12 + norm * 0.45).toFixed(2);
+          const colorRgb = norm >= 0.5 ? '16, 185, 129' : '245, 158, 11';
+          cellStyle = `background: rgba(${colorRgb}, ${alpha}); border-color: rgba(${colorRgb}, ${Math.min(0.85, Number(alpha) + 0.25).toFixed(2)});`;
+          subMetricText = `₹${row.per_kg_inr.toFixed(1)}/kg`;
+        } else {
+          const norm = maxA > minA ? (row.arrivals_qtl - minA) / (maxA - minA) : 0.5;
+          const alpha = (0.10 + norm * 0.48).toFixed(2);
+          cellStyle = `background: rgba(56, 189, 248, ${alpha}); border-color: rgba(56, 189, 248, ${Math.min(0.85, Number(alpha) + 0.25).toFixed(2)});`;
+          subMetricText = `${row.arrivals_qtl} Qtl`;
+        }
+
+        const ringClass = isAnchor ? 'ring-2 ring-amber-400 ring-offset-1 ring-offset-[#0b0f17]' : '';
+        const hoverPayload = `${row.date} | Modal: ${formatINR(row.modal_price)}/Qtl (${row.pct >= 0 ? '+' : ''}${row.pct.toFixed(2)}%) | Range: ${formatINR(row.min_price)}–${formatINR(row.max_price)} | Arrivals: ${row.arrivals_qtl} Qtl`;
+
+        gridHtml += `
+          <button
+            type="button"
+            onclick="selectClosestDate('${row.date}')"
+            onmouseenter="document.getElementById('heatmapHoverInfo').textContent='${hoverPayload}'"
+            style="${cellStyle}"
+            class="heat-cell ${ringClass} border rounded-lg p-1.5 sm:p-2 text-left flex flex-col justify-between min-h-[68px] sm:min-h-[76px] cursor-pointer focus:outline-none"
+          >
+            <div class="flex items-center justify-between w-full text-[9px] sm:text-[10px] font-mono text-gray-300/90">
+              <span>${monLbl} ${dayNum}</span>
+              ${isAnchor ? '<span class="h-1.5 w-1.5 rounded-full bg-amber-300"></span>' : ''}
+            </div>
+            <div class="font-mono font-bold text-[11px] sm:text-xs text-white leading-tight">
+              ₹${(row.modal_price / 1000).toFixed(2)}k
+            </div>
+            <div class="font-mono text-[9px] sm:text-[10px] ${heatmapMode === 'change' ? (row.pct >= 0 ? 'text-emerald-200' : 'text-rose-200') : 'text-gray-200/90'}">
+              ${subMetricText}
+            </div>
+          </button>
+        `;
+      });
+
+      document.getElementById('last30HeatmapGrid').innerHTML = gridHtml;
+
+      const legendEl = document.getElementById('heatmapLegend');
+      if (heatmapMode === 'change') {
+        legendEl.innerHTML = `
+          <span class="text-gray-500">Drop</span>
+          <span class="h-3 w-4 rounded-sm inline-block" style="background: rgba(244,63,94,0.45)"></span>
+          <span class="h-3 w-4 rounded-sm inline-block" style="background: rgba(244,63,94,0.2)"></span>
+          <span class="h-3 w-4 rounded-sm inline-block" style="background: rgba(55,65,81,0.45)"></span>
+          <span class="h-3 w-4 rounded-sm inline-block" style="background: rgba(16,185,129,0.2)"></span>
+          <span class="h-3 w-4 rounded-sm inline-block" style="background: rgba(16,185,129,0.45)"></span>
+          <span class="text-gray-500">Gain</span>
+        `;
+      } else if (heatmapMode === 'price') {
+        legendEl.innerHTML = `
+          <span class="text-gray-500">30d Low</span>
+          <span class="h-3 w-4 rounded-sm inline-block" style="background: rgba(245,158,11,0.18)"></span>
+          <span class="h-3 w-4 rounded-sm inline-block" style="background: rgba(245,158,11,0.35)"></span>
+          <span class="h-3 w-4 rounded-sm inline-block" style="background: rgba(16,185,129,0.32)"></span>
+          <span class="h-3 w-4 rounded-sm inline-block" style="background: rgba(16,185,129,0.55)"></span>
+          <span class="text-gray-500">30d High</span>
+        `;
+      } else {
+        legendEl.innerHTML = `
+          <span class="text-gray-500">Low Supply</span>
+          <span class="h-3 w-4 rounded-sm inline-block" style="background: rgba(56,189,248,0.12)"></span>
+          <span class="h-3 w-4 rounded-sm inline-block" style="background: rgba(56,189,248,0.28)"></span>
+          <span class="h-3 w-4 rounded-sm inline-block" style="background: rgba(56,189,248,0.45)"></span>
+          <span class="h-3 w-4 rounded-sm inline-block" style="background: rgba(56,189,248,0.62)"></span>
+          <span class="text-gray-500">Peak Arrivals</span>
+        `;
+      }
+    }
+
+    // Charts
     function renderActiveCharts() {
       if (typeof Chart === 'undefined' || !lastAnalysisCache) return;
       renderMainChart(lastAnalysisCache);
@@ -1813,33 +1850,42 @@
 
     function renderTabCharts(tab) {
       if (typeof Chart === 'undefined' || !lastAnalysisCache) return;
-      if (tab === 'technical') {
-        renderRsiChart(lastAnalysisCache);
-        renderMacdChart(lastAnalysisCache);
-      } else if (tab === 'seasonal') {
-        renderYoyChart(lastAnalysisCache.histUpToAnchor);
-      } else if (tab === 'supply') {
-        renderArrivalsChart(lastAnalysisCache.histUpToAnchor);
-        renderSpreadChart(lastAnalysisCache.histUpToAnchor);
-      } else if (tab === 'ml') {
-        renderFeatureChart(lastAnalysisCache.model30d);
-      }
+      if (tab === 'technical') { renderRsiChart(lastAnalysisCache); renderMacdChart(lastAnalysisCache); }
+      else if (tab === 'seasonal') { renderYoyChart(fullDataset); }
+      else if (tab === 'supply') { renderArrivalsChart(lastAnalysisCache.histUpToAnchor); renderSpreadChart(lastAnalysisCache.histUpToAnchor); }
+      else if (tab === 'ml') { renderFeatureChart(lastAnalysisCache.model30d); }
     }
 
     function renderMainChart(c) {
       document.getElementById('chartAnchorLabel').textContent = c.anchorRow.date;
       const startSlice = windowDays >= 9999 ? 0 : Math.max(0, c.anchorIdx - windowDays);
       const histSlice = fullDataset.slice(startSlice, c.anchorIdx + 1);
-      const fLen = c.forecastSeries.length;
-      const padNull = new Array(fLen).fill(null);
+      const isPastDate = c.anchorIdx < fullDataset.length - 1;
 
-      const labels = histSlice.map((d) => d.date).concat(c.forecastSeries.map((f) => f.date));
-      const actualData = histSlice.map((d) => d.modal_price).concat(padNull);
+      document.getElementById('forecastToggleLabel').textContent = isPastDate
+        ? '30d ML Projection vs Actual Audit'
+        : '30-Day ML Forecast + 95% CI';
+
+      const futureDates = c.forecastSeries.map(f => f.date);
+      const dateToActual = new Map();
+      if (isPastDate) {
+        for (let i = c.anchorIdx + 1; i < Math.min(fullDataset.length, c.anchorIdx + 35); i++) {
+          dateToActual.set(fullDataset[i].date, fullDataset[i].modal_price);
+        }
+      }
+
+      const futureActualAligned = futureDates.map(d => dateToActual.has(d) ? dateToActual.get(d) : null);
+      const labels = histSlice.map(d => d.date).concat(futureDates);
+      const padNull = new Array(futureDates.length).fill(null);
+
+      const histActualData = histSlice.map(d => d.modal_price).concat(padNull);
+      const futurePad = new Array(Math.max(0, histSlice.length - 1)).fill(null);
+      const lastActual = histSlice[histSlice.length - 1].modal_price;
 
       const datasets = [
         {
           label: 'Actual Tiptur Modal (₹/Qtl)',
-          data: actualData,
+          data: histActualData,
           borderColor: '#10b981',
           backgroundColor: 'rgba(16, 185, 129, 0.08)',
           borderWidth: 2,
@@ -1849,6 +1895,18 @@
           fill: true
         }
       ];
+
+      if (isPastDate && futureActualAligned.some(v => v != null)) {
+        datasets.push({
+          label: 'Actual Realized (Post-Anchor Audit)',
+          data: futurePad.concat([lastActual]).concat(futureActualAligned),
+          borderColor: '#34d399',
+          borderWidth: 2.5,
+          pointRadius: 1.5,
+          pointHoverRadius: 4,
+          tension: 0.2
+        });
+      }
 
       if (document.getElementById('ovSma30').checked) {
         datasets.push({
@@ -1874,7 +1932,7 @@
 
       if (document.getElementById('ovBollinger').checked) {
         datasets.push({
-          label: 'BB Upper (20,2σ)',
+          label: 'BB Upper',
           data: c.bb.upper.slice(startSlice, c.anchorIdx + 1).concat(padNull),
           borderColor: 'rgba(129, 140, 248, 0.45)',
           borderDash: [3, 3],
@@ -1883,7 +1941,7 @@
           fill: false
         });
         datasets.push({
-          label: 'BB Lower (20,2σ)',
+          label: 'BB Lower',
           data: c.bb.lower.slice(startSlice, c.anchorIdx + 1).concat(padNull),
           borderColor: 'rgba(129, 140, 248, 0.45)',
           backgroundColor: 'rgba(129, 140, 248, 0.07)',
@@ -1895,10 +1953,10 @@
       }
 
       if (document.getElementById('ovBacktest').checked) {
-        const backMap = new Map(c.backtestSeries.map((b) => [b.date, b.predicted]));
+        const backMap = new Map(c.backtestSeries.map(b => [b.date, b.predicted]));
         datasets.push({
           label: 'OOS Back-Prediction',
-          data: histSlice.map((d) => (backMap.has(d.date) ? backMap.get(d.date) : null)).concat(padNull),
+          data: histSlice.map(d => backMap.has(d.date) ? backMap.get(d.date) : null).concat(padNull),
           borderColor: '#22d3ee',
           borderDash: [4, 3],
           borderWidth: 1.5,
@@ -1908,36 +1966,37 @@
       }
 
       if (document.getElementById('ovForecast').checked) {
-        const forecastPad = new Array(Math.max(0, histSlice.length - 1)).fill(null);
-        const lastActual = histSlice[histSlice.length - 1].modal_price;
         datasets.push({
-          label: '30-Day ML Forecast',
-          data: forecastPad.concat([lastActual]).concat(c.forecastSeries.map((f) => f.predicted)),
+          label: isPastDate ? 'ML Historical Projection (30d)' : '30-Day ML Forecast',
+          data: futurePad.concat([lastActual]).concat(c.forecastSeries.map(f => f.predicted)),
           borderColor: '#f59e0b',
           borderWidth: 2.5,
+          borderDash: isPastDate ? [5, 3] : [],
           pointRadius: 1.5,
-          pointHoverRadius: 5,
           tension: 0.3
         });
-        datasets.push({
-          label: '95% Upper CI',
-          data: forecastPad.concat([lastActual]).concat(c.forecastSeries.map((f) => f.upper95)),
-          borderColor: 'rgba(245, 158, 11, 0.25)',
-          backgroundColor: 'rgba(245, 158, 11, 0.12)',
-          borderWidth: 1,
-          pointRadius: 0,
-          fill: '+1',
-          tension: 0.3
-        });
-        datasets.push({
-          label: '95% Lower CI',
-          data: forecastPad.concat([lastActual]).concat(c.forecastSeries.map((f) => f.lower95)),
-          borderColor: 'rgba(245, 158, 11, 0.25)',
-          borderWidth: 1,
-          pointRadius: 0,
-          fill: false,
-          tension: 0.3
-        });
+
+        if (!isPastDate) {
+          datasets.push({
+            label: '95% Upper CI',
+            data: futurePad.concat([lastActual]).concat(c.forecastSeries.map(f => f.upper95)),
+            borderColor: 'rgba(245, 158, 11, 0.25)',
+            backgroundColor: 'rgba(245, 158, 11, 0.12)',
+            borderWidth: 1,
+            pointRadius: 0,
+            fill: '+1',
+            tension: 0.3
+          });
+          datasets.push({
+            label: '95% Lower CI',
+            data: futurePad.concat([lastActual]).concat(c.forecastSeries.map(f => f.lower95)),
+            borderColor: 'rgba(245, 158, 11, 0.25)',
+            borderWidth: 1,
+            pointRadius: 0,
+            fill: false,
+            tension: 0.3
+          });
+        }
       }
 
       destroyChart('main');
@@ -1955,16 +2014,13 @@
               borderColor: '#374151',
               borderWidth: 1,
               callbacks: {
-                label: (ctx) => (ctx.parsed.y == null ? null : `${ctx.dataset.label}: ₹${Math.round(ctx.parsed.y).toLocaleString('en-IN')}`)
+                label: (ctx) => ctx.parsed.y == null ? null : `${ctx.dataset.label}: ₹${Math.round(ctx.parsed.y).toLocaleString('en-IN')}`
               }
             }
           },
           scales: {
             x: { ticks: { color: '#6b7280', maxTicksLimit: 10, font: { family: 'JetBrains Mono', size: 10 } }, grid: { color: 'rgba(31,41,55,0.45)' } },
-            y: {
-              ticks: { color: '#9ca3af', font: { family: 'JetBrains Mono', size: 10 }, callback: (v) => '₹' + (v / 1000).toFixed(1) + 'k' },
-              grid: { color: 'rgba(31,41,55,0.45)' }
-            }
+            y: { ticks: { color: '#9ca3af', font: { family: 'JetBrains Mono', size: 10 }, callback: (v) => '₹' + (v / 1000).toFixed(1) + 'k' }, grid: { color: 'rgba(31,41,55,0.45)' } }
           }
         }
       });
@@ -1972,7 +2028,7 @@
 
     function renderRsiChart(c) {
       const start = Math.max(0, c.anchorIdx - 120);
-      const labels = c.histUpToAnchor.slice(start).map((d) => d.date);
+      const labels = c.histUpToAnchor.slice(start).map(d => d.date);
       const rsiSlice = c.rsi14.slice(start);
       destroyChart('rsi');
       charts.rsi = new Chart(document.getElementById('rsiChart').getContext('2d'), {
@@ -1999,7 +2055,7 @@
 
     function renderMacdChart(c) {
       const start = Math.max(0, c.anchorIdx - 120);
-      const labels = c.histUpToAnchor.slice(start).map((d) => d.date);
+      const labels = c.histUpToAnchor.slice(start).map(d => d.date);
       const histData = c.macd.histogram.slice(start);
       destroyChart('macd');
       charts.macd = new Chart(document.getElementById('macdChart').getContext('2d'), {
@@ -2007,28 +2063,9 @@
         data: {
           labels,
           datasets: [
-            {
-              type: 'line',
-              label: 'MACD',
-              data: c.macd.macdLine.slice(start),
-              borderColor: '#38bdf8',
-              borderWidth: 1.75,
-              pointRadius: 0
-            },
-            {
-              type: 'line',
-              label: 'Signal (9)',
-              data: c.macd.signalLine.slice(start),
-              borderColor: '#f59e0b',
-              borderWidth: 1.5,
-              pointRadius: 0
-            },
-            {
-              type: 'bar',
-              label: 'Histogram',
-              data: histData,
-              backgroundColor: histData.map((v) => (v >= 0 ? 'rgba(16,185,129,0.45)' : 'rgba(244,63,94,0.45)'))
-            }
+            { type: 'line', label: 'MACD', data: c.macd.macdLine.slice(start), borderColor: '#38bdf8', borderWidth: 1.75, pointRadius: 0 },
+            { type: 'line', label: 'Signal (9)', data: c.macd.signalLine.slice(start), borderColor: '#f59e0b', borderWidth: 1.5, pointRadius: 0 },
+            { type: 'bar', label: 'Histogram', data: histData, backgroundColor: histData.map(v => v >= 0 ? 'rgba(16,185,129,0.45)' : 'rgba(244,63,94,0.45)') }
           ]
         },
         options: {
@@ -2046,20 +2083,21 @@
     function renderYoyChart(hist) {
       const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
       const grouped = {};
-      hist.forEach((r) => {
+      hist.forEach(r => {
         const y = r.date.slice(0, 4);
         const m = parseInt(r.date.slice(5, 7), 10) - 1;
         if (!grouped[y]) grouped[y] = Array.from({ length: 12 }, () => []);
         grouped[y][m].push(r.modal_price);
       });
 
-      const palette = { '2022': '#64748b', '2023': '#f43f5e', '2024': '#38bdf8', '2025': '#c084fc', '2026': '#10b981' };
-      const datasets = Object.keys(grouped).sort().map((y) => ({
+      const colors = ['#64748b', '#f43f5e', '#38bdf8', '#c084fc', '#10b981', '#f59e0b', '#22d3ee', '#ec4899'];
+      const years = Object.keys(grouped).sort();
+      const datasets = years.map((y, idx) => ({
         label: y,
-        data: grouped[y].map((arr) => (arr.length ? Math.round(arr.reduce((a, b) => a + b, 0) / arr.length) : null)),
-        borderColor: palette[y] || '#f59e0b',
-        borderWidth: y === '2026' ? 3 : 1.75,
-        pointRadius: y === '2026' ? 3 : 1.5,
+        data: grouped[y].map(arr => arr.length ? Math.round(arr.reduce((a, b) => a + b, 0) / arr.length) : null),
+        borderColor: colors[idx % colors.length],
+        borderWidth: idx === years.length - 1 ? 3 : 1.75,
+        pointRadius: idx === years.length - 1 ? 3 : 1.5,
         tension: 0.3
       }));
 
@@ -2074,10 +2112,7 @@
           plugins: { legend: { labels: { color: '#d1d5db', font: { size: 11 }, usePointStyle: true } } },
           scales: {
             x: { ticks: { color: '#9ca3af', font: { family: 'JetBrains Mono', size: 11 } }, grid: { color: 'rgba(31,41,55,0.4)' } },
-            y: {
-              ticks: { color: '#9ca3af', font: { family: 'JetBrains Mono', size: 10 }, callback: (v) => '₹' + (v / 1000).toFixed(0) + 'k' },
-              grid: { color: 'rgba(31,41,55,0.4)' }
-            }
+            y: { ticks: { color: '#9ca3af', font: { family: 'JetBrains Mono', size: 10 }, callback: (v) => '₹' + (v / 1000).toFixed(0) + 'k' }, grid: { color: 'rgba(31,41,55,0.4)' } }
           }
         }
       });
@@ -2089,24 +2124,10 @@
       charts.arrivals = new Chart(document.getElementById('arrivalsChart').getContext('2d'), {
         type: 'bar',
         data: {
-          labels: slice.map((d) => d.date),
+          labels: slice.map(d => d.date),
           datasets: [
-            {
-              type: 'line',
-              label: 'Modal Price (₹/Qtl)',
-              data: slice.map((d) => d.modal_price),
-              borderColor: '#10b981',
-              borderWidth: 2,
-              pointRadius: 0,
-              yAxisID: 'yPrice'
-            },
-            {
-              type: 'bar',
-              label: 'Arrivals (Qtl)',
-              data: slice.map((d) => d.arrivals_qtl),
-              backgroundColor: 'rgba(56, 189, 248, 0.35)',
-              yAxisID: 'yArr'
-            }
+            { type: 'line', label: 'Modal Price (₹/Qtl)', data: slice.map(d => d.modal_price), borderColor: '#10b981', borderWidth: 2, pointRadius: 0, yAxisID: 'yPrice' },
+            { type: 'bar', label: 'Arrivals (Qtl)', data: slice.map(d => d.arrivals_qtl), backgroundColor: 'rgba(56, 189, 248, 0.35)', yAxisID: 'yArr' }
           ]
         },
         options: {
@@ -2128,11 +2149,11 @@
       charts.spread = new Chart(document.getElementById('spreadChart').getContext('2d'), {
         type: 'line',
         data: {
-          labels: slice.map((d) => d.date),
+          labels: slice.map(d => d.date),
           datasets: [
-            { label: 'Max Grade-A', data: slice.map((d) => d.max_price), borderColor: 'rgba(16,185,129,0.55)', borderWidth: 1.2, pointRadius: 0, fill: false },
-            { label: 'Min Grade', data: slice.map((d) => d.min_price), borderColor: 'rgba(244,63,94,0.55)', backgroundColor: 'rgba(16,185,129,0.08)', borderWidth: 1.2, pointRadius: 0, fill: '-1' },
-            { label: 'Raw Ref (₹/Qtl)', data: slice.map((d) => d.copra_ref_qtl), borderColor: '#f59e0b', borderDash: [4, 3], borderWidth: 1.75, pointRadius: 0 }
+            { label: 'Max Grade-A', data: slice.map(d => d.max_price), borderColor: 'rgba(16,185,129,0.55)', borderWidth: 1.2, pointRadius: 0, fill: false },
+            { label: 'Min Grade', data: slice.map(d => d.min_price), borderColor: 'rgba(244,63,94,0.55)', backgroundColor: 'rgba(16,185,129,0.08)', borderWidth: 1.2, pointRadius: 0, fill: '-1' },
+            { label: 'Raw Ref (₹/Qtl)', data: slice.map(d => d.copra_ref_qtl), borderColor: '#f59e0b', borderDash: [4, 3], borderWidth: 1.75, pointRadius: 0 }
           ]
         },
         options: {
@@ -2154,7 +2175,7 @@
         'Copra Spread', 'APMC Arrivals Vol', 'Annual Season (Sin)',
         'Annual Season (Cos)', 'Harvest Cycle (Sin)', 'Harvest Cycle (Cos)'
       ];
-      const vals = model30d.weightsStd.slice(1).map((v) => Math.round(v));
+      const vals = model30d.weightsStd.slice(1).map(v => Math.round(v));
       destroyChart('feature');
       charts.feature = new Chart(document.getElementById('featureChart').getContext('2d'), {
         type: 'bar',
@@ -2162,8 +2183,8 @@
           labels: featNames,
           datasets: [{
             data: vals,
-            backgroundColor: vals.map((v) => (v >= 0 ? 'rgba(16,185,129,0.7)' : 'rgba(244,63,94,0.7)')),
-            borderColor: vals.map((v) => (v >= 0 ? '#10b981' : '#f43f5e')),
+            backgroundColor: vals.map(v => v >= 0 ? 'rgba(16,185,129,0.7)' : 'rgba(244,63,94,0.7)'),
+            borderColor: vals.map(v => v >= 0 ? '#10b981' : '#f43f5e'),
             borderWidth: 1,
             borderRadius: 4
           }]
@@ -2184,37 +2205,6 @@
       });
     }
 
-    // =========================================================================
-    // 7. CSV EXPORT UTILITY
-    // =========================================================================
-    function exportActiveCSV() {
-      if (!lastAnalysisCache) return;
-      let csv = '';
-      let filename = `tiptur_copra_${selectedDateStr}.csv`;
-
-      if (currentLedgerTab === 'forecast') {
-        csv = 'Horizon,Target_Date,Predicted_Modal_INR_Qtl,Per_Kg_INR,Lower_95_CI,Upper_95_CI\n';
-        csv += lastAnalysisCache.forecastSeries
-          .map((r) => `+${r.horizon}d,${r.date},${r.predicted},${r.perKg},${r.lower95},${r.upper95}`)
-          .join('\n');
-        filename = `tiptur_copra_forecast_${selectedDateStr}.csv`;
-      } else {
-        csv = 'Date,Min_Price,Max_Price,Modal_Price_Qtl,Per_Kg_INR,Per_Nut_INR,Arrivals_Qtl\n';
-        csv += fullDataset
-          .map((r) => `${r.date},${r.min_price},${r.max_price},${r.modal_price},${r.per_kg_inr},${r.per_nut_inr},${r.arrivals_qtl}`)
-          .join('\n');
-        filename = `tiptur_copra_history_${selectedDateStr}.csv`;
-      }
-
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-
     if (document.readyState === 'loading') {
       window.addEventListener('DOMContentLoaded', initApp);
     } else {
@@ -2222,4 +2212,4 @@
     }
   </script>
 </body>
-</html>
+</html
