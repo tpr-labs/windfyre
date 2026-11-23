@@ -1,57 +1,77 @@
 {
-  "generated_at": "2026-11-22T21:55:19Z",
+  "generated_at": "2026-11-23T09:15:56Z",
   "model": "gemma-4-26b-a4b-it",
   "source": "Open-Meteo live telemetry + Windfyre ML baseline",
   "cities": {
     "bengaluru-nandini-layout": {
       "status": "ok",
-      "summary": "Bengaluru is experiencing clear skies with moderate winds and humidity levels below the historical baseline.",
-      "current_conditions": "Current temperature is 19.2C with 80% humidity, clear skies, and wind speeds of 8.4 km/h.",
-      "baseline_comparison": "Recent observations show lower humidity and wind speeds compared to the ML baseline.",
-      "next_24h_outlook": "The next 24 hours will see clear skies with temperatures around 23.8C and wind gusts up to 36.4 km/h.",
-      "next_7d_outlook": "The next 7 days will be characterized by increased precipitation and higher humidity levels, with daily rainfall expected.",
+      "summary": "Bengaluru is experiencing dry, windy conditions with temperatures around 28.7C and significant wind gusts.",
+      "current_conditions": "Temperature is 28.7C with 25% humidity and wind speed of 10.9 km/h from the NE, with gusts up to 32.0 km/h.",
+      "baseline_comparison": "Recent observations show significantly lower humidity levels compared to the ML baseline, while wind speed and temperature are near baseline.",
+      "next_24h_outlook": "Expect a temperature of 23.8C and wind gusts up to 36.4 km/h, with minimal precipitation (0.1 mm).",
+      "next_7d_outlook": "The forecast shows a trend of increasing humidity and precipitation, with daily precipitation totals of up to 5.4 mm.",
       "anomalies": [
         {
           "type": "humidity",
           "severity": "medium",
           "timeframe": "last 7 days",
-          "description": "Humidity levels have been consistently lower than the ML baseline over the past week."
+          "description": "Observed humidity levels have been consistently lower than the ML baseline. "
         },
         {
           "type": "precipitation",
-          "severity": "medium",
+          "severity": "low",
           "timeframe": "next 7 days",
-          "description": "Forecasted precipitation is significantly higher than the ML baseline for the upcoming week."
+          "description": "Forecasted precipitation is expected to be higher than the ML baseline. "
+        },
+        {
+          "type": "weather",
+          "severity": "low",
+          "timeframe": "last 7 days",
+          "description": "Weather codes indicate a mix of cloud cover and scattered-cloud conditions. "
         }
       ],
       "watch_items": [
-        "Increased precipitation and higher humidity levels expected in the coming week."
+        "High wind gusts in the next 24 hours.",
+        "Increasing precipitation forecast for the upcoming week.",
+        "humidity_deviation-low"
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecast uncertainty is inherent in all weather models; data quality is based on 2025 validation metrics.",
-      "updated_at": "2026-11-22T21:55:19Z"
+      "data_quality_note": "Forecasts are inherently uncertain; model validation data is provided for context. ",
+      "updated_at": "2026-11-23T09:15:56Z"
     },
     "nagamangala": {
       "status": "ok",
-      "summary": "Nagamangala is experiencing clear skies with moderate humidity, though significant precipitation is forecasted for later in the week.",
-      "current_conditions": "Temperature is 19.1C with 70% humidity and clear skies (weather code 0). Wind speed is 3.2 km/h from 87 degrees.",
+      "summary": "Nagamangala is experiencing clear skies and moderate wind, with a significant shift toward wetter, more humid conditions expected in the coming week.",
+      "current_conditions": "Temperature is 29.7C with 35% humidity and clear skies. Wind speed is 9.7 km/h from the NE, with gusts up to 24.8 km/h.",
       "baseline_comparison": "Recent observations show lower humidity and lower wind speeds compared to the ML baseline.",
-      "next_24h_outlook": "Expect clear skies and a temperature of 23.6C with 56.5% humidity and wind gusts up to 26.3 km/h.",
-      "next_7d_outlook": "A period of significant precipitation is expected between Nov 24 and Nov 29, with humidity levels rising to approximately 88%.",
+      "next_24h_outlook": "Expect clear skies and moderate wind, with average temperature around 23.6C and average humidity of 57.3%.",
+      "next_7d_outlook": "A period of significant precipitation and high humidity (up to 87.5%) is forecast for the next 7 days, with wind gusts up to 33.8 km/h.",
       "anomalies": [
         {
           "type": "precipitation",
           "severity": "high",
-          "timeframe": "2026-11-24 to 2026-11-29",
-          "description": "Forecasted precipitation significantly exceeds the ML baseline, peaking at 9.9mm on Nov 24."
+          "timeframe": "Next 7 days",
+          "description": "Forecasted precipitation totals are significantly higher than the ML baseline, peaking at 8.9mm on Nov 26."
+        },
+        {
+          "type": "humidity",
+          "severity": "medium",
+          "timeframe": "Next 7 days",
+          "description": "Forecasted humidity levels are expected to be much higher than the ML baseline, consistently above 80%."
+        },
+        {
+          "type": "weather",
+          "severity": "low",
+          "timeframe": "Recent observations",
+          "description": "Temperature and wind speed are slightly lower than the ML baseline over the last week."
         }
       ],
       "watch_items": [
-        "Increased precipitation and higher humidity levels expected later this week."
+        "Increased precipitation and high humidity levels expected in the coming week."
       ],
       "confidence": "medium",
-      "data_quality_note": "Forecast uncertainty is present due to the variability in precipitation and wind gust predictions.",
-      "updated_at": "2026-11-22T21:55:19Z"
+      "data_quality_note": "Forecasts are subject to uncertainty; model validation data from 2025 shows a temperature MAE of 1.16C and precipitation precipitation MAE of 0.14mm.",
+      "updated_at": "2026-11-23T09:15:56Z"
     }
   }
 }
