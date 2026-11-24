@@ -5,8 +5,8 @@
     "unit": "INR per Quintal (100 kg)",
     "nuts_per_quintal_copra": 700,
     "history_start": "2022-01-01",
-    "last_updated": "2026-11-23",
-    "total_days": 1788,
+    "last_updated": "2026-11-24",
+    "total_days": 1789,
     "source": "Krishimaratavahini (Govt. of Karnataka) / Coconut Development Board (CDB)"
   },
   "data": [
@@ -17889,6 +17889,16 @@
       "per_nut_inr": 45.31,
       "arrivals_qtl": 400.2,
       "copra_ref_qtl": 23788
+    },
+    {
+      "date": "2026-11-24",
+      "min_price": 30652,
+      "max_price": 32401,
+      "modal_price": 31619,
+      "per_kg_inr": 316.19,
+      "per_nut_inr": 45.17,
+      "arrivals_qtl": 445.5,
+      "copra_ref_qtl": 23714
     }
   ]
 }
